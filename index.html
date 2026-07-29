@@ -24,8 +24,8 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:lin
 </style>
 </head>
 <body><div id="toast" class="toast"></div><div class="app">
-<header class="top"><div><div class="brand">LE<b>GADO</b><span class="versionBadge">v0.8 · PLANTILLAS AMPLIADAS</span></div><div class="season" id="topSeason">Simulador mundial · Plantillas LALIGA 2026/27</div></div><div class="row"><button class="btn secondary small" data-action="save">Guardar</button><button class="btn secondary small" data-action="open-settings">☰</button></div></header>
-<section id="welcome" class="screen"><div class="card hero"><span class="tag">⚽ Carrera determinista y explicable</span><h1>CONSTRUYE<br>TU LEGADO</h1><p>Empieza como juvenil, toma decisiones con consecuencias visibles y recorre una carrera completa: club, selección, mercado, lesiones, títulos, vida personal y retirada.</p><div class="row"><button class="btn" data-action="new-game">Crear futbolista</button><button class="btn secondary" data-action="load">Cargar partida</button></div><p class="small muted">Versión 0.3 · nueva interfaz, centro de jornada, vestuario, competición y retransmisión. Base mundial seleccionada, no exhaustiva.</p></div></section>
+<header class="top"><div><div class="brand">LE<b>GADO</b><span class="versionBadge">v0.8.1 · CORRECCIÓN ESTABLE</span></div><div class="season" id="topSeason">Simulador mundial · Plantillas LALIGA 2026/27</div></div><div class="row"><button class="btn secondary small" data-action="save">Guardar</button><button class="btn secondary small" data-action="open-settings">☰</button></div></header>
+<section id="welcome" class="screen"><div class="card hero"><span class="tag">⚽ Carrera determinista y explicable</span><h1>CONSTRUYE<br>TU LEGADO</h1><p>Empieza como juvenil, toma decisiones con consecuencias visibles y recorre una carrera completa: club, selección, mercado, lesiones, títulos, vida personal y retirada.</p><div class="row"><button class="btn" data-action="new-game">Crear futbolista</button><button class="btn secondary" data-action="load">Cargar partida</button></div><p class="small muted">Versión 0.8.1 · corrección de inicio y plantillas ampliadas. Base mundial seleccionada, no exhaustiva.</p></div></section>
 <main id="game" class="hidden">
 <section id="view-home" class="view active"></section><section id="view-career" class="view"></section><section id="view-train" class="view"></section><section id="view-world" class="view"></section><section id="view-legacy" class="view"></section>
 </main></div>
@@ -134,15 +134,17 @@ const ROSTER_EXPANSION={
 'RC Deportivo':[['Helton Leite','Portero'],['Germán Parreño','Portero'],['Pablo Vázquez','Defensa central'],['Dani Barcia','Defensa central'],['Pablo Martínez','Defensa central'],['Ximo Navarro','Lateral'],['Rafa Obrador','Lateral'],['José Ángel Jurado','Centrocampista defensivo'],['Diego Villares','Centrocampista'],['Mario Soriano','Mediapunta'],['Yeremay Hernández','Extremo'],['David Mella','Extremo'],['Lucas Pérez','Delantero'],['Barbero','Delantero']]
 };
 let expansionId=0;
-for(const [club,players] of Object.entries(ROSTER_EXPANSION)){
-  players.forEach(([name,position],idx)=>{
-    if(REAL_PLAYERS.some(p=>p.name===name))return;
-    const c=CLUBS.find(x=>clubKey(x.name)===clubKey(club));
-    const base=clamp((c?Math.round(c.level*.72+18):76)+((hash(name)%5)-2),72,88);
-    const age=clamp(19+(hash(name+'age')%17),18,36);
-    const potential=clamp(base+(age<=21?7:age<=24?4:2),base,92);
-    REAL_PLAYERS.push({id:'roster-exp-'+(expansionId++),name,club,position,goals:0,apps:0,season:'2026/27',verified:false,rosterStatus:'provisional',base,potential,age});
-  });
+function buildRosterExpansion(){
+  for(const [club,players] of Object.entries(ROSTER_EXPANSION)){
+    players.forEach(([name,position])=>{
+      if(REAL_PLAYERS.some(p=>p.name===name))return;
+      const c=CLUBS.find(x=>clubKey(x.name)===clubKey(club));
+      const base=clamp((c?Math.round(c.level*.72+18):76)+((hash(name)%5)-2),72,88);
+      const age=clamp(19+(hash(name+'age')%17),18,36);
+      const potential=clamp(base+(age<=21?7:age<=24?4:2),base,92);
+      REAL_PLAYERS.push({id:'roster-exp-'+(expansionId++),name,club,position,goals:0,apps:0,season:'2026/27',verified:false,rosterStatus:'provisional',base,potential,age});
+    });
+  }
 }
 
 const REAL_RATING_OVERRIDES={
@@ -167,6 +169,7 @@ const MEMORY_STORE={}; const STORE={getItem(k){try{return window.localStorage.ge
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)], clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), avg=a=>a.reduce((x,y)=>x+y,0)/Math.max(1,a.length), money=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
 function hash(str){let h=2166136261;for(const ch of String(str)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return Math.abs(h>>>0)}
 function pick(arr,key){return arr[hash(key)%arr.length]}
+buildRosterExpansion();
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
 function explain(text,type=''){S.log.unshift({date:`${S.season}/${S.week}`,text,type});S.log=S.log.slice(0,100)}
 function addNews(headline,body,type=''){S.news.unshift({week:S.week,season:S.season,headline,body,type});S.news=S.news.slice(0,50)}
