@@ -24,7 +24,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:lin
 </style>
 </head>
 <body><div id="toast" class="toast"></div><div class="app">
-<header class="top"><div><div class="brand">LE<b>GADO</b><span class="versionBadge">v0.8.1 · CORRECCIÓN ESTABLE</span></div><div class="season" id="topSeason">Simulador mundial · Plantillas LALIGA 2026/27</div></div><div class="row"><button class="btn secondary small" data-action="save">Guardar</button><button class="btn secondary small" data-action="open-settings">☰</button></div></header>
+<header class="top"><div><div class="brand">LE<b>GADO</b><span class="versionBadge">v0.9 · PLANTILLAS AUDITADAS</span></div><div class="season" id="topSeason">Simulador mundial · Plantillas LALIGA 2026/27</div></div><div class="row"><button class="btn secondary small" data-action="save">Guardar</button><button class="btn secondary small" data-action="open-settings">☰</button></div></header>
 <section id="welcome" class="screen"><div class="card hero"><span class="tag">⚽ Carrera determinista y explicable</span><h1>CONSTRUYE<br>TU LEGADO</h1><p>Empieza como juvenil, toma decisiones con consecuencias visibles y recorre una carrera completa: club, selección, mercado, lesiones, títulos, vida personal y retirada.</p><div class="row"><button class="btn" data-action="new-game">Crear futbolista</button><button class="btn secondary" data-action="load">Cargar partida</button></div><p class="small muted">Versión 0.8.1 · corrección de inicio y plantillas ampliadas. Base mundial seleccionada, no exhaustiva.</p></div></section>
 <main id="game" class="hidden">
 <section id="view-home" class="view active"></section><section id="view-career" class="view"></section><section id="view-train" class="view"></section><section id="view-world" class="view"></section><section id="view-legacy" class="view"></section>
@@ -160,16 +160,64 @@ function realOverall(p){const wp=worldPlayer(p);return wp?Math.round(wp.currentO
 function simulateWorldPlayers(){if(!S)return;initWorldPlayers(S);REAL_PLAYERS.forEach(p=>{const w=S.worldPlayers[p.id],club=CLUBS.find(c=>clubKey(c.name)===clubKey(p.club)),teamLevel=club?club.level:72;const seed=hash(`${S.season}-${S.week}-${p.id}`),startChance=clamp(.35+(w.currentOverall-teamLevel+12)/35,0.2,.95),played=(seed%100)/100<startChance;if(!played){w.form=clamp(w.form-.25,35,95);w.fitness=clamp(w.fitness+3,60,100);w.lastChange=0;return}const mins=35+(seed%56),quality=clamp(5.4+(w.currentOverall-70)/18+((seed>>5)%18-9)/10,4.2,9.4),attack=['Delantero','Extremo','Segundo delantero','Mediapunta'].includes(p.position),goalChance=clamp((w.currentOverall-68)/120+(attack?.12:.025),.01,.34),assistChance=clamp((w.currentOverall-68)/150+(attack?.08:.035),.01,.25),goal=((seed>>8)%100)/100<goalChance?1:0,assist=((seed>>13)%100)/100<assistChance?1:0,rating=clamp(quality+goal*.8+assist*.45,4,10);w.seasonApps++;w.seasonGoals+=goal;w.seasonAssists+=assist;w.ratingTotal+=rating;w.form=clamp(w.form+(rating-6.5)*1.4,35,95);w.fitness=clamp(w.fitness-(mins/20)+2,55,100);const ageFactor=w.age<=23?1.15:w.age>=32?.72:1;const target=clamp(w.baseOverall+(w.form-65)*.10+(w.seasonApps?((w.ratingTotal/w.seasonApps)-6.5)*1.25:0),w.baseOverall-5,w.potential);let delta=clamp((target-w.currentOverall)*.055*ageFactor,-.18,.22);if(w.age>=34)delta-=.025*(w.age-33);w.currentOverall=clamp(w.currentOverall+delta,55,w.potential);w.lastChange=delta})}
 function clubKey(n){return String(n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\b(fc|cf|rcd|club de futbol|futbol club)\b/g,'').replace(/[^a-z0-9]/g,'').replace('barcelona','barcelona').replace('villarreal','villarreal').replace('valencia','valencia').replace('sevilla','sevilla').replace('espanyoldebarcelona','espanyol').replace('racingdesantander','racing').replace('realracingclub','racing').replace('rcdeportivo','deportivo').replace('deportivocoruna','deportivo')}
 function realPlayersForClub(c){return REAL_PLAYERS.filter(p=>clubKey(p.club)===clubKey(c.name)).map(p=>{const w=worldPlayer(p);return {...p,overall:realOverall(p),baseOverall:w?.baseOverall||realisticBaseOverall(p),potential:w?.potential||playerPotential(p,realisticBaseOverall(p)),form:Math.round(w?.form||65),fitness:Math.round(w?.fitness||88),age:w?.age||inferredAge(p),real:true}})}
-function realDataModal(){initWorldPlayers(S);const top=[...REAL_PLAYERS].sort((a,b)=>realOverall(b)-realOverall(a)),clubs=new Set(REAL_PLAYERS.map(p=>clubKey(p.club))).size;openModal(`<h2>LALIGA 2026/27 · Plantillas ampliadas</h2><p class="muted"><b>${REAL_PLAYERS.length} futbolistas</b> de ${clubs} clubes. Los 20 participantes corresponden a la composición oficial de la temporada 2026/27. La plantilla está congelada a ${REAL_DATA_UPDATED}: los registros confirmados aparecen como reales y el resto como provisionales mientras el mercado continúa abierto. La media evoluciona por rendimiento, minutos, edad, forma y potencial.</p><div style="overflow:auto;max-height:58vh"><table><tr><th>#</th><th>Jugador</th><th>Club</th><th>Edad</th><th>Inicial</th><th>Actual</th><th>Pot.</th><th>Forma</th><th>Estado</th></tr>${top.map((p,i)=>{const w=worldPlayer(p),d=w.currentOverall-w.baseOverall;return `<tr><td>${i+1}</td><td><b>${p.name}</b><div class="small muted">${p.position}</div></td><td>${p.club}</td><td>${w.age}</td><td>${w.baseOverall}</td><td><b>${Math.round(w.currentOverall)}</b> <span class="small ${d>=.45?'good':d<=-.45?'badText':'muted'}">${d>=.45?'▲':d<=-.45?'▼':'—'}</span></td><td>${w.potential}</td><td>${Math.round(w.form)}</td><td><span class="pill ${p.verified?'good':'warn'}">${p.verified?'Confirmado':'Provisional'}</span></td></tr>`}).join('')}</table></div><button class="btn" data-action="close-modal" style="margin-top:14px">Cerrar</button>`)}
+function realDataModal(){initWorldPlayers(S);const top=[...REAL_PLAYERS].sort((a,b)=>realOverall(b)-realOverall(a)),clubs=new Set(REAL_PLAYERS.map(p=>clubKey(p.club))).size;openModal(`<h2>LALIGA 2026/27 · Plantillas auditadas</h2><p class="muted"><b>${REAL_PLAYERS.length} futbolistas</b> de ${clubs} clubes. Los 20 participantes corresponden a la composición oficial de la temporada 2026/27. Actualización ${REAL_DATA_UPDATED}. Real Madrid y FC Barcelona han sido reconstruidos desde sus plantillas oficiales; el resto de registros continúa marcado como provisional cuando no existe confirmación equivalente. La media evoluciona por rendimiento, minutos, edad, forma y potencial.</p><div style="overflow:auto;max-height:58vh"><table><tr><th>#</th><th>Jugador</th><th>Club</th><th>Edad</th><th>Inicial</th><th>Actual</th><th>Pot.</th><th>Forma</th><th>Estado</th></tr>${top.map((p,i)=>{const w=worldPlayer(p),d=w.currentOverall-w.baseOverall;return `<tr><td>${i+1}</td><td><b>${p.name}</b><div class="small muted">${p.position}</div></td><td>${p.club}</td><td>${w.age}</td><td>${w.baseOverall}</td><td><b>${Math.round(w.currentOverall)}</b> <span class="small ${d>=.45?'good':d<=-.45?'badText':'muted'}">${d>=.45?'▲':d<=-.45?'▼':'—'}</span></td><td>${w.potential}</td><td>${Math.round(w.form)}</td><td><span class="pill ${p.verified?'good':'warn'}">${p.verified?'Confirmado':'Provisional'}</span></td></tr>`}).join('')}</table></div><button class="btn" data-action="close-modal" style="margin-top:14px">Cerrar</button>`)}
 
 
 let S=null, activeTab='home';
-const SAVE_KEY='legado-save', GAME_VERSION=8;
+const SAVE_KEY='legado-save', GAME_VERSION=9;
 const MEMORY_STORE={}; const STORE={getItem(k){try{return window.localStorage.getItem(k)}catch{return MEMORY_STORE[k]||null}},setItem(k,v){try{window.localStorage.setItem(k,v)}catch{MEMORY_STORE[k]=String(v)}},removeItem(k){try{window.localStorage.removeItem(k)}catch{delete MEMORY_STORE[k]}}};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)], clamp=(n,a=0,b=100)=>Math.max(a,Math.min(b,n)), avg=a=>a.reduce((x,y)=>x+y,0)/Math.max(1,a.length), money=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
 function hash(str){let h=2166136261;for(const ch of String(str)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return Math.abs(h>>>0)}
 function pick(arr,key){return arr[hash(key)%arr.length]}
 buildRosterExpansion();
+
+/* Auditoría de plantillas 2026/27 basada en las plantillas oficiales publicadas
+   por los clubes. Las listas auditadas sustituyen los registros antiguos de esos
+   equipos para evitar que permanezcan jugadores que ya han causado baja. */
+const OFFICIAL_ROSTER_AUDIT={
+  'Real Madrid':[
+    ['Thibaut Courtois','Portero',89,89,34],['Andriy Lunin','Portero',82,85,27],
+    ['Denzel Dumfries','Lateral',85,85,30],['Ibrahima Konaté','Defensa central',86,88,27],
+    ['Marc Cucurella','Lateral',85,86,28],['Éder Militão','Defensa central',86,88,28],
+    ['Trent Alexander-Arnold','Lateral',87,88,27],['Raúl Asencio','Defensa central',82,87,23],
+    ['Álvaro Carreras','Lateral',82,88,23],['Antonio Rüdiger','Defensa central',85,85,33],
+    ['Ferland Mendy','Lateral',82,82,31],['Dean Huijsen','Defensa central',84,91,21],
+    ['Jude Bellingham','Centrocampista',90,94,23],['Eduardo Camavinga','Centrocampista',85,90,23],
+    ['Federico Valverde','Centrocampista',88,90,28],['Aurélien Tchouaméni','Centrocampista defensivo',86,89,26],
+    ['Arda Güler','Mediapunta',85,92,21],['Dani Ceballos','Centrocampista',82,82,29],
+    ['Bernardo Silva','Mediapunta',87,87,31],['Vinícius Júnior','Extremo',90,93,26],
+    ['Kylian Mbappé','Delantero',91,94,27],['Rodrygo','Extremo',86,89,25],
+    ['Gonzalo García','Delantero',81,87,22],['Brahim Díaz','Mediapunta',83,85,27],
+    ['Franco Mastantuono','Mediapunta',82,91,18],['Endrick','Delantero',82,91,20]
+  ],
+  'Barcelona':[
+    ['Marc-André ter Stegen','Portero',85,85,34],['Joan García','Portero',84,88,25],
+    ['Wojciech Szczęsny','Portero',82,82,36],['Alejandro Balde','Lateral',84,89,22],
+    ['Ronald Araujo','Defensa central',86,88,27],['Pau Cubarsí','Defensa central',85,92,19],
+    ['Andreas Christensen','Defensa central',83,83,30],['Gerard Martín','Lateral',78,84,24],
+    ['Jules Koundé','Lateral',86,87,27],['Eric García','Defensa central',82,84,25],
+    ['Héctor Fort','Lateral',78,86,19],['Gavi','Centrocampista',86,92,22],
+    ['Pedri','Centrocampista',88,92,23],['Fermín López','Mediapunta',84,88,23],
+    ['Marc Casadó','Centrocampista defensivo',82,88,22],['Dani Olmo','Mediapunta',85,86,28],
+    ['Frenkie de Jong','Centrocampista',87,87,29],['Marc Bernal','Centrocampista defensivo',79,89,19],
+    ['Ferran Torres','Delantero',83,84,26],['Lamine Yamal','Extremo',89,95,19],
+    ['Raphinha','Extremo',88,88,29],['Roony Bardghji','Extremo',78,87,20],
+    ['Anthony Gordon','Extremo',84,87,25],['Karim Adeyemi','Extremo',84,88,24]
+  ]
+};
+function applyOfficialRosterAudit(){
+  const audited=new Set(Object.keys(OFFICIAL_ROSTER_AUDIT).map(clubKey));
+  for(let i=REAL_PLAYERS.length-1;i>=0;i--){
+    if(audited.has(clubKey(REAL_PLAYERS[i].club)))REAL_PLAYERS.splice(i,1);
+  }
+  let n=0;
+  for(const [club,rows] of Object.entries(OFFICIAL_ROSTER_AUDIT)){
+    for(const [name,position,base,potential,age] of rows){
+      REAL_PLAYERS.push({id:'audit-2627-'+(n++),name,club,position,goals:0,apps:0,season:'2026/27',verified:true,rosterStatus:'confirmado',base,potential,age});
+    }
+  }
+}
+applyOfficialRosterAudit();
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
 function explain(text,type=''){S.log.unshift({date:`${S.season}/${S.week}`,text,type});S.log=S.log.slice(0,100)}
 function addNews(headline,body,type=''){S.news.unshift({week:S.week,season:S.season,headline,body,type});S.news=S.news.slice(0,50)}
