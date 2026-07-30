@@ -519,13 +519,137 @@ function applyOfficialRosterAudit(){
 }
 applyOfficialRosterAudit();
 
-/* Correcciones de mercado confirmadas posteriores a la auditoría base. */
-function applyConfirmedTransfers(){
-  // Fran García: traspaso Real Madrid -> Real Betis (08/07/2026).
+/* Correcciones de mercado confirmadas posteriores a la auditoría base.
+   Actualización: 30/07/2026. El mercado continúa abierto, por lo que esta capa
+   elimina bajas confirmadas y añade altas confirmadas sin inventar rumores. */
+const ROSTER_2627_UPDATED='30/07/2026';
+
+function removePlayer2627(name,club=null){
+  const nk=clubKey(name),ck=club?clubKey(club):null;
   for(let i=REAL_PLAYERS.length-1;i>=0;i--){
-    if(clubKey(REAL_PLAYERS[i].name)===clubKey('Fran García'))REAL_PLAYERS.splice(i,1);
+    const p=REAL_PLAYERS[i];
+    if(clubKey(p.name)===nk && (!ck || clubKey(p.club)===ck))REAL_PLAYERS.splice(i,1);
   }
-  REAL_PLAYERS.push({id:'transfer-2627-fran-garcia',name:'Fran García',club:'Real Betis',position:'Lateral',goals:0,apps:0,season:'2026/27',verified:true,rosterStatus:'confirmado',base:81,potential:83,age:27});
+}
+function addPlayer2627(name,club,position,base,potential,age,status='confirmado'){
+  removePlayer2627(name);
+  REAL_PLAYERS.push({
+    id:'market-2627-'+hash(name).toString(36),name,club,position,goals:0,apps:0,
+    season:'2026/27',verified:true,rosterStatus:status,base,potential,age
+  });
+}
+function replaceClubRoster2627(club,rows){
+  const ck=clubKey(club);
+  for(let i=REAL_PLAYERS.length-1;i>=0;i--){
+    if(clubKey(REAL_PLAYERS[i].club)===ck)REAL_PLAYERS.splice(i,1);
+  }
+  rows.forEach(r=>addPlayer2627(r[0],club,r[1],r[2],r[3],r[4]));
+}
+
+function applyConfirmedTransfers(){
+  /* Real Betis: plantilla 2026/27 revisada. Guido Rodríguez, Rui Silva,
+     Bakambu, Chimy Ávila, Ricardo Rodríguez, Sergi Altimira, Pau López,
+     Nobel Mendy y Adrián San Miguel ya no figuran. Antony sí pertenece al club. */
+  replaceClubRoster2627('Real Betis',[
+    ['Diego Conde','Portero',80,83,27],['Álvaro Valles','Portero',82,84,29],
+    ['Natan','Defensa central',81,86,25],['Fran García','Lateral',82,84,27],
+    ['Héctor Bellerín','Lateral',79,79,31],['Valentín Gómez','Defensa central',79,86,23],
+    ['Diego Llorente','Defensa central',81,81,32],['Junior Firpo','Lateral',80,80,29],
+    ['Ángel Ortiz','Lateral',76,84,22],['Marc Bartra','Defensa central',80,80,35],
+    ['Isco','Mediapunta',86,86,34],['Marc Roca','Centrocampista',81,82,29],
+    ['Pablo Fornals','Mediapunta',82,83,30],['Nelson Deossa','Centrocampista',80,84,26],
+    ['Álvaro Fidalgo','Centrocampista',81,83,29],['Rodrigo Riquelme','Extremo',82,86,26],
+    ['Facundo Bernal','Centrocampista defensivo',78,87,22],['Giovani Lo Celso','Mediapunta',83,83,30],
+    ['Iker Losada','Mediapunta',77,84,24],['Pablo García','Extremo',76,86,20],
+    ['Cucho Hernández','Delantero',82,84,27],['Aitor Ruibal','Extremo',78,79,30],
+    ['Abde Ezzalzouli','Extremo',82,87,24],['José Antonio Morante','Extremo',72,83,19],
+    ['Gonzalo Petit','Delantero',74,87,19],['Antony','Extremo',84,86,26]
+  ]);
+
+  const departures={
+    'Barcelona':['Ansu Fati','Iñaki Peña','Robert Lewandowski','João Cancelo','Marcus Rashford'],
+    'Real Madrid':['Fran García','Mario Martín','Dani Carvajal','David Alaba','Dani Ceballos','Nico Paz','Víctor Muñoz','Álvaro Rodríguez','Mario Gila'],
+    'Villarreal':['Ramón Terrats','Alfonso Pedraza','Dani Parejo','Diego Conde'],
+    'Atlético de Madrid':['Antoine Griezmann','Clément Lenglet','Horatiu Moldovan'],
+    'Celta':['Óscar Mingueza','Hugo Sotelo','Franco Cervi','Mihailo Ristic','Joseph Aidoo','Marc Vidal'],
+    'Getafe CF':['Luis Milla','Mauro Arambarri','Coba da Costa','Juan Iglesias','Diego Rico','Domingos Duarte','Allan Nyom'],
+    'Rayo Vallecano':['Pacha Espino','Abdul Mumin','Ilias Akhomach'],
+    'Valencia':['Cenk Özkacar','Thierry Correia','Baptiste Santamaria','Eray Cömert'],
+    'Real Sociedad':['Brais Méndez','Aritz Elustondo'],
+    'RCD Espanyol':['Justin Smith','Hugo Pérez','Fernando Calero','Carlos Romero'],
+    'Athletic Club':['Unai Gómez','Urko Izeta'],
+    'Sevilla':['Tanguy Nianzou','Ørjan Nyland','Nemanja Gudelj','Adnan Januzaj','Alexis Sánchez'],
+    'Deportivo Alavés':['Víctor Parada','Asier Villalibre','Jon Guridi','Raúl Fernández','Adrián Pica','Unai Ropero'],
+    'Elche CF':['Álvaro Rodríguez','Théo Pétrot','André Silva','Aleix Febas'],
+    'Levante UD':['José Luis Morales','Mathew Ryan','Pablo Martínez','Diego Pampín'],
+    'CA Osasuna':['Víctor Muñoz','Sheraldo Becker','Javi Galán','Juan Cruz'],
+    'Racing de Santander':['Mario García','Clément Michelin','Aritz Aldasoro','Jokin Ezkieta'],
+    'RC Deportivo':['Luis Chacón','Álex Petxarroman','Sergio Escudero','Diego Gómez'],
+    'Málaga CF':['Jokin Gabilondo','Víctor García','Javi Montero','Josué Dorrio','Darko Brasanac']
+  };
+  for(const [club,names] of Object.entries(departures)){
+    names.forEach(name=>removePlayer2627(name,club));
+  }
+
+  const arrivals=[
+    ['Anthony Gordon','Barcelona','Extremo',85,88,25],
+    ['Marc Cucurella','Real Madrid','Lateral',85,86,28],
+    ['Denzel Dumfries','Real Madrid','Lateral',85,85,30],
+    ['Bernardo Silva','Real Madrid','Mediapunta',87,87,31],
+    ['Ibrahima Konaté','Real Madrid','Defensa central',86,88,27],
+    ['Carlos Romero','Villarreal','Lateral',80,86,24],
+    ['Ilias Akhomach','Villarreal','Extremo',80,87,22],
+    ['Morten Hjulmand','Atlético de Madrid','Centrocampista defensivo',85,87,27],
+    ['Alejandro Grimaldo','Atlético de Madrid','Lateral',86,86,30],
+    ['Aleix Febas','Celta','Centrocampista',79,81,30],
+    ['Javi Galán','Celta','Lateral',80,80,31],
+    ['Martín Satriano','Getafe CF','Delantero',79,83,25],
+    ['Zaid Romero','Getafe CF','Defensa central',78,84,26],
+    ['Mario Martín','Getafe CF','Centrocampista',78,86,22],
+    ['Ramón Terrats','Getafe CF','Centrocampista',79,83,25],
+    ['Sebastián Boselli','Getafe CF','Defensa central',78,86,22],
+    ['Andrés García','Getafe CF','Lateral',77,85,23],
+    ['Ives Balou','Getafe CF','Extremo',74,84,20],
+    ['Nobel Mendy','Rayo Vallecano','Defensa central',77,85,22],
+    ['Jozhua Vertrouwd','Rayo Vallecano','Defensa central',75,83,22],
+    ['Ryunosuke Sato','Valencia','Lateral',76,86,20],
+    ['Justin de Haas','Valencia','Defensa central',77,82,26],
+    ['Aliou Dieng','Valencia','Centrocampista defensivo',78,80,28],
+    ['Kazunari Kita','Real Sociedad','Defensa central',75,86,20],
+    ['Álex Calatrava','RCD Espanyol','Mediapunta',79,85,26],
+    ['Gabriel Moscardo','RCD Espanyol','Centrocampista defensivo',78,88,20],
+    ['Quilindschy Hartman','RCD Espanyol','Lateral',80,84,24],
+    ['Beñat Gerenabarrena','Athletic Club','Centrocampista',75,83,23],
+    ['Peio Canales','Athletic Club','Mediapunta',76,87,21],
+    ['Julen Agirrezabala','Athletic Club','Portero',81,85,25],
+    ['Álvaro Djaló','Athletic Club','Extremo',80,84,26],
+    ['Hugo Rincón','Athletic Club','Lateral',77,84,23],
+    ['Unai Vencedor','Athletic Club','Centrocampista defensivo',79,82,25],
+    ['Jon Guridi','Sevilla','Centrocampista',79,79,31],
+    ['Juan Iglesias','Sevilla','Lateral',78,79,28],
+    ['Arouna Sangante','Sevilla','Defensa central',79,84,24],
+    ['Ville Koski','Deportivo Alavés','Defensa central',76,84,24],
+    ['Mikel Rodríguez','Deportivo Alavés','Centrocampista',75,84,23],
+    ['Buba Sangaré','Elche CF','Lateral',75,86,18],
+    ['Víctor Chust','Elche CF','Defensa central',78,83,26],
+    ['Gonzalo Villar','Elche CF','Centrocampista',79,82,28],
+    ['Hugo Sotelo','Levante UD','Centrocampista',77,85,22],
+    ['Aïssa Mandi','Levante UD','Defensa central',79,79,34],
+    ['Enzo Bardeli','Levante UD','Centrocampista',76,82,25],
+    ['Dani Requena','Levante UD','Centrocampista',75,84,22],
+    ['Facundo González','Racing de Santander','Defensa central',78,86,23],
+    ['Asier Villalibre','Racing de Santander','Delantero',79,80,28],
+    ['Sergio Canales','Racing de Santander','Mediapunta',83,83,35],
+    ['Leo Román','RC Deportivo','Portero',81,85,26],
+    ['Asp Jensen','RC Deportivo','Mediapunta',75,87,20],
+    ['Bright Ede','RC Deportivo','Defensa central',75,87,19],
+    ['Lorenzo Amatucci','RC Deportivo','Centrocampista defensivo',77,85,22],
+    ['Pierre-Emerick Aubameyang','RC Deportivo','Delantero',81,81,37],
+    ['Teun Gijselhart','RC Deportivo','Centrocampista',74,84,21],
+    ['Fernando Calero','Málaga CF','Defensa central',78,78,30],
+    ['Juan Cruz','Málaga CF','Extremo',77,83,26]
+  ];
+  arrivals.forEach(r=>addPlayer2627(...r));
 }
 applyConfirmedTransfers();
 
