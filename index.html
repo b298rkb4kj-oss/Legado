@@ -156,7 +156,23 @@ input,select{background:#09130f;border-color:rgba(157,204,183,.18)}
 <header class="top gameTop"><div class="brandZone"><div class="brand">LE<b>GADO</b><span class="versionBadge">v0.18.0 · CALENDARIO DIARIO</span></div><div class="season" id="topSeason">Simulador mundial · Carrera profesional</div></div><div class="topActions"><div class="onlineState"><i></i><span>AUTOGUARDADO</span></div><button class="btn secondary small iconBtn" data-action="save" aria-label="Guardar partida">💾 <span>Guardar</span></button><button class="btn secondary small iconBtn" data-action="open-settings" aria-label="Abrir ajustes">☰</button></div></header>
 <section id="welcome" class="screen welcomeScreen"><div class="card hero gameHero"><div class="heroGrid"></div><span class="tag gameTag"><i></i> MODO CARRERA · SIMULACIÓN EXPLICABLE</span><h1><span>CONSTRUYE</span><br>TU LEGADO</h1><p>Empieza como juvenil, toma decisiones con consecuencias visibles y recorre una carrera completa: club, selección, mercado, lesiones, títulos, vida personal y retirada.</p><div class="row heroActions"><button class="btn mainCta" data-action="new-game"><span>NUEVA CARRERA</span><b>Crear futbolista →</b></button><button class="btn secondary loadCta" data-action="load"><span>CONTINUAR</span><b>Cargar partida</b></button></div><p class="small muted">Versión 0.17.0 · nueva interfaz de videojuego, optimizada para móvil y tablet.</p></div></section>
 <main id="game" class="hidden">
-<section id="view-home" class="view active"></section><section id="view-career" class="view"></section><section id="view-train" class="view"></section><section id="view-world" class="view"></section><section id="view-legacy" class="view"></section>
+<section id="view-home" class="view active">
+<div class="card">
+<div class="commandCard">
+<div class="commandAvatar">10</div>
+<div>
+<h2 style="margin:0">CENTRO DE MANDO</h2>
+<div class="muted">Esta será la nueva pantalla principal de LEGADO.</div>
+<div class="commandStats">
+<div class="commandStat"><span>Energía</span><div class="commandBar"><i style="width:92%"></i></div><b>92%</b></div>
+<div class="commandStat"><span>Moral</span><div class="commandBar"><i style="width:81%"></i></div><b>81%</b></div>
+<div class="commandStat"><span>Forma</span><div class="commandBar"><i style="width:76%"></i></div><b>76%</b></div>
+<div class="commandStat"><span>Lesión</span><div class="commandBar"><i style="width:14%"></i></div><b>Baja</b></div>
+</div>
+</div>
+</div>
+</div>
+</section><section id="view-career" class="view"></section><section id="view-train" class="view"></section><section id="view-world" class="view"></section><section id="view-legacy" class="view"></section>
 </main></div>
 <nav id="tabs" class="tabs hidden"><button class="active" data-tab="home"><span>⌂</span>Inicio</button><button data-tab="career"><span>⚽</span>Carrera</button><button data-tab="train"><span>↗</span>Entrenar</button><button data-tab="world"><span>◎</span>Mundo</button><button data-tab="legacy"><span>★</span>Legado</button></nav>
 <div id="modal" class="modal"><div class="modalBox" id="modalBox"></div></div>
