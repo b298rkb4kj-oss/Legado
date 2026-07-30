@@ -151,6 +151,56 @@ input,select{background:#09130f;border-color:rgba(157,204,183,.18)}
 .matchPreviewHero>*{position:relative;z-index:1}.matchStage{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;margin:20px 0}.matchStageTeam{text-align:center}.matchStageTeam b{display:block;font-size:18px}.matchStageBadge{width:78px;height:78px;margin:0 auto 10px;border-radius:24px;display:grid;place-items:center;background:linear-gradient(145deg,#315f4c,#10231b);border:1px solid #4f7a68;color:var(--gold);font-size:22px;font-weight:1000;box-shadow:0 16px 32px #0007}.matchStageVs{text-align:center}.matchStageVs strong{display:block;font-size:28px}.matchContext{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px}.contextTile{padding:12px;border-radius:14px;background:#0b1712;border:1px solid var(--line)}.contextTile b{display:block;font-size:18px}.decisionGrid{display:grid;gap:10px;padding:0 14px 16px}.decisionCard{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:#0b1712;color:var(--txt);border-radius:16px;padding:14px;min-height:82px}.decisionCard:hover{border-color:#5d8a76;background:#10241b}.decisionIcon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#1d3a2d;font-size:20px}.decisionCard strong{display:block;font-size:16px}.decisionCard span{display:block;color:var(--muted);font-size:12px}.decisionRisk{font-size:11px!important;padding:5px 8px;border-radius:999px;background:#243930;color:var(--gold)!important}.matchResultShell{display:grid;gap:14px}.scoreboard{position:relative;overflow:hidden;padding:22px;border-radius:20px;background:linear-gradient(135deg,#1b3f2f,#091510 70%);border:1px solid #355a4b}.scoreboard:after{content:"";position:absolute;inset:-80px auto auto -80px;width:220px;height:220px;border-radius:50%;border:36px solid rgba(255,213,106,.06)}.scoreTeams{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;position:relative;z-index:1}.scoreTeam{text-align:center;font-weight:900}.scoreMain{font-size:48px;font-weight:1000;letter-spacing:.04em}.ratingHero{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:16px;border-radius:18px;background:#0b1712;border:1px solid var(--line)}.ratingBadge{width:74px;height:74px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(145deg,var(--accent),#42b874);color:#052016;font-size:28px;font-weight:1000}.matchTimeline{position:relative;padding-left:18px}.matchTimeline:before{content:"";position:absolute;left:4px;top:4px;bottom:4px;width:2px;background:#294039}.matchEvent{position:relative;display:grid;grid-template-columns:48px 1fr;gap:10px;padding:10px 0}.matchEvent:before{content:"";position:absolute;left:-18px;top:17px;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px #13231c}.matchEvent.goal:before{background:var(--gold)}.matchEvent.bad:before{background:var(--danger)}.matchEvent .minute{font-weight:1000;color:var(--gold)}.impactGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.impactTile{padding:12px;border-radius:14px;background:#0b1712;border:1px solid var(--line);text-align:center}.impactTile b{display:block;font-size:20px}.impactTile small{color:var(--muted)}.careerPulse{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.pulseTile{padding:12px;border-radius:14px;background:linear-gradient(145deg,#132a20,#0a1511);border:1px solid var(--line)}.pulseTile b{display:block;font-size:18px}.matchStatusStrip{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.matchStatusStrip .pill{background:#10261c;border:1px solid #315746}.spotlightBanner{padding:16px;border-radius:16px;background:linear-gradient(120deg,#2b553f,#12261e);border:1px solid #416e59}.spotlightBanner h3{margin:4px 0}.objectiveList{display:grid;gap:8px;margin-top:12px}.objective{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px;border-radius:12px;background:#0b1712}.objective i{width:24px;height:24px;border-radius:8px;background:#1f3d30;display:grid;place-items:center;font-style:normal;color:var(--accent)}
 @media(max-width:720px){.matchStage,.scoreTeams{grid-template-columns:1fr}.matchStageVs{order:2}.matchStageTeam:last-child{order:3}.matchContext,.impactGrid,.careerPulse{grid-template-columns:repeat(2,1fr)}.decisionCard{grid-template-columns:auto 1fr}.decisionRisk{grid-column:2}.scoreMain{font-size:38px}.matchPreviewHero{padding:16px}}
 </style>
+
+<style>
+/* ===== LEGADO · AJUSTE EXCLUSIVO PARA iPAD ===== */
+@media (min-width:768px) and (max-width:1180px){
+  html{-webkit-text-size-adjust:100%}
+  body{font-size:16px}
+  .app{max-width:none!important;margin:0!important;padding:12px 20px calc(104px + env(safe-area-inset-bottom))!important}
+  .gameTop{min-height:72px;padding:10px 4px!important}
+  .topActions{gap:10px}
+  .btn,.actionTile,.tabs button,input,select{touch-action:manipulation}
+  .btn{min-height:52px;padding:14px 18px}
+  .iconBtn{min-width:52px;justify-content:center}
+  .card{padding:20px;border-radius:20px}
+  .dashboard{grid-template-columns:minmax(0,1.55fr) minmax(280px,.75fr)!important;gap:18px}
+  .dashboardMain,.dashboardSide{gap:18px}
+  .matchHub{min-height:auto;padding:24px}
+  .fixture{margin:20px 0}
+  .actionRail{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .actionTile{min-height:108px;padding:16px}
+  .weekstrip{gap:8px}
+  .day{min-height:92px;padding:12px 6px;display:flex;flex-direction:column;justify-content:center}
+  .day b{font-size:20px}
+  .day span{font-size:11px;line-height:1.25}
+  .calendarHead{font-size:24px;margin-bottom:12px}
+  .modal{align-items:center;padding:32px}
+  .modalBox{width:min(720px,92vw);max-height:82vh;border-radius:24px;padding:24px}
+  .tabs:not(.hidden){position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:auto!important;height:auto!important;display:flex!important;flex-direction:row!important;justify-content:center!important;align-items:stretch!important;padding:9px 14px calc(9px + env(safe-area-inset-bottom))!important;background:rgba(7,16,13,.96)!important;border:0!important;border-top:1px solid var(--line)!important;box-shadow:0 -14px 40px rgba(0,0,0,.28)!important}
+  .tabs:not(.hidden):before,.tabs:not(.hidden):after{display:none!important}
+  .tabs button{width:auto!important;flex:1;max-width:180px;min-height:58px!important;display:grid!important;place-items:center!important;gap:2px!important;text-align:center!important;margin:0 3px!important;padding:8px 10px!important;font-size:11px!important;border-radius:14px!important}
+  .tabs button span{width:auto!important;height:auto!important;margin:0!important;background:transparent!important;font-size:21px!important}
+  .tabs button.active{box-shadow:none!important;border-color:rgba(119,243,170,.2)!important}
+  .teamRosterScroll{max-height:62vh}
+}
+@media (min-width:768px) and (max-width:900px) and (orientation:portrait){
+  .app{padding-left:18px!important;padding-right:18px!important}
+  .dashboard{grid-template-columns:1fr!important}
+  .dashboardSide{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dashboardSide>section:last-child{grid-column:1/-1}
+  .actionRail{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .playerBanner{grid-template-columns:auto 1fr auto}
+}
+@media (min-width:768px) and (max-width:1180px) and (orientation:landscape){
+  .app{padding-left:24px!important;padding-right:24px!important}
+  .dashboard{grid-template-columns:minmax(0,1.7fr) minmax(300px,.72fr)!important}
+  .matchHub{padding:26px}
+}
+@media (hover:none) and (pointer:coarse){
+  .card:hover,.btn:hover,.actionTile:hover,.choice:hover{transform:none!important;filter:none!important}
+}
+</style>
 </head>
 <body><div id="loadingScreen" class="loadingScreen" aria-label="Cargando LEGADO"><div class="loadingMark"><div class="loadingLogo">L</div><div class="loadingWord">LEGADO</div><div class="loadingClaim">Tu carrera. Tus decisiones. Tu historia.</div><div class="loadingBar"><i></i></div></div></div><div id="toast" class="toast"></div><div class="app">
 <header class="top gameTop"><div class="brandZone"><div class="brand">LE<b>GADO</b><span class="versionBadge">v0.18.0 · CALENDARIO DIARIO</span></div><div class="season" id="topSeason">Simulador mundial · Carrera profesional</div></div><div class="topActions"><div class="onlineState"><i></i><span>AUTOGUARDADO</span></div><button class="btn secondary small iconBtn" data-action="save" aria-label="Guardar partida">💾 <span>Guardar</span></button><button class="btn secondary small iconBtn" data-action="open-settings" aria-label="Abrir ajustes">☰</button></div></header>
