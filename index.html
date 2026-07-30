@@ -64,7 +64,7 @@ input:focus,select:focus{outline:2px solid rgba(122,240,166,.28);border-color:va
  .tabs button span{display:grid;place-items:center;width:28px;height:28px;margin:0;border-radius:9px;background:rgba(255,255,255,.04);font-size:17px}
  .tabs button.active{background:linear-gradient(90deg,rgba(122,240,166,.18),rgba(122,240,166,.04));border-color:rgba(122,240,166,.18);box-shadow:inset 3px 0 var(--accent)}
  .tabs button.active span{background:var(--accent);color:#092016}
- .tabs:not(.hidden):after{content:"LEGADO  •  v0.16.5.9";position:absolute;left:24px;bottom:25px;color:#587066;font-size:9px;letter-spacing:.12em}
+ .tabs:not(.hidden):after{content:"LEGADO  •  v0.17.0";position:absolute;left:24px;bottom:25px;color:#587066;font-size:9px;letter-spacing:.12em}
  .dashboard{grid-template-columns:minmax(0,1.8fr) minmax(300px,.72fr)}
  .card{padding:18px}.matchHub{padding:26px;min-height:340px}.hero{padding:34px}
 }
@@ -72,10 +72,78 @@ input:focus,select:focus{outline:2px solid rgba(122,240,166,.28);border-color:va
 @media(max-width:520px){.brand:before{width:30px;height:30px;border-radius:9px;font-size:17px}.brand{font-size:17px}.top .btn.small{min-height:40px;padding:9px 11px}.card{border-radius:16px;padding:14px}.fixture{gap:8px}.team b{font-size:12px}.actionRail{grid-template-columns:1fr}.playerBanner{grid-template-columns:auto 1fr}.avatar{width:58px;height:58px;border-radius:18px;font-size:22px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 </style>
+
+<style>
+/* ===== LEGADO v0.17.0 · INTERFAZ DE VIDEOJUEGO ===== */
+:root{
+ --bg:#050806;--panel:#0c1511;--panel2:#101e18;--line:rgba(157,204,183,.16);
+ --txt:#f7fff9;--muted:#89a398;--accent:#77f3aa;--accent2:#22b86a;
+ --gold:#f5cb61;--danger:#ff6868;--cyan:#68d9ff;
+ --shadow:0 22px 70px rgba(0,0,0,.42);--r:20px;
+}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.005em}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+ linear-gradient(115deg,transparent 0 47%,rgba(119,243,170,.018) 47% 48%,transparent 48% 100%),
+ radial-gradient(circle at 50% -10%,rgba(119,243,170,.12),transparent 36%);background-size:240px 240px,auto;z-index:0}
+.app{padding-top:8px}
+.gameTop{min-height:70px;margin-bottom:12px;background:linear-gradient(180deg,rgba(5,8,6,.97),rgba(5,8,6,.76),transparent);border:0}
+.brandZone{min-width:0}.versionBadge{margin-left:12px;padding:4px 8px;border:1px solid rgba(119,243,170,.2);border-radius:999px;color:#9bb1a7;font-size:9px;letter-spacing:.08em;font-weight:800}
+.topActions{display:flex;gap:8px;align-items:center}.onlineState{display:flex;align-items:center;gap:6px;color:#789287;font-size:9px;font-weight:900;letter-spacing:.12em}.onlineState i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.iconBtn{display:flex;align-items:center;gap:7px;background:rgba(16,30,24,.9);border:1px solid var(--line)}
+.card{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(18,34,27,.96),rgba(8,16,12,.98));border:1px solid var(--line);box-shadow:0 18px 54px rgba(0,0,0,.28)}
+.card:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);pointer-events:none}
+.card:hover{border-color:rgba(119,243,170,.28)}
+.btn{position:relative;overflow:hidden;border-radius:12px;text-transform:none;letter-spacing:.015em;box-shadow:0 8px 22px rgba(0,0,0,.2)}
+.btn:not(.secondary):not(.gold):not(.danger){background:linear-gradient(135deg,var(--accent),#45d985)}
+.btn.secondary{background:linear-gradient(145deg,#172a22,#101c17);border:1px solid var(--line)}
+.btn.gold{background:linear-gradient(135deg,#ffe08b,#eeb642)}
+.btn:focus-visible,.tabs button:focus-visible,.actionTile:focus-visible{outline:2px solid white;outline-offset:2px}
+.eyebrow{font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.headline{font-size:clamp(28px,5vw,54px)!important;line-height:.98;max-width:700px;letter-spacing:-.035em;text-transform:uppercase}
+.panelTitle h3,.sectionTitle h2,.card>h2{letter-spacing:-.025em}
+.matchHub{background:
+ radial-gradient(circle at 50% 0,rgba(119,243,170,.12),transparent 42%),
+ linear-gradient(145deg,#13251d,#09130f);border-color:rgba(119,243,170,.22)}
+.matchHub:after{content:"MATCHDAY";position:absolute;right:-8px;top:12px;font-size:clamp(44px,10vw,116px);font-weight:1000;letter-spacing:-.08em;color:rgba(255,255,255,.018);pointer-events:none}
+.fixture{position:relative;padding:18px 12px;margin:16px 0;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.team b{text-transform:uppercase;letter-spacing:.04em}.versus{font-style:italic;color:var(--gold);font-weight:1000}.matchMeta{text-transform:uppercase;letter-spacing:.08em;font-size:9px}
+.actionRail{gap:9px}.actionTile{position:relative;min-height:108px;background:linear-gradient(145deg,#14271f,#0b1712);border:1px solid var(--line);border-radius:15px;text-align:left}.actionTile strong{font-size:17px}.actionTile>span:first-child{font-size:9px;letter-spacing:.13em;color:#759087}.actionTile.primary{background:linear-gradient(135deg,#61ec9a,#24ad68);color:#04160c;border-color:transparent;box-shadow:0 14px 34px rgba(54,211,126,.2)}
+.playerBanner{border-color:rgba(255,255,255,.12)}.avatar{border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 0 0 4px rgba(0,0,0,.12),0 12px 30px rgba(0,0,0,.3)}
+.overallRing{filter:drop-shadow(0 8px 22px rgba(0,0,0,.32))}.overallRing b{font-style:italic}.overallRing span{letter-spacing:.12em}
+.statusBox,.miniStat{background:linear-gradient(145deg,#0f1d17,#09130f);border-color:rgba(255,255,255,.07)}.statusBox b,.miniStat b,.kpi{font-variant-numeric:tabular-nums;letter-spacing:-.035em}
+.notice{background:linear-gradient(90deg,rgba(35,92,65,.42),rgba(18,38,29,.55));border-left-width:4px}
+.inboxItem{border-radius:10px;padding:10px;margin:6px 0;background:rgba(255,255,255,.022)}
+table{border-collapse:separate;border-spacing:0}th{position:sticky;top:0;background:#101e18;color:#789087;text-transform:uppercase;font-size:9px;letter-spacing:.08em;z-index:1}tr:hover td{background:rgba(119,243,170,.025)}
+.tabs button{font-weight:800}.tabs button.active{color:#b8ffd1}
+.choice{background:linear-gradient(145deg,rgba(17,32,25,.88),rgba(10,20,15,.9));transition:.18s}.choice:hover{border-color:rgba(119,243,170,.28);transform:translateY(-1px)}
+input,select{background:#09130f;border-color:rgba(157,204,183,.18)}
+.pill{font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+/* Portada */
+.welcomeScreen{min-height:calc(100vh - 110px)}.gameHero{isolation:isolate;width:min(980px,100%);min-height:590px;display:flex;flex-direction:column;justify-content:center;padding:clamp(28px,6vw,74px);background:
+ linear-gradient(90deg,rgba(6,13,9,.98) 0%,rgba(7,15,11,.92) 52%,rgba(8,18,13,.55) 100%),
+ radial-gradient(circle at 78% 45%,rgba(119,243,170,.23),transparent 26%);border-color:rgba(119,243,170,.24)}
+.gameHero:after{content:"10";position:absolute;right:4%;bottom:-10%;font-size:min(48vw,520px);font-weight:1000;line-height:1;color:rgba(119,243,170,.035);font-style:italic;z-index:-1}.heroGrid{position:absolute;right:0;top:0;width:48%;height:100%;opacity:.18;background-image:linear-gradient(rgba(119,243,170,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(119,243,170,.18) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(90deg,transparent,#000)}
+.gameHero h1{font-size:clamp(54px,10vw,112px);letter-spacing:-.075em;font-style:italic;text-shadow:0 12px 46px #000}.gameHero h1 span{color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.55)}.gameHero p{font-size:16px;max-width:620px}.gameTag{background:transparent;border:1px solid rgba(119,243,170,.22);width:max-content}.gameTag i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.heroActions{margin-top:14px}.mainCta,.loadCta{min-width:205px;display:grid;text-align:left;padding:14px 17px}.mainCta span,.loadCta span{font-size:9px;letter-spacing:.13em;opacity:.72}.mainCta b,.loadCta b{font-size:15px}
+/* Eliminación visual definitiva de escudos: monogramas uniformes */
+.clubCrest{filter:none!important;border-radius:12px!important;background:linear-gradient(145deg,#1b352a,#0e1c16)!important;border:1px solid rgba(119,243,170,.16)!important;box-shadow:inset 0 0 0 3px rgba(0,0,0,.13)!important}.clubCrest svg{opacity:.88}.clubCrestStar{display:none}
+@media(min-width:980px){
+ .tabs:not(.hidden){background:linear-gradient(180deg,#0a1711 0%,#060e0a 100%)}
+ .tabs:not(.hidden):before{color:#678277}.tabs button{border-radius:13px}.tabs button.active{background:linear-gradient(90deg,rgba(119,243,170,.18),rgba(119,243,170,.015));box-shadow:inset 3px 0 var(--accent),0 8px 24px rgba(0,0,0,.16)}
+}
+@media(max-width:720px){
+ .onlineState{display:none}.gameTop{min-height:62px}.topActions .iconBtn span{display:none}.iconBtn{min-width:42px;justify-content:center;padding:9px}
+ .gameHero{min-height:calc(100vh - 150px);padding:28px 20px}.gameHero h1{font-size:clamp(50px,17vw,76px)}.gameHero p{font-size:14px}.heroActions{display:grid;grid-template-columns:1fr}.mainCta,.loadCta{width:100%}
+ .tabs{gap:3px;padding-top:7px}.tabs button{flex:1;min-width:0;font-size:10px}.tabs button span{font-size:19px}
+ .headline{font-size:32px!important}.matchHub{padding:18px}.actionTile{min-height:88px}.fixture{padding:12px 0}
+}
+@media(max-width:390px){.brand{letter-spacing:.14em}.brand:before{display:none}.gameHero h1{font-size:48px}.versionBadge{display:none}}
+</style>
+
 </head>
 <body><div id="loadingScreen" class="loadingScreen" aria-label="Cargando LEGADO"><div class="loadingMark"><div class="loadingLogo">L</div><div class="loadingWord">LEGADO</div><div class="loadingClaim">Tu carrera. Tus decisiones. Tu historia.</div><div class="loadingBar"><i></i></div></div></div><div id="toast" class="toast"></div><div class="app">
-<header class="top"><div><div class="brand">LE<b>GADO</b><span class="versionBadge">v0.16.5.9 · SIN ESCUDOS</span></div><div class="season" id="topSeason">Simulador mundial · Plantillas LALIGA 2026/27</div></div><div class="row"><button class="btn secondary small" data-action="save">Guardar</button><button class="btn secondary small" data-action="open-settings">☰</button></div></header>
-<section id="welcome" class="screen"><div class="card hero"><span class="tag">⚽ Carrera determinista y explicable</span><h1>CONSTRUYE<br>TU LEGADO</h1><p>Empieza como juvenil, toma decisiones con consecuencias visibles y recorre una carrera completa: club, selección, mercado, lesiones, títulos, vida personal y retirada.</p><div class="row"><button class="btn" data-action="new-game">Crear futbolista</button><button class="btn secondary" data-action="load">Cargar partida</button></div><p class="small muted">Versión 0.16.1.2 · auditoría de Real Madrid, Barcelona, Atlético, Athletic Club y Real Sociedad.</p></div></section>
+<header class="top gameTop"><div class="brandZone"><div class="brand">LE<b>GADO</b><span class="versionBadge">v0.17.0 · INTERFAZ VIDEOJUEGO</span></div><div class="season" id="topSeason">Simulador mundial · Carrera profesional</div></div><div class="topActions"><div class="onlineState"><i></i><span>AUTOGUARDADO</span></div><button class="btn secondary small iconBtn" data-action="save" aria-label="Guardar partida">💾 <span>Guardar</span></button><button class="btn secondary small iconBtn" data-action="open-settings" aria-label="Abrir ajustes">☰</button></div></header>
+<section id="welcome" class="screen welcomeScreen"><div class="card hero gameHero"><div class="heroGrid"></div><span class="tag gameTag"><i></i> MODO CARRERA · SIMULACIÓN EXPLICABLE</span><h1><span>CONSTRUYE</span><br>TU LEGADO</h1><p>Empieza como juvenil, toma decisiones con consecuencias visibles y recorre una carrera completa: club, selección, mercado, lesiones, títulos, vida personal y retirada.</p><div class="row heroActions"><button class="btn mainCta" data-action="new-game"><span>NUEVA CARRERA</span><b>Crear futbolista →</b></button><button class="btn secondary loadCta" data-action="load"><span>CONTINUAR</span><b>Cargar partida</b></button></div><p class="small muted">Versión 0.17.0 · nueva interfaz de videojuego, optimizada para móvil y tablet.</p></div></section>
 <main id="game" class="hidden">
 <section id="view-home" class="view active"></section><section id="view-career" class="view"></section><section id="view-train" class="view"></section><section id="view-world" class="view"></section><section id="view-legacy" class="view"></section>
 </main></div>
