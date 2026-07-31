@@ -2850,250 +2850,138 @@ window.TRANSFER_HISTORY=TRANSFER_HISTORY;
 
 
 <script>
-// ===== LEGADO v0.20.4 · CONTROL ECONÓMICO GLOBAL DEFINITIVO =====
 (function(){
-  const DIV2_NAMES=new Set([
-    'Real Valladolid CF','Real Valladolid','Granada CF','Granada','SD Eibar','Eibar',
-    'Real Sporting','Sporting de Gijón','Real Zaragoza','Cádiz CF','UD Las Palmas',
-    'CD Leganés','RC Deportivo','Deportivo de La Coruña','Racing de Santander',
-    'Málaga CF','Albacete Balompié','Burgos CF','CD Castellón','Córdoba CF',
-    'AD Ceuta','FC Andorra','SD Huesca','CD Mirandés','Cultural Leonesa',
-    'UD Almería'
-  ]);
-
-  const EXACT_BUDGETS={
-    // España · grandes
-    'Real Madrid':165000000,'Barcelona':75000000,'Atlético de Madrid':65000000,
-    'Athletic Club':30000000,'Real Sociedad':28000000,'Villarreal':32000000,
-    'Real Betis':26000000,'Sevilla':18000000,'Valencia':14000000,
-    // España · Primera media/baja
-    'Celta':11000000,'RC Celta':11000000,'CA Osasuna':9500000,
-    'RCD Espanyol':9000000,'Getafe CF':7500000,'Rayo Vallecano':7000000,
-    'Deportivo Alavés':6500000,'Levante UD':6000000,'Elche CF':6000000,
-    'Girona':22000000,'RCD Mallorca':8500000,'Real Oviedo':5500000,
-    // Segunda española
-    'Real Valladolid CF':5500000,'Real Valladolid':5500000,
-    'Granada CF':5000000,'Granada':5000000,'SD Eibar':4500000,'Eibar':4500000,
-    'Real Sporting':4500000,'Sporting de Gijón':4500000,'Real Zaragoza':4000000,
-    'Cádiz CF':4500000,'UD Las Palmas':5000000,'CD Leganés':4500000,
-    'RC Deportivo':4000000,'Deportivo de La Coruña':4000000,
-    'Racing de Santander':4000000,'Málaga CF':4000000,
-    'Albacete Balompié':3000000,'Burgos CF':2800000,'CD Castellón':2800000,
-    'Córdoba CF':2500000,'AD Ceuta':2200000,'FC Andorra':2500000,
-    'SD Huesca':2500000,'CD Mirandés':2200000,'Cultural Leonesa':2000000,
-    'UD Almería':6000000,
-    // Premier
-    'Manchester City':175000000,'Arsenal':155000000,'Liverpool':145000000,
-    'Manchester United':135000000,'Chelsea':150000000,'Tottenham':95000000,
-    'Newcastle United':100000000,'Aston Villa':75000000,
-    // Italia
-    'Inter':75000000,'Juventus':80000000,'Milan':70000000,'Napoli':65000000,
-    'Roma':45000000,'Atalanta':42000000,'Lazio':32000000,'Fiorentina':30000000,
-    'Bologna':25000000,'Como':22000000
+  const ALL_BASE_CLUB_FINANCES={"Real Madrid":{"budget":165000000,"cap":79200000},"Barcelona":{"budget":75000000,"cap":36000000},"Atlético de Madrid":{"budget":62000000,"cap":22300000},"Athletic Club":{"budget":28000000,"cap":7000000},"Real Sociedad":{"budget":24000000,"cap":6000000},"Sevilla":{"budget":16000000,"cap":4000000},"Valencia":{"budget":12000000,"cap":3000000},"Villarreal":{"budget":28000000,"cap":7000000},"Real Betis":{"budget":22000000,"cap":5500000},"CA Osasuna":{"budget":7000000,"cap":1250000},"Celta":{"budget":7000000,"cap":1250000},"Deportivo Alavés":{"budget":7000000,"cap":1250000},"Levante UD":{"budget":7000000,"cap":1250000},"Rayo Vallecano":{"budget":7000000,"cap":1250000},"Getafe CF":{"budget":7000000,"cap":1250000},"RCD Espanyol":{"budget":7000000,"cap":1250000},"Elche CF":{"budget":7000000,"cap":1250000},"Málaga CF":{"budget":7000000,"cap":1250000},"Racing de Santander":{"budget":7000000,"cap":1250000},"RC Deportivo":{"budget":7000000,"cap":1250000},"Manchester City":{"budget":170000000,"cap":81600000},"Liverpool":{"budget":145000000,"cap":69600000},"Manchester United":{"budget":125000000,"cap":60000000},"Arsenal":{"budget":150000000,"cap":72000000},"Chelsea":{"budget":140000000,"cap":42000000},"Tottenham Hotspur":{"budget":80000000,"cap":28800000},"Newcastle United":{"budget":95000000,"cap":34200000},"Aston Villa":{"budget":70000000,"cap":12000000},"AFC Bournemouth":{"budget":38000000,"cap":9500000},"Brentford":{"budget":38000000,"cap":9500000},"Brighton & Hove Albion":{"budget":38000000,"cap":9500000},"Coventry City":{"budget":16000000,"cap":2900000},"Crystal Palace":{"budget":38000000,"cap":9500000},"Everton":{"budget":38000000,"cap":9500000},"Fulham":{"budget":38000000,"cap":9500000},"Hull City":{"budget":16000000,"cap":2900000},"Ipswich Town":{"budget":16000000,"cap":2900000},"Leeds United":{"budget":38000000,"cap":9500000},"Nottingham Forest":{"budget":38000000,"cap":9500000},"Sunderland":{"budget":38000000,"cap":9500000},"Paris Saint-Germain":{"budget":145000000,"cap":69600000},"Olympique de Marseille":{"budget":42000000,"cap":15100000},"Olympique Lyonnais":{"budget":17000000,"cap":4250000},"AS Monaco":{"budget":42000000,"cap":15100000},"Bayern Munich":{"budget":115000000,"cap":55200000},"Borussia Dortmund":{"budget":70000000,"cap":25200000},"Bayer Leverkusen":{"budget":55000000,"cap":19800000},"RB Leipzig":{"budget":55000000,"cap":19800000},"Atalanta":{"budget":38000000,"cap":13700000},"Bologna":{"budget":22000000,"cap":5500000},"Cagliari":{"budget":9000000,"cap":1600000},"Como":{"budget":22000000,"cap":5500000},"Fiorentina":{"budget":22000000,"cap":5500000},"Frosinone":{"budget":9000000,"cap":1600000},"Genoa":{"budget":9000000,"cap":1600000},"Inter":{"budget":70000000,"cap":33600000},"Juventus":{"budget":75000000,"cap":36000000},"Lazio":{"budget":28000000,"cap":10100000},"Lecce":{"budget":9000000,"cap":1600000},"Milan":{"budget":65000000,"cap":31200000},"Monza":{"budget":9000000,"cap":1600000},"Napoli":{"budget":58000000,"cap":20900000},"Parma":{"budget":9000000,"cap":1600000},"Roma":{"budget":40000000,"cap":14400000},"Sassuolo":{"budget":9000000,"cap":1600000},"Torino":{"budget":22000000,"cap":5500000},"Udinese":{"budget":9000000,"cap":1600000},"Venezia":{"budget":9000000,"cap":1600000},"Benfica":{"budget":24000000,"cap":8650000},"Porto":{"budget":24000000,"cap":8650000},"Sporting CP":{"budget":24000000,"cap":8650000},"Ajax":{"budget":22000000,"cap":7900000},"PSV":{"budget":22000000,"cap":7900000},"Feyenoord":{"budget":22000000,"cap":7900000},"Club Brugge":{"budget":7000000,"cap":1750000},"Anderlecht":{"budget":7000000,"cap":1750000},"Celtic":{"budget":13000000,"cap":4700000},"Rangers":{"budget":13000000,"cap":4700000},"Galatasaray":{"budget":20000000,"cap":7200000},"Fenerbahçe":{"budget":20000000,"cap":7200000},"Olympiacos":{"budget":6000000,"cap":1500000},"Panathinaikos":{"budget":6000000,"cap":1500000},"Red Bull Salzburg":{"budget":6000000,"cap":1500000},"Basel":{"budget":6000000,"cap":1500000},"Young Boys":{"budget":6000000,"cap":1500000},"Copenhagen":{"budget":6000000,"cap":1500000},"Bodø/Glimt":{"budget":6000000,"cap":1500000},"Malmö FF":{"budget":6000000,"cap":1500000},"Legia Warsaw":{"budget":6000000,"cap":1500000},"Red Star Belgrade":{"budget":6000000,"cap":1500000},"Dinamo Zagreb":{"budget":6000000,"cap":1500000},"Shakhtar Donetsk":{"budget":14000000,"cap":5050000},"Sparta Prague":{"budget":6000000,"cap":1500000},"FCSB":{"budget":6000000,"cap":1500000},"Flamengo":{"budget":32000000,"cap":15350000},"Palmeiras":{"budget":32000000,"cap":15350000},"São Paulo":{"budget":16000000,"cap":5750000},"Corinthians":{"budget":16000000,"cap":5750000},"Grêmio":{"budget":16000000,"cap":5750000},"Internacional":{"budget":16000000,"cap":5750000},"River Plate":{"budget":24000000,"cap":11500000},"Boca Juniors":{"budget":24000000,"cap":11500000},"Racing Club":{"budget":12000000,"cap":4300000},"Independiente":{"budget":12000000,"cap":4300000},"Nacional":{"budget":14000000,"cap":5050000},"Peñarol":{"budget":14000000,"cap":5050000},"Atlético Nacional":{"budget":14000000,"cap":5050000},"Millonarios":{"budget":6000000,"cap":1500000},"Colo-Colo":{"budget":14000000,"cap":5050000},"LDU Quito":{"budget":6000000,"cap":1500000},"Alianza Lima":{"budget":6000000,"cap":1500000},"Olimpia":{"budget":6000000,"cap":1500000},"Bolívar":{"budget":6000000,"cap":1500000},"Deportivo Táchira":{"budget":3000000,"cap":550000},"LA Galaxy":{"budget":5000000,"cap":1250000},"Inter Miami":{"budget":10000000,"cap":3600000},"Seattle Sounders":{"budget":5000000,"cap":1250000},"Toronto FC":{"budget":6000000,"cap":1500000},"Club América":{"budget":12000000,"cap":4300000},"Guadalajara":{"budget":12000000,"cap":4300000},"Monterrey":{"budget":12000000,"cap":4300000},"Al Ahly":{"budget":14000000,"cap":5050000},"Zamalek":{"budget":6000000,"cap":1500000},"Wydad Casablanca":{"budget":14000000,"cap":5050000},"Raja Casablanca":{"budget":14000000,"cap":5050000},"Espérance de Tunis":{"budget":6000000,"cap":1500000},"Mamelodi Sundowns":{"budget":14000000,"cap":5050000},"Kaizer Chiefs":{"budget":6000000,"cap":1500000},"Enyimba":{"budget":3000000,"cap":550000},"Hearts of Oak":{"budget":3000000,"cap":550000},"ASEC Mimosas":{"budget":3000000,"cap":550000},"Kashima Antlers":{"budget":4000000,"cap":1000000},"Urawa Red Diamonds":{"budget":9000000,"cap":3250000},"Yokohama F. Marinos":{"budget":4000000,"cap":1000000},"Ulsan HD":{"budget":4000000,"cap":1000000},"Jeonbuk Hyundai Motors":{"budget":4000000,"cap":1000000},"Shanghai Port":{"budget":6000000,"cap":1500000},"Al Hilal":{"budget":85000000,"cap":40800000},"Al Nassr":{"budget":48000000,"cap":17300000},"Al Ittihad":{"budget":48000000,"cap":17300000},"Al Sadd":{"budget":9000000,"cap":2250000},"Al Ain":{"budget":8000000,"cap":2000000},"Persepolis":{"budget":6000000,"cap":1500000},"Esteghlal":{"budget":6000000,"cap":1500000},"Sydney FC":{"budget":6000000,"cap":1500000},"Melbourne Victory":{"budget":6000000,"cap":1500000},"Auckland City":{"budget":6000000,"cap":1500000}};
+  const SECOND_DIVISION_EXACT={
+    'Real Valladolid CF':[4500000,1400000],'Real Valladolid':[4500000,1400000],
+    'Granada CF':[4000000,1200000],'Granada':[4000000,1200000],
+    'SD Eibar':[3500000,1000000],'Eibar':[3500000,1000000],
+    'Real Sporting':[3500000,1000000],'Sporting de Gijón':[3500000,1000000],
+    'Real Zaragoza':[3000000,900000],'Cádiz CF':[3500000,1000000],
+    'UD Las Palmas':[4000000,1200000],'CD Leganés':[3500000,1000000],
+    'RC Deportivo':[3000000,850000],'Racing de Santander':[3000000,850000],
+    'Málaga CF':[3000000,850000],'Albacete Balompié':[2300000,650000],
+    'Burgos CF':[2200000,600000],'CD Castellón':[2200000,600000],
+    'Córdoba CF':[2000000,550000],'SD Huesca':[2000000,550000],
+    'CD Mirandés':[1800000,500000],'Cultural Leonesa':[1600000,450000],
+    'AD Ceuta':[1600000,450000],'FC Andorra':[1800000,500000],
+    'UD Almería':[4500000,1400000]
   };
+  const RESERVE_NAMES=['celta fortuna','real sociedad b','villarreal b','castilla','barça atlètic','barcelona atlètic','bilbao athletic','betis deportivo','sevilla atlético','sevilla atletico','valencia mestalla','osasuna promesas','deportivo fabril'];
 
-  const RESERVE_WORDS=[
-    ' b',' ii',' u23',' u21',' reserva',' reserves',' castilla',' fortuna',
-    'mestalla','promesas','fabril','atlètic','atletic','atlético','atletico',
-    'bilbao athletic','betis deportivo','villarreal b','real sociedad b'
-  ];
-
-  function norm(v){
-    return ` ${String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')} `;
+  function clean(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+  function reserveClub(name){
+    const n=clean(name);
+    return RESERVE_NAMES.some(x=>n.includes(clean(x)))||/(^|\s)(b|ii|u21|u23)$/.test(n);
   }
-
-  function isReserveClub(name){
-    const n=norm(name);
-    return RESERVE_WORDS.some(w=>n.includes(norm(w).trim()));
+  function secondDivision(club){
+    if(!club)return false;
+    if(SECOND_DIVISION_EXACT[club.name])return true;
+    const league=clean(club.league||club.competition);
+    return league.includes('hypermotion')||league.includes('segunda')||league.includes('championship')||league.includes('serie b')||league.includes('2. bundesliga')||league.includes('ligue 2');
   }
-
-  function isSecondDivisionClub(club){
-    if(!club) return false;
-    const league=norm(club.league||club.competition||'');
-    return DIV2_NAMES.has(club.name) ||
-      league.includes('hypermotion') || league.includes('segunda') ||
-      league.includes('championship') || league.includes('serie b') ||
-      league.includes('2. bundesliga') || league.includes('ligue 2');
+  function fallbackFinance(club){
+    if(reserveClub(club?.name))return {budget:350000,cap:100000};
+    if(secondDivision(club)){
+      const tier=Math.max(1,Number(club?.tier)||4);
+      const budget=tier<=2?4000000:tier===3?2800000:1800000;
+      return {budget,cap:Math.min(1200000,Math.round(budget*.28))};
+    }
+    const level=Number(club?.level)||65;
+    const country=String(club?.country||'');
+    let budget=level>=91?110000000:level>=85?52000000:level>=78?20000000:level>=71?7500000:3000000;
+    if(country==='ENG')budget*=1.18;
+    if(['USA','CAN','AUS','NZL'].includes(country))budget*=.58;
+    budget=Math.round(budget/250000)*250000;
+    const cap=Math.round(Math.min(budget*.28,level>=85?38000000:level>=78?10000000:3500000)/50000)*50000;
+    return {budget,cap};
   }
-
-  function economicBand(club){
-    if(!club) return 6;
-    if(isReserveClub(club.name)) return 7;
-    if(isSecondDivisionClub(club)) return 6;
-    const level=Number(club.level)||65;
-    const prestige=Number(club.prestige)||level;
-    if(level>=90||prestige>=91) return 1;
-    if(level>=85||prestige>=85) return 2;
-    if(level>=79||prestige>=78) return 3;
-    if(level>=73||prestige>=71) return 4;
-    return 5;
+  function clubFinance(club){
+    if(!club)return {budget:1000000,cap:250000};
+    if(reserveClub(club.name))return {budget:350000,cap:100000};
+    if(SECOND_DIVISION_EXACT[club.name]){
+      const [budget,cap]=SECOND_DIVISION_EXACT[club.name];
+      return {budget,cap};
+    }
+    return ALL_BASE_CLUB_FINANCES[club.name]||fallbackFinance(club);
   }
-
-  function finalClubBudget(club){
-    if(!club) return 1500000;
-    if(EXACT_BUDGETS[club.name]!=null) return EXACT_BUDGETS[club.name];
-
-    const band=economicBand(club);
-    let amount={1:120000000,2:60000000,3:26000000,4:10500000,5:5500000,6:3500000,7:500000}[band];
-
-    const country=String(club.country||'');
-    if(country==='ENG'&&band<=4) amount*=1.18;
-    if(isSecondDivisionClub(club)) amount=Math.min(amount,6000000);
-    if(isReserveClub(club.name)) amount=Math.min(amount,750000);
-
-    return Math.round(amount/250000)*250000;
-  }
-
-  function finalOperationCap(club,currentBudget){
-    const band=economicBand(club);
-    const percent={1:.52,2:.40,3:.30,4:.22,5:.18,6:.28,7:.15}[band];
-    const hard={1:150000000,2:65000000,3:24000000,4:8000000,5:4000000,6:2200000,7:200000}[band];
-    return Math.max(100000,Math.min(Math.round(currentBudget*percent),hard));
-  }
-
-  function finalPlayerValue(player){
-    if(!player) return 0;
+  function strictPlayerValue(player){
+    if(!player)return 0;
     const ov=Number(player.base)||Number(player.overall)||60;
     const pot=Math.max(ov,Number(player.potential)||ov);
-    const age=Number(player.age)||21;
     const apps=Number(player.apps)||0;
     const firstApps=Number(player.firstTeamApps)||0;
-    const reserve=isReserveClub(player.club);
-
-    let value;
-    if(ov>=90) value=145000000;
-    else if(ov>=87) value=82000000;
-    else if(ov>=84) value=43000000;
-    else if(ov>=81) value=22000000;
-    else if(ov>=78) value=10500000;
-    else if(ov>=75) value=4800000;
-    else if(ov>=72) value=2100000;
-    else if(ov>=69) value=850000;
-    else if(ov>=66) value=350000;
-    else value=120000;
-
-    // El potencial suma de forma moderada.
-    value*=1+Math.min(.30,Math.max(0,pot-ov)*.025);
-
-    if(age<=20) value*=1.08;
-    else if(age>=32) value*=.68;
-    else if(age>=35) value*=.48;
-
-    // La experiencia es obligatoria para alcanzar precios elevados.
-    if(apps===0&&firstApps===0) value*=.30;
-    else if(apps<10&&firstApps<5) value*=.42;
-    else if(apps<25&&firstApps<12) value*=.60;
-    else if(apps<50) value*=.78;
-
-    if(reserve){
-      value*=.34;
-      let cap=2500000;
-      if(ov>=76||pot>=84) cap=4500000;
-      if(ov>=79&&firstApps>=8) cap=7500000;
-      if(ov>=82&&firstApps>=20) cap=12000000;
+    const age=Number(player.age)||21;
+    let value=ov>=90?140000000:ov>=87?78000000:ov>=84?39000000:ov>=81?19500000:ov>=78?9000000:ov>=75?3900000:ov>=72?1600000:ov>=69?650000:ov>=66?250000:75000;
+    value*=1+Math.min(.22,Math.max(0,pot-ov)*.018);
+    if(apps===0&&firstApps===0)value*=.25;
+    else if(apps<10&&firstApps<5)value*=.38;
+    else if(apps<25&&firstApps<12)value*=.58;
+    else if(apps<50)value*=.78;
+    if(age>=32)value*=.70;
+    if(age>=35)value*=.52;
+    if(reserveClub(player.club)){
+      value*=.28;
+      let cap=1800000;
+      if(ov>=76||pot>=84)cap=3000000;
+      if(ov>=79&&firstApps>=10)cap=5000000;
+      if(ov>=82&&firstApps>=25)cap=8000000;
       value=Math.min(value,cap);
     }
-
-    return Math.max(75000,Math.round(value/25000)*25000);
+    return Math.max(50000,Math.round(value/25000)*25000);
   }
 
   window.initClubBudgets=function(clubs){
-    if(!Array.isArray(clubs)) return;
+    if(!Array.isArray(clubs))return;
     clubs.forEach(club=>{
-      const transfer=finalClubBudget(club);
-      CLUB_BUDGETS[club.name]={
-        transfer,
-        initialTransfer:transfer,
-        wages:Math.round(transfer*.22),
-        spent:0,
-        income:0,
-        economicBand:economicBand(club)
-      };
+      const finance=clubFinance(club);
+      CLUB_BUDGETS[club.name]={transfer:finance.budget,initialTransfer:finance.budget,operationCap:finance.cap,wages:Math.round(finance.budget*.18),spent:0,income:0};
     });
   };
-
-  window.getPlayerMarketValue=finalPlayerValue;
-  try{ getPlayerMarketValue=finalPlayerValue; }catch(_){}
-
-  const baseSubmit=window.submitTransferOffer;
-  window.submitTransferOffer=function(args){
-    const buyerClub=args?.buyerClub;
-    const player=args?.player;
-    const offer=Math.round(Number(args?.amount)||0);
+  window.getPlayerMarketValue=strictPlayerValue;
+  try{getPlayerMarketValue=strictPlayerValue;}catch(_){}
+  window.calculateSellerDemand=function(player,buyerClub){
+    const fair=strictPlayerValue(player);
     const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===buyerClub):null;
-    const budget=getClubBudget(buyerClub);
-    const cap=finalOperationCap(buyer,budget.transfer);
-    const fair=finalPlayerValue(player);
-    const reserve=isReserveClub(player?.club);
+    const seller=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===player?.club):null;
+    let multiplier=reserveClub(player?.club)?1.04:1.08;
+    if((Number(player?.age)||25)<=22)multiplier+=.05;
+    if((Number(player?.potential)||0)>=85)multiplier+=.05;
+    if((seller?.level||65)>(buyer?.level||65))multiplier+=.04;
+    return Math.round(fair*multiplier/25000)*25000;
+  };
 
-    let reason='';
-    if(offer>budget.transfer) reason='Presupuesto total insuficiente';
-    else if(offer>cap) reason='La operación supera el límite autorizado por el club';
-    else if(reserve&&offer>fair*1.12) reason='Precio excesivo para un jugador de filial';
-    else if(offer>fair*1.25) reason='La dirección deportiva considera el precio inflado';
-
-    if(reason){
-      const result={
-        id:`T${Date.now()}${Math.floor(Math.random()*1000)}`,
-        buyerClub,
-        sellerClub:player?.club||'Sin club',
-        playerName:player?.name||'Jugador',
-        amount:offer,
-        value:fair,
-        demand:fair,
-        status:'rejected',
-        reason,
-        date:new Date().toISOString()
-      };
-      if(typeof TRANSFER_HISTORY!=='undefined') TRANSFER_HISTORY.unshift(result);
+  const previousSubmit=window.submitTransferOffer;
+  window.submitTransferOffer=function(args){
+    const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===args?.buyerClub):null;
+    const finance=clubFinance(buyer);
+    const budget=getClubBudget(args?.buyerClub);
+    const fair=strictPlayerValue(args?.player);
+    const offer=Math.round(Number(args?.amount)||0);
+    const maximum=Math.min(finance.cap,budget.transfer,Math.round(fair*(reserveClub(args?.player?.club)?1.08:1.18)));
+    if(offer>maximum||fair>finance.cap*1.10){
+      const result={id:`T${Date.now()}${Math.floor(Math.random()*1000)}`,buyerClub:args?.buyerClub,sellerClub:args?.player?.club||'Sin club',playerName:args?.player?.name||'Jugador',amount:offer,value:fair,demand:fair,status:'rejected',reason:'Operación fuera del presupuesto o del valor real autorizado',date:new Date().toISOString()};
+      if(typeof TRANSFER_HISTORY!=='undefined')TRANSFER_HISTORY.unshift(result);
       return result;
     }
-
-    return baseSubmit({...args,amount:Math.min(offer,Math.round(fair*1.18))});
+    return previousSubmit({...args,amount:Math.min(offer,maximum)});
   };
 
   window.runClubTransferAI=function(clubName){
     const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===clubName):null;
+    const finance=clubFinance(buyer);
     const budget=getClubBudget(clubName);
-    const cap=finalOperationCap(buyer,budget.transfer);
-
-    const targets=findTransferTargets(clubName,30)
-      .map(p=>({...p,finalValue:finalPlayerValue(p)}))
-      .filter(p=>p.finalValue<=cap&&p.finalValue<=budget.transfer)
-      .filter(p=>!(isReserveClub(p.club)&&p.finalValue>cap*.85))
-      .sort((a,b)=>(b.fitScore||0)-(a.fitScore||0));
-
-    if(!targets.length){
-      return {status:'no-target',club:clubName,reason:'No hay jugadores adecuados dentro del presupuesto real'};
-    }
-
+    const ceiling=Math.min(finance.cap,budget.transfer);
+    const targets=findTransferTargets(clubName,30).map(p=>({...p,realValue:strictPlayerValue(p)})).filter(p=>p.realValue<=ceiling).sort((a,b)=>(b.fitScore||0)-(a.fitScore||0));
+    if(!targets.length)return {status:'no-target',club:clubName,reason:'Sin objetivos asequibles'};
     const target=targets[Math.floor(Math.random()*Math.min(5,targets.length))];
-    const offer=Math.min(
-      cap,
-      budget.transfer,
-      Math.round(target.finalValue*(.96+Math.random()*.14)/25000)*25000
-    );
-
+    const offer=Math.min(ceiling,Math.round(target.realValue*(.97+Math.random()*.10)/25000)*25000);
     return window.submitTransferOffer({buyerClub:clubName,player:target,amount:offer});
   };
 
-  // Elimina operaciones imposibles ya generadas en la sesión actual.
-  if(typeof TRANSFER_HISTORY!=='undefined'){
-    for(let i=TRANSFER_HISTORY.length-1;i>=0;i--){
-      const move=TRANSFER_HISTORY[i];
-      const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===move.buyerClub):null;
-      const cap=finalOperationCap(buyer,finalClubBudget(buyer));
-      if(move.status==='accepted'&&Number(move.amount)>cap*1.15){
-        TRANSFER_HISTORY.splice(i,1);
-      }
-    }
-  }
-
-  if(typeof CLUBS!=='undefined') window.initClubBudgets(CLUBS);
-
-  window.finalClubBudget=finalClubBudget;
-  window.finalOperationCap=finalOperationCap;
-  window.finalPlayerValue=finalPlayerValue;
+  if(typeof CLUBS!=='undefined')window.initClubBudgets(CLUBS);
+  window.clubFinance=clubFinance;
+  window.ALL_BASE_CLUB_FINANCES=ALL_BASE_CLUB_FINANCES;
 })();
 </script>
 
