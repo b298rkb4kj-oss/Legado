@@ -383,7 +383,7 @@ const COUNTRIES=[
 ['NZL','Nueva Zelanda','OFC',78,'Copa de Naciones de Oceanía'],['FIJ','Fiyi','OFC',58,'Copa de Naciones de Oceanía'],['SOL','Islas Salomón','OFC',56,'Copa de Naciones de Oceanía']
 ].map(([code,name,confed,level,continental])=>({code,name,confed,level,ranking:Math.max(1,101-level),continental,federation:`Federación de ${name}`}));
 const LEAGUES={ESP:['LaLiga',20,3],ENG:['Premier League',20,3],FRA:['Ligue 1',18,2],GER:['Bundesliga',18,2],ITA:['Serie A',20,3],POR:['Primeira Liga',18,2],NED:['Eredivisie',18,2],BEL:['Pro League',16,2],SCO:['Scottish Premiership',12,1],TUR:['Süper Lig',20,3],GRE:['Super League Greece',14,2],AUT:['Austrian Bundesliga',12,1],SUI:['Swiss Super League',12,1],DEN:['Danish Superliga',12,1],NOR:['Eliteserien',16,2],SWE:['Allsvenskan',16,2],POL:['Ekstraklasa',18,3],SRB:['Serbian SuperLiga',16,2],CRO:['HNL',10,1],UKR:['Ukrainian Premier League',16,2],CZE:['Czech First League',16,2],ROU:['Liga I',16,2],BRA:['Série A',20,4],ARG:['Liga Profesional',30,2],URU:['Primera División Uruguay',16,3],COL:['Categoría Primera A',20,2],CHI:['Primera División Chile',16,2],ECU:['LigaPro',16,2],PER:['Liga 1',18,3],PAR:['División Profesional',12,1],BOL:['División Profesional Bolivia',16,2],VEN:['Primera División Venezuela',14,2],USA:['Major League Soccer',30,0],CAN:['Canadian Premier League',8,0],MEX:['Liga MX',18,0],MAR:['Botola Pro',16,2],EGY:['Egyptian Premier League',18,3],TUN:['Tunisian Ligue 1',16,2],ALG:['Ligue 1 Algeria',16,2],RSA:['South African Premiership',16,2],NGA:['Nigeria Premier Football League',20,4],GHA:['Ghana Premier League',18,3],SEN:['Senegal Ligue 1',14,2],CIV:['Ligue 1 Côte d’Ivoire',16,2],JPN:['J1 League',20,3],KOR:['K League 1',12,1],CHN:['Chinese Super League',16,2],KSA:['Saudi Pro League',18,3],QAT:['Qatar Stars League',12,1],UAE:['UAE Pro League',14,2],IRN:['Persian Gulf Pro League',16,2],AUS:['A-League Men',13,0],NZL:['New Zealand National League',10,0]};
-const CLUB_ROWS=`Real Madrid|ESP|1|Santiago Bernabéu|81044;Barcelona|ESP|1|Spotify Camp Nou|99354;Atlético de Madrid|ESP|2|Metropolitano|70460;Athletic Club|ESP|3|San Mamés|53331;Real Sociedad|ESP|3|Anoeta|39500;Sevilla|ESP|3|Ramón Sánchez-Pizjuán|43883;Valencia|ESP|3|Mestalla|49430;Villarreal|ESP|3|La Cerámica|23500;Real Betis|ESP|3|Benito Villamarín|60721;CA Osasuna|ESP|4|El Sadar|23516;Celta|ESP|4|Abanca Balaídos|24791;Deportivo Alavés|ESP|4|Mendizorroza|19840;Levante UD|ESP|4|Ciutat de València|26354;Rayo Vallecano|ESP|4|Vallecas|14708;Getafe CF|ESP|4|Coliseum|16800;RCD Espanyol|ESP|4|RCDE Stadium|40500;Elche CF|ESP|4|Martínez Valero|31388;Málaga CF|ESP|4|La Rosaleda|30044;Racing de Santander|ESP|4|El Sardinero|22222;RC Deportivo|ESP|4|Riazor|32912;Manchester City|ENG|1|Etihad Stadium|53400;Liverpool|ENG|1|Anfield|61276;Manchester United|ENG|1|Old Trafford|74310;Arsenal|ENG|1|Emirates Stadium|60704;Chelsea|ENG|2|Stamford Bridge|40341;Tottenham Hotspur|ENG|2|Tottenham Hotspur Stadium|62850;Newcastle United|ENG|2|St James’ Park|52305;Aston Villa|ENG|3|Villa Park|42640;AFC Bournemouth|ENG|3|Vitality Stadium|11307;Brentford|ENG|3|Gtech Community Stadium|17250;Brighton & Hove Albion|ENG|3|American Express Stadium|31876;Coventry City|ENG|4|Coventry Building Society Arena|32609;Crystal Palace|ENG|3|Selhurst Park|25486;Everton|ENG|3|Hill Dickinson Stadium|52888;Fulham|ENG|3|Craven Cottage|29600;Hull City|ENG|4|MKM Stadium|25586;Ipswich Town|ENG|4|Portman Road|29673;Leeds United|ENG|3|Elland Road|37645;Nottingham Forest|ENG|3|The City Ground|30445;Sunderland|ENG|3|Stadium of Light|49000;Paris Saint-Germain|FRA|1|Parc des Princes|47929;Olympique de Marseille|FRA|2|Vélodrome|67394;Olympique Lyonnais|FRA|3|Groupama Stadium|59186;AS Monaco|FRA|2|Stade Louis II|18523;Bayern Munich|GER|1|Allianz Arena|75024;Borussia Dortmund|GER|2|Signal Iduna Park|81365;Bayer Leverkusen|GER|2|BayArena|30210;RB Leipzig|GER|2|Red Bull Arena|47069;Juventus|ITA|1|Allianz Stadium|41507;Inter|ITA|1|San Siro|75817;Milan|ITA|1|San Siro|75817;Napoli|ITA|2|Diego Armando Maradona|54726;Roma|ITA|2|Stadio Olimpico|70634;Lazio|ITA|2|Stadio Olimpico|70634;Atalanta|ITA|2|Gewiss Stadium|24950;Benfica|POR|2|Estádio da Luz|64642;Porto|POR|2|Estádio do Dragão|50033;Sporting CP|POR|2|José Alvalade|50095;Ajax|NED|2|Johan Cruyff Arena|55865;PSV|NED|2|Philips Stadion|36500;Feyenoord|NED|2|De Kuip|51117;Club Brugge|BEL|3|Jan Breydel|29062;Anderlecht|BEL|3|Lotto Park|22500;Celtic|SCO|2|Celtic Park|60411;Rangers|SCO|2|Ibrox|50817;Galatasaray|TUR|2|RAMS Park|52280;Fenerbahçe|TUR|2|Şükrü Saracoğlu|47834;Olympiacos|GRE|3|Karaiskakis|32115;Panathinaikos|GRE|3|Olympic Stadium|69618;Red Bull Salzburg|AUT|3|Red Bull Arena Salzburg|30188;Basel|SUI|3|St. Jakob-Park|38512;Young Boys|SUI|3|Wankdorf|31789;Copenhagen|DEN|3|Parken|38065;Bodø/Glimt|NOR|3|Aspmyra|8270;Malmö FF|SWE|3|Eleda Stadion|22500;Legia Warsaw|POL|3|Polish Army Stadium|31103;Red Star Belgrade|SRB|3|Rajko Mitić|51500;Dinamo Zagreb|CRO|3|Maksimir|35000;Shakhtar Donetsk|UKR|2|Arena Lviv|34915;Sparta Prague|CZE|3|epet ARENA|18349;FCSB|ROU|3|Arena Națională|55634;Flamengo|BRA|1|Maracanã|78838;Palmeiras|BRA|1|Allianz Parque|43713;São Paulo|BRA|2|Morumbi|66795;Corinthians|BRA|2|Neo Química Arena|49205;Grêmio|BRA|2|Arena do Grêmio|55662;Internacional|BRA|2|Beira-Rio|50842;River Plate|ARG|1|Monumental|84567;Boca Juniors|ARG|1|La Bombonera|57200;Racing Club|ARG|2|El Cilindro|55000;Independiente|ARG|2|Libertadores de América|49000;Nacional|URU|2|Gran Parque Central|34000;Peñarol|URU|2|Campeón del Siglo|40005;Atlético Nacional|COL|2|Atanasio Girardot|45943;Millonarios|COL|3|El Campín|36343;Colo-Colo|CHI|2|Monumental David Arellano|47347;LDU Quito|ECU|3|Rodrigo Paz Delgado|41575;Alianza Lima|PER|3|Alejandro Villanueva|33938;Olimpia|PAR|3|Manuel Ferreira|22000;Bolívar|BOL|3|Hernando Siles|41143;Deportivo Táchira|VEN|4|Pueblo Nuevo|38755;LA Galaxy|USA|3|Dignity Health Sports Park|27000;Inter Miami|USA|2|Miami Freedom Park|25000;Seattle Sounders|USA|3|Lumen Field|68740;Toronto FC|CAN|3|BMO Field|30991;Club América|MEX|2|Estadio Azteca|83264;Guadalajara|MEX|2|Akron|49850;Monterrey|MEX|2|BBVA|53500;Al Ahly|EGY|2|Cairo International|75000;Zamalek|EGY|3|Cairo International|75000;Wydad Casablanca|MAR|2|Mohammed V|45891;Raja Casablanca|MAR|2|Mohammed V|45891;Espérance de Tunis|TUN|3|Hammadi Agrebi|60000;Mamelodi Sundowns|RSA|2|Loftus Versfeld|51762;Kaizer Chiefs|RSA|3|FNB Stadium|94736;Enyimba|NGA|4|Enyimba Stadium|16000;Hearts of Oak|GHA|4|Accra Sports Stadium|40000;ASEC Mimosas|CIV|4|Félix Houphouët-Boigny|45000;Kashima Antlers|JPN|3|Kashima Soccer Stadium|40728;Urawa Red Diamonds|JPN|2|Saitama Stadium|63700;Yokohama F. Marinos|JPN|3|Nissan Stadium|72327;Ulsan HD|KOR|3|Ulsan Munsu|44102;Jeonbuk Hyundai Motors|KOR|3|Jeonju World Cup Stadium|36521;Shanghai Port|CHN|3|Pudong Football Stadium|37000;Al Hilal|KSA|1|Kingdom Arena|30000;Al Nassr|KSA|2|Al-Awwal Park|25000;Al Ittihad|KSA|2|King Abdullah Sports City|62345;Al Sadd|QAT|3|Jassim bin Hamad|12946;Al Ain|UAE|3|Hazza bin Zayed|25174;Persepolis|IRN|3|Azadi Stadium|78116;Esteghlal|IRN|3|Azadi Stadium|78116;Sydney FC|AUS|3|Sydney Football Stadium|42000;Melbourne Victory|AUS|3|AAMI Park|30050;Auckland City|NZL|3|Kiwitea Street|3500`;
+const CLUB_ROWS=`Real Madrid|ESP|1|Santiago Bernabéu|81044;Barcelona|ESP|1|Spotify Camp Nou|99354;Atlético de Madrid|ESP|2|Metropolitano|70460;Athletic Club|ESP|3|San Mamés|53331;Real Sociedad|ESP|3|Anoeta|39500;Sevilla|ESP|3|Ramón Sánchez-Pizjuán|43883;Valencia|ESP|3|Mestalla|49430;Villarreal|ESP|3|La Cerámica|23500;Real Betis|ESP|3|Benito Villamarín|60721;CA Osasuna|ESP|4|El Sadar|23516;Celta|ESP|4|Abanca Balaídos|24791;Deportivo Alavés|ESP|4|Mendizorroza|19840;Levante UD|ESP|4|Ciutat de València|26354;Rayo Vallecano|ESP|4|Vallecas|14708;Getafe CF|ESP|4|Coliseum|16800;RCD Espanyol|ESP|4|RCDE Stadium|40500;Elche CF|ESP|4|Martínez Valero|31388;Málaga CF|ESP|4|La Rosaleda|30044;Racing de Santander|ESP|4|El Sardinero|22222;RC Deportivo|ESP|4|Riazor|32912;Manchester City|ENG|1|Etihad Stadium|53400;Liverpool|ENG|1|Anfield|61276;Manchester United|ENG|1|Old Trafford|74310;Arsenal|ENG|1|Emirates Stadium|60704;Chelsea|ENG|2|Stamford Bridge|40341;Tottenham Hotspur|ENG|2|Tottenham Hotspur Stadium|62850;Newcastle United|ENG|2|St James’ Park|52305;Aston Villa|ENG|3|Villa Park|42640;AFC Bournemouth|ENG|3|Vitality Stadium|11307;Brentford|ENG|3|Gtech Community Stadium|17250;Brighton & Hove Albion|ENG|3|American Express Stadium|31876;Coventry City|ENG|4|Coventry Building Society Arena|32609;Crystal Palace|ENG|3|Selhurst Park|25486;Everton|ENG|3|Hill Dickinson Stadium|52888;Fulham|ENG|3|Craven Cottage|29600;Hull City|ENG|4|MKM Stadium|25586;Ipswich Town|ENG|4|Portman Road|29673;Leeds United|ENG|3|Elland Road|37645;Nottingham Forest|ENG|3|The City Ground|30445;Sunderland|ENG|3|Stadium of Light|49000;Paris Saint-Germain|FRA|1|Parc des Princes|47929;Olympique de Marseille|FRA|2|Vélodrome|67394;Olympique Lyonnais|FRA|3|Groupama Stadium|59186;AS Monaco|FRA|2|Stade Louis II|18523;Bayern Munich|GER|1|Allianz Arena|75024;Borussia Dortmund|GER|2|Signal Iduna Park|81365;Bayer Leverkusen|GER|2|BayArena|30210;RB Leipzig|GER|2|Red Bull Arena|47069;Atalanta|ITA|2|New Balance Arena|24950;Bologna|ITA|3|Renato Dall'Ara|36462;Cagliari|ITA|4|Unipol Domus|16416;Como|ITA|3|Giuseppe Sinigaglia|13602;Fiorentina|ITA|3|Artemio Franchi|43147;Frosinone|ITA|4|Benito Stirpe|16227;Genoa|ITA|4|Luigi Ferraris|33205;Inter|ITA|1|San Siro|75817;Juventus|ITA|1|Allianz Stadium|41507;Lazio|ITA|2|Stadio Olimpico|70634;Lecce|ITA|4|Via del Mare|31533;Milan|ITA|1|San Siro|75817;Monza|ITA|4|U-Power Stadium|18568;Napoli|ITA|2|Diego Armando Maradona|54726;Parma|ITA|4|Ennio Tardini|22352;Roma|ITA|2|Stadio Olimpico|70634;Sassuolo|ITA|4|Mapei Stadium|21584;Torino|ITA|3|Olimpico Grande Torino|27958;Udinese|ITA|4|Bluenergy Stadium|25144;Venezia|ITA|4|Pier Luigi Penzo|11150;Benfica|POR|2|Estádio da Luz|64642;Porto|POR|2|Estádio do Dragão|50033;Sporting CP|POR|2|José Alvalade|50095;Ajax|NED|2|Johan Cruyff Arena|55865;PSV|NED|2|Philips Stadion|36500;Feyenoord|NED|2|De Kuip|51117;Club Brugge|BEL|3|Jan Breydel|29062;Anderlecht|BEL|3|Lotto Park|22500;Celtic|SCO|2|Celtic Park|60411;Rangers|SCO|2|Ibrox|50817;Galatasaray|TUR|2|RAMS Park|52280;Fenerbahçe|TUR|2|Şükrü Saracoğlu|47834;Olympiacos|GRE|3|Karaiskakis|32115;Panathinaikos|GRE|3|Olympic Stadium|69618;Red Bull Salzburg|AUT|3|Red Bull Arena Salzburg|30188;Basel|SUI|3|St. Jakob-Park|38512;Young Boys|SUI|3|Wankdorf|31789;Copenhagen|DEN|3|Parken|38065;Bodø/Glimt|NOR|3|Aspmyra|8270;Malmö FF|SWE|3|Eleda Stadion|22500;Legia Warsaw|POL|3|Polish Army Stadium|31103;Red Star Belgrade|SRB|3|Rajko Mitić|51500;Dinamo Zagreb|CRO|3|Maksimir|35000;Shakhtar Donetsk|UKR|2|Arena Lviv|34915;Sparta Prague|CZE|3|epet ARENA|18349;FCSB|ROU|3|Arena Națională|55634;Flamengo|BRA|1|Maracanã|78838;Palmeiras|BRA|1|Allianz Parque|43713;São Paulo|BRA|2|Morumbi|66795;Corinthians|BRA|2|Neo Química Arena|49205;Grêmio|BRA|2|Arena do Grêmio|55662;Internacional|BRA|2|Beira-Rio|50842;River Plate|ARG|1|Monumental|84567;Boca Juniors|ARG|1|La Bombonera|57200;Racing Club|ARG|2|El Cilindro|55000;Independiente|ARG|2|Libertadores de América|49000;Nacional|URU|2|Gran Parque Central|34000;Peñarol|URU|2|Campeón del Siglo|40005;Atlético Nacional|COL|2|Atanasio Girardot|45943;Millonarios|COL|3|El Campín|36343;Colo-Colo|CHI|2|Monumental David Arellano|47347;LDU Quito|ECU|3|Rodrigo Paz Delgado|41575;Alianza Lima|PER|3|Alejandro Villanueva|33938;Olimpia|PAR|3|Manuel Ferreira|22000;Bolívar|BOL|3|Hernando Siles|41143;Deportivo Táchira|VEN|4|Pueblo Nuevo|38755;LA Galaxy|USA|3|Dignity Health Sports Park|27000;Inter Miami|USA|2|Miami Freedom Park|25000;Seattle Sounders|USA|3|Lumen Field|68740;Toronto FC|CAN|3|BMO Field|30991;Club América|MEX|2|Estadio Azteca|83264;Guadalajara|MEX|2|Akron|49850;Monterrey|MEX|2|BBVA|53500;Al Ahly|EGY|2|Cairo International|75000;Zamalek|EGY|3|Cairo International|75000;Wydad Casablanca|MAR|2|Mohammed V|45891;Raja Casablanca|MAR|2|Mohammed V|45891;Espérance de Tunis|TUN|3|Hammadi Agrebi|60000;Mamelodi Sundowns|RSA|2|Loftus Versfeld|51762;Kaizer Chiefs|RSA|3|FNB Stadium|94736;Enyimba|NGA|4|Enyimba Stadium|16000;Hearts of Oak|GHA|4|Accra Sports Stadium|40000;ASEC Mimosas|CIV|4|Félix Houphouët-Boigny|45000;Kashima Antlers|JPN|3|Kashima Soccer Stadium|40728;Urawa Red Diamonds|JPN|2|Saitama Stadium|63700;Yokohama F. Marinos|JPN|3|Nissan Stadium|72327;Ulsan HD|KOR|3|Ulsan Munsu|44102;Jeonbuk Hyundai Motors|KOR|3|Jeonju World Cup Stadium|36521;Shanghai Port|CHN|3|Pudong Football Stadium|37000;Al Hilal|KSA|1|Kingdom Arena|30000;Al Nassr|KSA|2|Al-Awwal Park|25000;Al Ittihad|KSA|2|King Abdullah Sports City|62345;Al Sadd|QAT|3|Jassim bin Hamad|12946;Al Ain|UAE|3|Hazza bin Zayed|25174;Persepolis|IRN|3|Azadi Stadium|78116;Esteghlal|IRN|3|Azadi Stadium|78116;Sydney FC|AUS|3|Sydney Football Stadium|42000;Melbourne Victory|AUS|3|AAMI Park|30050;Auckland City|NZL|3|Kiwitea Street|3500`;
 const CLUB_LEAGUE_OVERRIDES={'Toronto FC':'Major League Soccer'};
 const CLUBS=CLUB_ROWS.split(';').map((r,i)=>{const [name,country,tier,stadium,capacity]=r.split('|');const c=COUNTRIES.find(x=>x.code===country);const l=LEAGUES[country]||['Liga nacional',16,2];return{id:'c'+i,name,country,confed:c.confed,league:CLUB_LEAGUE_OVERRIDES[name]||l[0],tier:+tier,level:100-(+tier*10)+((i*7)%7),prestige:100-(+tier*12),budget:Math.round((6-(+tier))*35),stadium,capacity:+capacity,fans:Math.min(100,110-(+tier*12)),pressure:Math.min(100,105-(+tier*10)),history:`Club real de ${c.name}. Datos de estadio y capacidad aproximados.`,objectives:+tier<=2?'Ganar títulos y competir internacionalmente':+tier===3?'Clasificación continental y progreso':'Permanencia y desarrollo',rivals:[]}});
 const CONTINENTALS={UEFA:['Champions League','Europa League','Conference League'],CONMEBOL:['Copa Libertadores','Copa Sudamericana'],CONCACAF:['CONCACAF Champions Cup'],CAF:['CAF Champions League','CAF Confederation Cup'],AFC:['AFC Champions League Elite','AFC Champions League Two'],OFC:['OFC Champions League']};
@@ -1907,7 +1907,7 @@ function simulateClubTransferMarket(){
 function romanoPanelHTML(){
  ensureMarketEconomy();const win=transferWindowInfo(),fin=S.clubFinances[S.clubId];
  const items=[...S.transferNews.map(x=>({...x,type:'confirmed'})),...S.transferRumours.map(x=>({...x,type:'rumour'}))].sort((a,b)=>(b.season-a.season)||(b.week-a.week)).slice(0,5);
- const tweets=items.length?items.map(x=>{const confirmed=x.type==='confirmed',clauseText=x.clauseUsed?` Cláusula de rescisión de ${money(x.clause||x.fee)} activada.`:x.clause?` El contrato incluía una cláusula de ${money(x.clause)}.`:'';const body=confirmed?`${x.player} to ${x.to}, deal completed from ${x.from} for ${money(x.fee)}. Contracts signed and official announcement expected. <span class="hereWeGo">Here we go! 🔵⚪</span>${clauseText}`:`${x.text}${x.clause?` El jugador tiene una cláusula de rescisión de <span class="clauseTag">${money(x.clause)}</span>.`:''}`;return `<article class="journalistTweet ${confirmed?'confirmed':'rumour'}"><div class="tweetHeader"><div class="journalistLogo">FR</div><div class="tweetIdentity"><b>Fabrizio Romano <span class="verifiedMark">✓</span></b><span>@FabrizioRomano</span></div><span class="tweetTime">${storyDateLabel(x)}</span></div><div class="tweetBody"><span class="${confirmed?'confirmedLabel':'rumourLabel'}">${confirmed?'CONFIRMADO':'RUMOR'}</span><br>${body}</div><div class="tweetMeta"><span>💬 ${12+hash(x.id)%480}</span><span>↻ ${80+hash(x.id+'r')%4200}</span><span>♡ ${400+hash(x.id+'l')%28000}</span><span>◉ ${10+hash(x.id+'v')%890} mil</span></div></article>`}).join(''):`<article class="journalistTweet"><div class="tweetHeader"><div class="journalistLogo">FR</div><div class="tweetIdentity"><b>Fabrizio Romano <span class="verifiedMark">✓</span></b><span>@FabrizioRomano</span></div><span class="tweetTime">Ahora</span></div><div class="tweetBody">Sin novedades importantes por el momento. ${win.open?'Los clubes mantienen conversaciones y pueden aparecer nuevas operaciones.':'La actividad continuará, aunque los fichajes solo podrán cerrarse cuando abra el mercado.'}</div></article>`;
+ const tweets=items.length?items.map(x=>{const confirmed=x.type==='confirmed';const totalPaid=Number(x.totalPaid||x.fee||0);const body=confirmed?`${x.player} to ${x.to}, deal completed from ${x.from}. Total package paid by ${x.to}: <b>${money(totalPaid)}</b>. Contracts signed and official announcement expected. <span class="hereWeGo">Here we go! 🔵⚪</span>`:`${x.text}${x.clause?` El jugador tiene una cláusula de rescisión de <span class="clauseTag">${money(x.clause)}</span>.`:''}`;return `<article class="journalistTweet ${confirmed?'confirmed':'rumour'}"><div class="tweetHeader"><div class="journalistLogo">FR</div><div class="tweetIdentity"><b>Fabrizio Romano <span class="verifiedMark">✓</span></b><span>@FabrizioRomano</span></div><span class="tweetTime">${storyDateLabel(x)}</span></div><div class="tweetBody"><span class="${confirmed?'confirmedLabel':'rumourLabel'}">${confirmed?'CONFIRMADO':'RUMOR'}</span><br>${body}</div><div class="tweetMeta"><span>💬 ${12+hash(x.id)%480}</span><span>↻ ${80+hash(x.id+'r')%4200}</span><span>♡ ${400+hash(x.id+'l')%28000}</span><span>◉ ${10+hash(x.id+'v')%890} mil</span></div></article>`}).join(''):`<article class="journalistTweet"><div class="tweetHeader"><div class="journalistLogo">FR</div><div class="tweetIdentity"><b>Fabrizio Romano <span class="verifiedMark">✓</span></b><span>@FabrizioRomano</span></div><span class="tweetTime">Ahora</span></div><div class="tweetBody">Sin novedades importantes por el momento. ${win.open?'Los clubes mantienen conversaciones y pueden aparecer nuevas operaciones.':'La actividad continuará, aunque los fichajes solo podrán cerrarse cuando abra el mercado.'}</div></article>`;
  return `<section class="card romanoPanel"><div class="newsFeedTitle"><div><h3>Noticias</h3><small>Mercado de fichajes · Fabrizio Romano</small></div><span class="pill windowBadge ${win.open?'open':'closed'}">${win.name}</span></div><div class="tweetFeed">${tweets}</div><div class="financeGrid" style="margin-top:12px"><div class="financeBox"><small>Presupuesto del club</small><b>${money(fin.budget)}</b></div><div class="financeBox"><small>Gastado</small><b>${money(fin.spent)}</b></div><div class="financeBox"><small>Ingresos</small><b>${money(fin.income)}</b></div></div></section>`;
 }
 const LEGADO_renderHome_market=renderHome;
@@ -2076,6 +2076,160 @@ if(typeof CLUBS!=='undefined'){
   initClubBudgets(CLUBS);
   window.detectSquadNeeds=detectSquadNeeds;
   window.findTransferTargets=findTransferTargets;
+}
+
+
+// ===== LEGADO v0.20.1 · SERIE A 2026/27 (primera tanda de plantillas) =====
+const SERIE_A_2627_CLUBS=['Atalanta','Bologna','Cagliari','Como','Fiorentina','Frosinone','Genoa','Inter','Juventus','Lazio','Lecce','Milan','Monza','Napoli','Parma','Roma','Sassuolo','Torino','Udinese','Venezia'];
+const SERIE_A_FIRST_TEN_PLAYERS=[
+['Marco Carnesecchi','Atalanta','Portero',84,88,26],
+['Juan Musso','Atalanta','Portero',81,81,32],
+['Giorgio Scalvini','Atalanta','Defensa central',84,90,22],
+['Berat Djimsiti','Atalanta','Defensa central',82,82,33],
+['Isak Hien','Atalanta','Defensa central',81,84,27],
+['Davide Zappacosta','Atalanta','Lateral',80,80,34],
+['Matteo Ruggeri','Atalanta','Lateral',81,86,24],
+['Éderson','Atalanta','Centrocampista',85,88,27],
+['Marten de Roon','Atalanta','Centrocampista defensivo',82,82,35],
+['Mario Pašalić','Atalanta','Mediapunta',82,82,31],
+['Charles De Ketelaere','Atalanta','Mediapunta',85,89,25],
+['Gianluca Scamacca','Atalanta','Delantero',83,85,27],
+['Ademola Lookman','Atalanta','Extremo',86,87,28],
+['Lazar Samardžić','Atalanta','Mediapunta',81,86,24],
+['Łukasz Skorupski','Bologna','Portero',81,81,35],
+['Federico Ravaglia','Bologna','Portero',76,82,27],
+['Sam Beukema','Bologna','Defensa central',82,86,27],
+['Jhon Lucumí','Bologna','Defensa central',82,85,28],
+['Riccardo Calafiori','Bologna','Defensa central',84,89,24],
+['Emil Holm','Bologna','Lateral',79,84,26],
+['Juan Miranda','Bologna','Lateral',80,84,26],
+['Remo Freuler','Bologna','Centrocampista',82,82,34],
+['Lewis Ferguson','Bologna','Centrocampista',83,86,27],
+['Michel Aebischer','Bologna','Centrocampista',80,82,29],
+['Riccardo Orsolini','Bologna','Extremo',84,84,29],
+['Dan Ndoye','Bologna','Extremo',82,87,25],
+['Santiago Castro','Bologna','Delantero',80,88,22],
+['Thijs Dallinga','Bologna','Delantero',81,85,26],
+['Elia Caprile','Cagliari','Portero',78,84,24],
+['Simone Scuffet','Cagliari','Portero',76,77,30],
+['Yerry Mina','Cagliari','Defensa central',79,79,31],
+['Sebastiano Luperto','Cagliari','Defensa central',78,79,29],
+['Gabriele Zappa','Cagliari','Lateral',77,80,26],
+['Tommaso Augello','Cagliari','Lateral',77,77,31],
+['Antoine Makoumbou','Cagliari','Centrocampista defensivo',77,80,28],
+['Michel Adopo','Cagliari','Centrocampista',76,82,25],
+['Nicolas Viola','Cagliari','Mediapunta',76,76,36],
+['Gianluca Gaetano','Cagliari','Mediapunta',78,83,26],
+['Zito Luvumbo','Cagliari','Extremo',78,85,24],
+['Roberto Piccoli','Cagliari','Delantero',79,84,25],
+['Leonardo Pavoletti','Cagliari','Delantero',75,75,37],
+['Jean Butez','Como','Portero',80,82,31],
+['Pepe Reina','Como','Portero',74,74,43],
+['Alberto Dossena','Como','Defensa central',79,82,28],
+['Marc-Oliver Kempf','Como','Defensa central',79,79,31],
+['Ignace Van der Brempt','Como','Lateral',77,82,24],
+['Álex Valle','Como','Lateral',78,86,22],
+['Máximo Perrone','Como','Centrocampista defensivo',79,87,23],
+['Lucas Da Cunha','Como','Centrocampista',79,83,25],
+['Nico Paz','Como','Mediapunta',84,92,21],
+['Gabriel Strefezza','Como','Extremo',81,81,29],
+['Assane Diao','Como','Extremo',80,89,20],
+['Patrick Cutrone','Como','Delantero',78,79,28],
+['Andrea Belotti','Como','Delantero',78,78,32],
+['David de Gea','Fiorentina','Portero',85,85,35],
+['Oliver Christensen','Fiorentina','Portero',77,81,27],
+['Luca Ranieri','Fiorentina','Defensa central',80,83,27],
+['Marin Pongračić','Fiorentina','Defensa central',80,81,28],
+['Dodô','Fiorentina','Lateral',83,86,27],
+['Robin Gosens','Fiorentina','Lateral',82,82,32],
+['Rolando Mandragora','Fiorentina','Centrocampista',80,80,29],
+['Danilo Cataldi','Fiorentina','Centrocampista defensivo',79,79,31],
+['Albert Guðmundsson','Fiorentina','Mediapunta',83,84,29],
+['Andrea Colpani','Fiorentina','Mediapunta',80,84,27],
+['Nicolás González','Fiorentina','Extremo',83,84,28],
+['Moise Kean','Fiorentina','Delantero',84,87,26],
+['Lucas Beltrán','Fiorentina','Segundo delantero',81,86,25],
+['Michele Cerofolini','Frosinone','Portero',75,78,27],
+['Pierluigi Frattali','Frosinone','Portero',71,71,40],
+['Ilario Monterisi','Frosinone','Defensa central',75,80,24],
+['Caleb Okoli','Frosinone','Defensa central',78,84,25],
+['Anthony Oyono','Frosinone','Lateral',75,81,25],
+['Riccardo Marchizza','Frosinone','Lateral',75,77,28],
+['Luca Mazzitelli','Frosinone','Centrocampista',77,78,30],
+['Enzo Barrenechea','Frosinone','Centrocampista defensivo',78,85,25],
+['Reinier','Frosinone','Mediapunta',76,82,24],
+['Matías Soulé','Frosinone','Extremo',82,89,23],
+['Walid Cheddira','Frosinone','Delantero',77,80,28],
+['Kaio Jorge','Frosinone','Delantero',76,83,24],
+['Nicola Leali','Genoa','Portero',77,77,33],
+['Daniele Sommariva','Genoa','Portero',72,72,29],
+['Koni De Winter','Genoa','Defensa central',81,87,24],
+['Johan Vásquez','Genoa','Defensa central',80,83,27],
+['Mattia Bani','Genoa','Defensa central',78,78,32],
+['Stefano Sabelli','Genoa','Lateral',75,75,33],
+['Morten Frendrup','Genoa','Centrocampista',82,87,25],
+['Milan Badelj','Genoa','Centrocampista defensivo',78,78,37],
+['Ruslan Malinovskyi','Genoa','Mediapunta',80,80,33],
+['Junior Messias','Genoa','Extremo',78,78,35],
+['Albert Guðmundsson','Genoa','Segundo delantero',83,84,29],
+['Andrea Pinamonti','Genoa','Delantero',80,82,27],
+['Yann Sommer','Inter','Portero',85,85,37],
+['Josep Martínez','Inter','Portero',80,85,28],
+['Alessandro Bastoni','Inter','Defensa central',88,90,27],
+['Benjamin Pavard','Inter','Defensa central',86,87,30],
+['Francesco Acerbi','Inter','Defensa central',83,83,38],
+['Denzel Dumfries','Inter','Lateral',85,85,30],
+['Federico Dimarco','Inter','Lateral',87,88,28],
+['Nicolò Barella','Inter','Centrocampista',88,90,29],
+['Hakan Çalhanoğlu','Inter','Centrocampista defensivo',87,87,32],
+['Henrikh Mkhitaryan','Inter','Centrocampista',82,82,37],
+['Davide Frattesi','Inter','Centrocampista',84,86,26],
+['Marcus Thuram','Inter','Delantero',86,87,29],
+['Lautaro Martínez','Inter','Delantero',89,90,28],
+['Mehdi Taremi','Inter','Delantero',82,82,34],
+['Michele Di Gregorio','Juventus','Portero',84,87,28],
+['Mattia Perin','Juventus','Portero',81,81,33],
+['Bremer','Juventus','Defensa central',87,88,29],
+['Federico Gatti','Juventus','Defensa central',82,84,28],
+['Pierre Kalulu','Juventus','Defensa central',82,85,26],
+['Andrea Cambiaso','Juventus','Lateral',84,88,26],
+['Manuel Locatelli','Juventus','Centrocampista defensivo',84,85,28],
+['Khéphren Thuram','Juventus','Centrocampista',84,89,25],
+['Teun Koopmeiners','Juventus','Mediapunta',85,86,28],
+['Douglas Luiz','Juventus','Centrocampista',84,85,28],
+['Kenan Yıldız','Juventus','Mediapunta',84,92,21],
+['Francisco Conceição','Juventus','Extremo',82,88,23],
+['Dušan Vlahović','Juventus','Delantero',86,88,26],
+['Arkadiusz Milik','Juventus','Delantero',80,80,32],
+['Ivan Provedel','Lazio','Portero',82,82,32],
+['Christos Mandas','Lazio','Portero',77,84,24],
+['Alessio Romagnoli','Lazio','Defensa central',83,83,31],
+['Mario Gila','Lazio','Defensa central',81,86,25],
+['Adam Marušić','Lazio','Lateral',79,79,33],
+['Nuno Tavares','Lazio','Lateral',81,85,26],
+['Mattéo Guendouzi','Lazio','Centrocampista',83,85,27],
+['Nicolò Rovella','Lazio','Centrocampista defensivo',82,87,24],
+['Luis Alberto','Lazio','Mediapunta',84,84,33],
+['Mattia Zaccagni','Lazio','Extremo',84,84,31],
+['Gustav Isaksen','Lazio','Extremo',79,85,25],
+['Boulaye Dia','Lazio','Delantero',81,82,29],
+['Taty Castellanos','Lazio','Delantero',80,84,27]
+].map((r,i)=>({
+  id:'seriea-2627-'+i,
+  name:r[0],
+  club:r[1],
+  position:r[2],
+  goals:0,
+  apps:0,
+  season:'2026/27',
+  verified:false,
+  rosterStatus:'provisional',
+  base:r[3],
+  potential:r[4],
+  age:r[5]
+}));
+for(const p of SERIE_A_FIRST_TEN_PLAYERS){
+  if(!REAL_PLAYERS.some(x=>x.name===p.name&&x.club===p.club)) REAL_PLAYERS.push(p);
 }
 
 // ===== LEGADO v0.20.0c - Ofertas y resolución de fichajes IA =====
