@@ -777,6 +777,171 @@ function applyPremierRoster2627(){
 }
 applyPremierRoster2627();
 
+/* ===== LEGADO v0.18.4 · PREMIER COMPLETA + LALIGA HYPERMOTION 2026/27 =====
+   Datos de estructura actualizados a 31/07/2026. Las plantillas inglesas
+   sustituyen cualquier registro anterior del mismo club y eliminan jugadores
+   duplicados por nombre mediante addPlayer2627(). */
+const PREMIER_ROSTER_2627_REST={
+'Aston Villa':[
+['Emiliano Martínez','Portero',87,87,33],['Marco Bizot','Portero',79,79,35],['Oliwier Zych','Portero',74,83,22],
+['Matty Cash','Lateral',82,83,28],['Ezri Konsa','Defensa central',84,86,28],['Pau Torres','Defensa central',84,85,29],
+['Tyrone Mings','Defensa central',80,80,33],['Ian Maatsen','Lateral',82,87,24],['Lucas Digne','Lateral',81,81,33],
+['Andrés García','Lateral',78,85,23],['Boubacar Kamara','Centrocampista defensivo',84,87,26],['Amadou Onana','Centrocampista defensivo',84,87,24],
+['Youri Tielemans','Centrocampista',85,86,29],['John McGinn','Centrocampista',82,82,31],['Ross Barkley','Centrocampista',78,78,32],
+['Morgan Rogers','Mediapunta',85,90,24],['Ollie Watkins','Delantero',85,85,30],['Donyell Malen','Delantero',82,84,27],
+['Leon Bailey','Extremo',81,83,29],['Jaden Philogene','Extremo',80,86,24],['Samuel Iling-Junior','Extremo',77,85,22]
+],
+'Brentford':[
+['Caoimhín Kelleher','Portero',83,86,27],['Hákon Valdimarsson','Portero',76,83,24],['Julian Eyestone','Portero',72,84,20],
+['Nathan Collins','Defensa central',83,86,25],['Ethan Pinnock','Defensa central',81,81,33],['Sepp van den Berg','Defensa central',81,85,24],
+['Kristoffer Ajer','Defensa central',80,81,28],['Michael Kayode','Lateral',80,87,22],['Rico Henry','Lateral',79,81,29],
+['Aaron Hickey','Lateral',78,84,24],['Mads Roerslev','Lateral',77,79,27],['Mathias Jensen','Centrocampista',81,81,30],
+['Mikkel Damsgaard','Mediapunta',82,85,26],['Yegor Yarmoliuk','Centrocampista',77,86,22],['Vitaly Janelt','Centrocampista defensivo',80,81,28],
+['Fábio Carvalho','Mediapunta',79,85,23],['Paris Maghoma','Centrocampista',74,83,25],['Kevin Schade','Extremo',81,85,24],
+['Keane Lewis-Potter','Extremo',79,83,25],['Igor Thiago','Delantero',81,84,25],['Gustavo Nunes','Extremo',75,86,20]
+],
+'Crystal Palace':[
+['Dean Henderson','Portero',83,84,29],['Matt Turner','Portero',77,77,32],['Remi Matthews','Portero',72,72,32],
+['Marc Guéhi','Defensa central',85,87,26],['Maxence Lacroix','Defensa central',82,85,26],['Chris Richards','Defensa central',80,83,26],
+['Chadi Riad','Defensa central',78,86,23],['Tyrick Mitchell','Lateral',81,83,26],['Daniel Muñoz','Lateral',83,83,30],
+['Joel Ward','Lateral',75,75,36],['Adam Wharton','Centrocampista',84,90,22],['Cheick Doucouré','Centrocampista defensivo',82,85,26],
+['Daichi Kamada','Mediapunta',81,81,29],['Jefferson Lerma','Centrocampista defensivo',80,80,31],['Will Hughes','Centrocampista',79,79,31],
+['Justin Devenny','Centrocampista',75,84,22],['Ismaïla Sarr','Extremo',81,82,28],['Yeremy Pino','Extremo',82,87,23],
+['Jean-Philippe Mateta','Delantero',84,84,29],['Eddie Nketiah','Delantero',80,83,27],['Romain Esse','Mediapunta',77,87,21]
+],
+'Everton':[
+['Jordan Pickford','Portero',86,86,32],['Mark Travers','Portero',78,80,27],['Harry Tyrer','Portero',72,80,24],
+['Jarrad Branthwaite','Defensa central',84,89,24],['James Tarkowski','Defensa central',82,82,33],["Jake O'Brien",'Defensa central',80,85,25],
+['Michael Keane','Defensa central',78,78,33],['Vitalii Mykolenko','Lateral',80,81,27],['Nathan Patterson','Lateral',77,83,24],
+['Séamus Coleman','Lateral',75,75,37],['James Garner','Centrocampista',81,85,25],['Idrissa Gueye','Centrocampista defensivo',80,80,36],
+['Carlos Alcaraz','Mediapunta',80,84,23],['Tim Iroegbunam','Centrocampista defensivo',77,85,23],['Dwight McNeil','Extremo',81,82,26],
+['Iliman Ndiaye','Mediapunta',83,85,26],['Tyrique George','Extremo',77,88,20],['Jack Harrison','Extremo',79,79,29],
+['Beto','Delantero',81,82,28],['Youssef Chermiti','Delantero',76,85,22],['Armando Broja','Delantero',79,84,24]
+],
+'Fulham':[
+['Bernd Leno','Portero',84,84,34],['Steven Benda','Portero',75,76,27],['Benjamin Lecomte','Portero',78,78,35],
+['Joachim Andersen','Defensa central',83,84,30],['Calvin Bassey','Defensa central',82,85,26],['Issa Diop','Defensa central',80,81,29],
+['Kenny Tete','Lateral',81,81,30],['Antonee Robinson','Lateral',84,85,28],['Ryan Sessegnon','Lateral',79,84,26],
+['Timothy Castagne','Lateral',80,80,30],['Sander Berge','Centrocampista defensivo',82,83,28],['Saša Lukić','Centrocampista',80,81,29],
+['Andreas Pereira','Mediapunta',82,82,30],['Emile Smith Rowe','Mediapunta',81,85,26],['Alex Iwobi','Extremo',82,82,30],
+['Harry Wilson','Extremo',80,80,29],['Adama Traoré','Extremo',79,79,30],['Joshua King','Mediapunta',76,87,19],
+['Rodrigo Muniz','Delantero',81,85,25],['Raúl Jiménez','Delantero',80,80,35],['Carlos Vinícius','Delantero',78,78,31]
+],
+'Hull City':[
+['Ivor Pandur','Portero',77,82,26],['Dillon Phillips','Portero',74,74,31],['Harvey Cartwright','Portero',71,80,24],
+['Alfie Jones','Defensa central',76,79,28],['Charlie Hughes','Defensa central',77,84,22],['John Egan','Defensa central',77,77,33],
+['Lewie Coyle','Lateral',75,75,30],['Cody Drameh','Lateral',76,82,24],['Ryan Giles','Lateral',76,79,26],
+['Matty Jacob','Lateral',72,80,24],['Regan Slater','Centrocampista',76,80,26],['Gustavo Puerta','Centrocampista',77,85,23],
+['Matt Crooks','Mediapunta',76,76,32],['Steven Alzate','Centrocampista',76,79,27],['Kasey Palmer','Mediapunta',76,77,29],
+['Mohamed Belloumi','Extremo',77,83,24],['Liam Millar','Extremo',76,80,26],['Abu Kamara','Extremo',75,84,22],
+['Joe Gelhardt','Delantero',76,83,24],['Kyle Joseph','Delantero',75,81,25],['Mason Burstow','Delantero',74,82,22]
+],
+'Leeds United':[
+['Lucas Perri','Portero',82,85,28],['Karl Darlow','Portero',76,76,35],['Illan Meslier','Portero',79,84,26],
+['Joe Rodon','Defensa central',81,83,28],['Pascal Struijk','Defensa central',81,84,26],['Jaka Bijol','Defensa central',82,84,27],
+['Jayden Bogle','Lateral',80,83,26],['Gabriel Gudmundsson','Lateral',79,82,27],['Sam Byram','Lateral',76,76,32],
+['Ethan Ampadu','Centrocampista defensivo',82,85,25],['Anton Stach','Centrocampista defensivo',81,83,27],['Ao Tanaka','Centrocampista',81,84,27],
+['Brenden Aaronson','Mediapunta',79,82,25],['Ilia Gruev','Centrocampista',79,81,26],['Daniel James','Extremo',81,81,28],
+['Wilfried Gnonto','Extremo',80,86,22],['Noah Okafor','Extremo',81,84,26],['Jack Harrison','Extremo',79,79,29],
+['Dominic Calvert-Lewin','Delantero',80,81,29],['Joel Piroe','Delantero',80,81,27],['Lukas Nmecha','Delantero',79,81,27]
+],
+'Manchester City':[
+['Gianluigi Donnarumma','Portero',90,92,27],['James Trafford','Portero',80,87,23],['Stefan Ortega','Portero',82,82,33],
+['Rúben Dias','Defensa central',88,89,29],['Joško Gvardiol','Defensa central',87,90,24],['Abdukodir Khusanov','Defensa central',81,89,22],
+['John Stones','Defensa central',83,83,32],['Rayan Aït-Nouri','Lateral',83,86,25],['Rico Lewis','Lateral',81,89,21],
+['Matheus Nunes','Lateral',82,84,27],['Rodri','Centrocampista defensivo',90,90,30],['Tijjani Reijnders','Centrocampista',86,88,28],
+['Nico González','Centrocampista defensivo',83,87,24],['Elliot Anderson','Centrocampista',84,89,23],['Bernardo Silva','Centrocampista',87,87,31],
+['Phil Foden','Mediapunta',88,90,26],['Rayan Cherki','Mediapunta',85,90,22],['Jérémy Doku','Extremo',84,88,24],
+['Savinho','Extremo',83,89,22],['Jeremy Monga','Extremo',75,90,17],['Erling Haaland','Delantero',91,93,26],
+['Omar Marmoush','Delantero',85,87,27]
+],
+'Sunderland':[
+['Robin Roefs','Portero',79,86,23],['Anthony Patterson','Portero',76,82,26],['Simon Moore','Portero',72,72,36],
+['Dan Ballard','Defensa central',79,83,26],['Omar Alderete','Defensa central',81,82,29],['Nordi Mukiele','Defensa central',81,82,28],
+['Reinildo Mandava','Lateral',79,79,32],['Trai Hume','Lateral',79,84,24],['Luke O’Nien','Defensa central',76,76,31],
+['Granit Xhaka','Centrocampista',84,84,33],['Enzo Le Fée','Centrocampista',81,84,26],['Habib Diarra','Centrocampista',80,86,22],
+['Noah Sadiki','Centrocampista defensivo',78,86,21],['Chris Rigg','Centrocampista',77,89,19],['Simon Adingra','Extremo',81,85,24],
+['Chemsdine Talbi','Extremo',77,86,21],['Wilson Isidor','Delantero',79,82,26],['Eliezer Mayenda','Delantero',78,85,21],
+['Brian Brobbey','Delantero',81,85,24],['Romaïne Mundle','Extremo',76,83,23],['Patrick Roberts','Extremo',76,77,29]
+],
+'Tottenham Hotspur':[
+['Guglielmo Vicario','Portero',84,85,29],['Antonín Kinský','Portero',78,86,23],['Brandon Austin','Portero',73,75,27],
+['Cristian Romero','Defensa central',87,88,28],['Micky van de Ven','Defensa central',85,89,25],['Kevin Danso','Defensa central',82,84,27],
+['Radu Drăgușin','Defensa central',81,86,24],['Pedro Porro','Lateral',84,86,26],['Destiny Udogie','Lateral',82,87,23],
+['Djed Spence','Lateral',80,84,26],['Sandro Tonali','Centrocampista',87,89,26],['Rodrigo Bentancur','Centrocampista',83,84,29],
+['Pape Matar Sarr','Centrocampista',82,88,23],['Lucas Bergvall','Centrocampista',81,90,20],['James Maddison','Mediapunta',84,84,29],
+['Dejan Kulusevski','Mediapunta',84,87,26],['Mohammed Kudus','Extremo',84,87,25],['Brennan Johnson','Extremo',82,86,25],
+['Wilson Odobert','Extremo',79,87,21],['Mathys Tel','Delantero',81,89,21],['Dominic Solanke','Delantero',83,84,28],
+['Richarlison','Delantero',81,82,29]
+]
+};
+
+function applyRemainingPremierRoster2627(){
+  for(const [club,rows] of Object.entries(PREMIER_ROSTER_2627_REST)){
+    replaceClubRoster2627(club,rows);
+  }
+  /* Dos movimientos confirmados que afectan a plantillas ya cargadas. */
+  removePlayer2627('Sandro Tonali');
+  addPlayer2627('Sandro Tonali','Tottenham Hotspur','Centrocampista',87,89,26);
+  removePlayer2627('Elliot Anderson');
+  addPlayer2627('Elliot Anderson','Manchester City','Centrocampista',84,89,23);
+}
+applyRemainingPremierRoster2627();
+
+/* Segunda división española independiente de LaLiga EA Sports. */
+const HYPERMOTION_2627_UPDATED='31/07/2026';
+const HYPERMOTION_2627_CLUBS=[
+['AD Ceuta FC','Alfonso Murube',6500,70],
+['Albacete BP','Carlos Belmonte',17524,73],
+['Burgos CF','El Plantío',12200,72],
+['Cádiz CF','Nuevo Mirandilla',20724,76],
+['CD Castellón','SkyFi Castalia',15500,73],
+['CD Eldense','Nuevo Pepico Amat',4036,69],
+['CD Leganés','Butarque',12454,76],
+['CD Tenerife','Heliodoro Rodríguez López',22824,74],
+['CE Sabadell','Nova Creu Alta',11981,68],
+['Celta Fortuna','Abanca Balaídos',24791,69],
+['Córdoba CF','Nuevo Arcángel',21822,72],
+['FC Andorra','Estadi Nacional',3306,71],
+['Girona FC','Montilivi',14624,78],
+['Granada CF','Nuevo Los Cármenes',19336,77],
+['R. Sociedad B','Anoeta',39500,70],
+['RCD Mallorca','Son Moix',23142,79],
+['Real Oviedo','Carlos Tartiere',30500,78],
+['Real Sporting','El Molinón',30000,76],
+['Real Valladolid CF','José Zorrilla',27618,77],
+['SD Eibar','Ipurua',8164,75],
+['UD Almería','UD Almería Stadium',18331,77],
+['UD Las Palmas','Gran Canaria',32400,77]
+];
+
+function addHypermotionClubs2627(){
+  const league='LALIGA HYPERMOTION';
+  for(const [name,stadium,capacity,level] of HYPERMOTION_2627_CLUBS){
+    let club=CLUBS.find(c=>clubKey(c.name)===clubKey(name));
+    if(club){
+      club.league=league;
+      club.country='ESP';
+      club.stadium=stadium;
+      club.capacity=capacity;
+      club.level=level;
+      club.tier=4;
+      club.prestige=Math.max(55,level-4);
+      club.budget=Math.max(12,Math.round((level-55)*1.4));
+      continue;
+    }
+    CLUBS.push({
+      id:'hyp-'+hash(name).toString(36),name,country:'ESP',confed:'UEFA',league,tier:4,
+      level,prestige:Math.max(55,level-4),budget:Math.max(12,Math.round((level-55)*1.4)),
+      stadium,capacity,fans:Math.max(48,level-18),pressure:Math.max(48,level-16),
+      colors:['#204834','#7af0a6','#f5cb61']
+    });
+  }
+}
+addHypermotionClubs2627();
+
+
+
 
 /* ===== v0.16.1.3 · MODELO PROFESIONAL DE JUGADOR =====
    Esta capa normaliza todos los registros, elimina duplicados exactos y asigna
