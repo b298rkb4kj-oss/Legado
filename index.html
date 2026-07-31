@@ -2652,4 +2652,200 @@ window.TRANSFER_HISTORY=TRANSFER_HISTORY;
 })();
 </script>
 
+
+<script>
+// ===== LEGADO v0.20.3 · FILIALES, EXPERIENCIA Y VALORES REALES =====
+(function(){
+  const previousMarketValue=window.getPlayerMarketValue;
+  const previousSubmit=window.submitTransferOffer;
+
+  const RESERVE_MARKERS=[
+    ' b',' b ',' ii',' u23',' u21',' sub-23',' sub 23',' reserves',' reserva',
+    'castilla','barça atlètic','barcelona atlètic','real sociedad b',
+    'san sebastián de los reyes b','villarreal b','betis deportivo',
+    'sevilla atlético','atlético madrileño','athletic club b','bilbao athletic',
+    'valencia mestalla','celta fortuna','osasuna promesas','deportivo fabril'
+  ];
+
+  function normalizedText(value){
+    return ` ${String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')} `;
+  }
+
+  function isReserveClubName(name){
+    const value=normalizedText(name);
+    return RESERVE_MARKERS.some(marker=>value.includes(normalizedText(marker).trim()));
+  }
+
+  function getPlayerExperience(player){
+    const apps=Number(player?.apps)||0;
+    const starts=Number(player?.starts)||0;
+    const minutes=Number(player?.minutes)||0;
+    const seasons=Number(player?.professionalSeasons)||0;
+    return {apps,starts,minutes,seasons};
+  }
+
+  function reservePlayerValue(player){
+    if(!player) return 0;
+
+    const ov=Number(player.base)||Number(player.overall)||60;
+    const pot=Math.max(ov,Number(player.potential)||ov);
+    const age=Number(player.age)||20;
+    const exp=getPlayerExperience(player);
+    const reserve=isReserveClubName(player.club);
+    const professionalApps=exp.apps;
+    const firstTeamApps=Number(player.firstTeamApps)||0;
+
+    let value;
+    if(ov>=88) value=85000000;
+    else if(ov>=85) value=50000000;
+    else if(ov>=82) value=27000000;
+    else if(ov>=80) value=17500000;
+    else if(ov>=78) value=10500000;
+    else if(ov>=76) value=6200000;
+    else if(ov>=74) value=3500000;
+    else if(ov>=72) value=1900000;
+    else if(ov>=70) value=950000;
+    else if(ov>=67) value=450000;
+    else value=180000;
+
+    // El potencial aumenta el valor, pero nunca sustituye a la experiencia real.
+    const potentialGap=Math.max(0,pot-ov);
+    value*=1+Math.min(.38,potentialGap*.032);
+
+    if(age<=19) value*=1.12;
+    else if(age<=22) value*=1.07;
+    else if(age>=31) value*=.78;
+    else if(age>=34) value*=.58;
+
+    // Penalización por falta de experiencia profesional.
+    let experienceFactor=1;
+    if(professionalApps===0 && firstTeamApps===0) experienceFactor=.42;
+    else if(professionalApps<5 && firstTeamApps<3) experienceFactor=.50;
+    else if(professionalApps<15 && firstTeamApps<8) experienceFactor=.62;
+    else if(professionalApps<30 && firstTeamApps<15) experienceFactor=.76;
+    else if(professionalApps<60) experienceFactor=.88;
+    value*=experienceFactor;
+
+    // Los filiales tienen una escala propia mucho más baja.
+    if(reserve){
+      let reserveFactor=.40;
+      if(firstTeamApps>=10) reserveFactor=.62;
+      if(firstTeamApps>=25) reserveFactor=.78;
+      value*=reserveFactor;
+
+      // Límites duros para evitar precios absurdos en jugadores sin consolidar.
+      let cap=5000000;
+      if(ov>=78 || pot>=86) cap=9000000;
+      if(ov>=81 && firstTeamApps>=10) cap=16000000;
+      if(ov>=84 && firstTeamApps>=20) cap=28000000;
+      value=Math.min(value,cap);
+    }
+
+    // Rendimiento real únicamente cuando hay una muestra suficiente.
+    if(professionalApps>=12){
+      const goals=Number(player.goals)||0;
+      const assists=Number(player.assists)||0;
+      const rating=Number(player.avgRating)||Number(player.rating)||6.7;
+      const contribution=(goals+assists*.75)/Math.max(12,professionalApps);
+      value*=1+Math.min(.22,contribution*.22);
+      if(rating>=7.3) value*=1.10;
+      if(rating<6.3) value*=.88;
+    }
+
+    return Math.max(100000,Math.round(value/50000)*50000);
+  }
+
+  function correctedMarketValue(player){
+    const corrected=reservePlayerValue(player);
+    const oldValue=typeof previousMarketValue==='function'?Number(previousMarketValue(player))||0:0;
+
+    // Para jugadores de filiales o sin experiencia manda siempre el nuevo cálculo.
+    if(isReserveClubName(player?.club)){
+      return corrected;
+    }
+
+    const exp=getPlayerExperience(player);
+    if(exp.apps<15 && (Number(player?.firstTeamApps)||0)<8){
+      return Math.min(corrected,Math.max(150000,oldValue*.58));
+    }
+
+    // Para jugadores consolidados conserva el sistema previo, pero sin inflación excesiva.
+    return Math.round(Math.max(corrected,oldValue*.82)/50000)*50000;
+  }
+
+  // Actualiza tanto la propiedad global como la referencia usada por funciones anteriores.
+  window.getPlayerMarketValue=correctedMarketValue;
+  try{ getPlayerMarketValue=correctedMarketValue; }catch(_){}
+
+  window.submitTransferOffer=function(args){
+    const player=args?.player;
+    const buyerClub=args?.buyerClub;
+    const offer=Math.round(Number(args?.amount)||0);
+    const fairValue=correctedMarketValue(player);
+    const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===buyerClub):null;
+    const buyerBudget=getClubBudget(buyerClub);
+    const buyerTier=buyer?.economicTier||buyerBudget?.economicTier||5;
+
+    // Clubes modestos no pagan primas desproporcionadas por promesas.
+    const maxPremium=isReserveClubName(player?.club)
+      ? (buyerTier<=2?1.30:buyerTier===3?1.18:1.08)
+      : (buyerTier<=2?1.38:buyerTier===3?1.24:1.12);
+
+    if(offer>fairValue*maxPremium){
+      const result={
+        id:`T${Date.now()}${Math.floor(Math.random()*1000)}`,
+        buyerClub,
+        sellerClub:player?.club||'Sin club',
+        playerName:player?.name||'Jugador',
+        amount:offer,
+        value:fairValue,
+        demand:fairValue,
+        status:'rejected',
+        reason:'La dirección deportiva considera el precio excesivo para su experiencia y categoría',
+        date:new Date().toISOString()
+      };
+      if(typeof TRANSFER_HISTORY!=='undefined') TRANSFER_HISTORY.unshift(result);
+      return result;
+    }
+
+    return previousSubmit(args);
+  };
+
+  const previousAI=window.runClubTransferAI;
+  window.runClubTransferAI=function(clubName){
+    const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===clubName):null;
+    const budget=getClubBudget(clubName);
+    const tier=buyer?.economicTier||budget?.economicTier||5;
+    const targets=findTransferTargets(clubName,20)
+      .map(p=>({...p,correctedValue:correctedMarketValue(p)}))
+      .filter(p=>{
+        if(isReserveClubName(p.club) && tier>=4 && p.correctedValue>4500000) return false;
+        if(isReserveClubName(p.club) && tier===3 && p.correctedValue>9000000) return false;
+        return p.correctedValue<=budget.transfer*.45;
+      })
+      .sort((a,b)=>(b.fitScore||0)-(a.fitScore||0));
+
+    if(!targets.length){
+      return {status:'no-target',club:clubName,reason:'No hay objetivos con precio y experiencia adecuados'};
+    }
+
+    const target=targets[Math.floor(Math.random()*Math.min(4,targets.length))];
+    const value=target.correctedValue;
+    const premium=isReserveClubName(target.club)
+      ? .96+Math.random()*.10
+      : .98+Math.random()*.16;
+    const offer=Math.min(budget.transfer,Math.round(value*premium/50000)*50000);
+
+    return window.submitTransferOffer({
+      buyerClub:clubName,
+      player:target,
+      amount:offer
+    });
+  };
+
+  window.isReserveClubName=isReserveClubName;
+  window.reservePlayerValue=reservePlayerValue;
+})();
+</script>
+
 </body></html>
