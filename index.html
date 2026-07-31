@@ -2464,4 +2464,192 @@ window.submitTransferOffer=submitTransferOffer;
 window.runClubTransferAI=runClubTransferAI;
 window.runTransferWindowRound=runTransferWindowRound;
 window.TRANSFER_HISTORY=TRANSFER_HISTORY;
-</script></body></html>
+</script>
+<script>
+// ===== LEGADO v0.20.2 · ECONOMÍA DE CLUBES Y PRECIOS REALISTAS =====
+(function(){
+  const TOP_LEAGUES=new Set(['Premier League','LaLiga EA Sports','Serie A','Bundesliga','Ligue 1']);
+  const SECOND_DIVISIONS=new Set(['LALIGA HYPERMOTION','Championship','Serie B','2. Bundesliga','Ligue 2']);
+
+  const CLUB_BUDGET_OVERRIDES={
+    'Real Madrid':180000000,'Barcelona':90000000,'Atlético de Madrid':75000000,
+    'Athletic Club':35000000,'Villarreal':42000000,'Real Betis':32000000,
+    'Real Sociedad':38000000,'Sevilla':22000000,'Valencia':18000000,
+    'Celta':14000000,'CA Osasuna':12000000,'RCD Espanyol':12000000,
+    'Getafe CF':9000000,'Rayo Vallecano':8500000,'Deportivo Alavés':8000000,
+    'Levante UD':7500000,'Elche CF':7000000,'Málaga CF':6500000,
+    'Racing de Santander':6000000,'RC Deportivo':6000000,
+    'Granada CF':6500000,'Granada':6500000,'SD Eibar':5500000,'Eibar':5500000,
+    'Real Sporting':5500000,'Real Valladolid CF':7000000,'CD Leganés':6500000,
+    'UD Las Palmas':7000000,'Cádiz CF':5500000,'Real Zaragoza':5000000,
+    'Manchester City':190000000,'Arsenal':170000000,'Liverpool':160000000,
+    'Manchester United':150000000,'Chelsea':175000000,'Tottenham':110000000,
+    'Newcastle United':120000000,'Aston Villa':90000000,
+    'Inter':85000000,'Juventus':90000000,'Milan':80000000,'Napoli':75000000,
+    'Roma':55000000,'Atalanta':50000000,'Lazio':38000000,'Fiorentina':35000000,
+    'Bologna':30000000,'Como':26000000
+  };
+
+  function clubEconomicTier(club){
+    if(!club) return 5;
+    const level=Number(club.level)||65;
+    const prestige=Number(club.prestige)||60;
+    if(level>=91||prestige>=92) return 1;
+    if(level>=85||prestige>=84) return 2;
+    if(level>=78||prestige>=76) return 3;
+    if(level>=70||prestige>=66) return 4;
+    return 5;
+  }
+
+  function realisticClubBudget(club){
+    if(!club) return 3000000;
+    if(CLUB_BUDGET_OVERRIDES[club.name]) return CLUB_BUDGET_OVERRIDES[club.name];
+    const tier=clubEconomicTier(club);
+    const league=club.league||'';
+    const country=club.country||'';
+    let base={1:120000000,2:65000000,3:28000000,4:11000000,5:4500000}[tier];
+    if(SECOND_DIVISIONS.has(league)) base*=0.42;
+    else if(!TOP_LEAGUES.has(league)) base*=0.68;
+    if(country==='ENG') base*=1.22;
+    if(country==='ESP'&&tier>=4) base*=0.86;
+    if(country==='ITA'&&tier>=4) base*=0.88;
+    return Math.round(base/250000)*250000;
+  }
+
+  function maxSingleTransferSpend(club,budget){
+    const tier=clubEconomicTier(club);
+    const share={1:.62,2:.48,3:.36,4:.25,5:.18}[tier];
+    const hardCap={1:180000000,2:85000000,3:35000000,4:12000000,5:5000000}[tier];
+    return Math.min(Math.round(budget*share),hardCap);
+  }
+
+  function realisticMarketValue(player){
+    if(!player) return 0;
+    const ov=Number(player.base)||Number(player.overall)||60;
+    const pot=Math.max(ov,Number(player.potential)||ov);
+    const age=Number(player.age)||25;
+    const apps=Number(player.apps)||0;
+    const goals=Number(player.goals)||0;
+    const assists=Number(player.assists)||0;
+    const rating=Number(player.avgRating)||Number(player.rating)||6.7;
+
+    let value;
+    if(ov>=91) value=175000000;
+    else if(ov>=89) value=130000000;
+    else if(ov>=87) value=90000000;
+    else if(ov>=85) value=62000000;
+    else if(ov>=83) value=40000000;
+    else if(ov>=81) value=26000000;
+    else if(ov>=79) value=15500000;
+    else if(ov>=77) value=9000000;
+    else if(ov>=75) value=5200000;
+    else if(ov>=72) value=2600000;
+    else if(ov>=69) value=1200000;
+    else value=450000;
+
+    value*=1+Math.min(.65,Math.max(0,pot-ov)*.055);
+    if(age<=20) value*=1.32;
+    else if(age<=23) value*=1.20;
+    else if(age<=27) value*=1.06;
+    else if(age>=34) value*=.48;
+    else if(age>=32) value*=.62;
+    else if(age>=30) value*=.82;
+
+    if(apps>=12){
+      const performance=(goals*1.4+assists*.9)/Math.max(8,apps);
+      value*=1+Math.min(.28,performance*.18);
+      if(rating>=7.4) value*=1.12;
+      else if(rating<6.3) value*=.88;
+    }
+
+    const seller=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===player.club):null;
+    value*={1:1.18,2:1.10,3:1.02,4:.94,5:.86}[clubEconomicTier(seller)];
+    return Math.max(150000,Math.round(value/50000)*50000);
+  }
+
+  window.initClubBudgets=function(clubs){
+    if(!Array.isArray(clubs)) return;
+    clubs.forEach(club=>{
+      const transfer=realisticClubBudget(club);
+      const wageFactor={1:.62,2:.46,3:.31,4:.19,5:.11}[clubEconomicTier(club)];
+      CLUB_BUDGETS[club.name]={
+        transfer,
+        initialTransfer:transfer,
+        wages:Math.round(transfer*wageFactor),
+        spent:0,
+        income:0,
+        economicTier:clubEconomicTier(club)
+      };
+    });
+  };
+
+  window.getPlayerMarketValue=realisticMarketValue;
+
+  const originalSubmit=window.submitTransferOffer;
+  window.submitTransferOffer=function({buyerClub,player,amount}){
+    const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===buyerClub):null;
+    const budget=getClubBudget(buyerClub);
+    const offer=Math.round(Number(amount)||0);
+    const maxSpend=maxSingleTransferSpend(buyer,budget.transfer);
+    const playerValue=realisticMarketValue(player);
+
+    if(offer>maxSpend||playerValue>maxSpend*1.08){
+      const result={
+        id:`T${Date.now()}${Math.floor(Math.random()*1000)}`,
+        buyerClub,
+        sellerClub:player?.club||'Sin club',
+        playerName:player?.name||'Jugador',
+        amount:offer,
+        value:playerValue,
+        demand:playerValue,
+        status:'rejected',
+        reason:offer>maxSpend
+          ?`El club no autoriza gastar más de ${Math.round(maxSpend/1000000)} M€ en una sola operación`
+          :'El jugador está fuera del rango económico del club',
+        date:new Date().toISOString()
+      };
+      if(typeof TRANSFER_HISTORY!=='undefined') TRANSFER_HISTORY.unshift(result);
+      return result;
+    }
+
+    const result=originalSubmit({buyerClub,player,amount});
+    if(result.status==='accepted'){
+      CLUB_BUDGETS[buyerClub].spent=(CLUB_BUDGETS[buyerClub].spent||0)+result.amount;
+      if(CLUB_BUDGETS[result.sellerClub]){
+        CLUB_BUDGETS[result.sellerClub].income=(CLUB_BUDGETS[result.sellerClub].income||0)+result.amount;
+      }
+    }
+    return result;
+  };
+
+  window.runClubTransferAI=function(clubName){
+    const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===clubName):null;
+    const budget=getClubBudget(clubName);
+    const maxSpend=maxSingleTransferSpend(buyer,budget.transfer);
+    const targets=findTransferTargets(clubName,12)
+      .filter(p=>realisticMarketValue(p)<=maxSpend)
+      .sort((a,b)=>(b.fitScore||0)-(a.fitScore||0));
+
+    if(!targets.length){
+      return {status:'no-target',club:clubName,reason:'No hay objetivos adecuados dentro del presupuesto'};
+    }
+
+    const target=targets[Math.floor(Math.random()*Math.min(3,targets.length))];
+    const value=realisticMarketValue(target);
+    const demand=calculateSellerDemand(target,clubName);
+    const ceiling=Math.min(maxSpend,budget.transfer);
+    const offer=Math.min(ceiling,Math.round(Math.max(value*.96,demand*(.94+Math.random()*.08))/50000)*50000);
+
+    if(offer>ceiling||value>ceiling){
+      return {status:'no-budget',club:clubName,player:target.name,reason:'El jugador supera el límite económico del club'};
+    }
+    return window.submitTransferOffer({buyerClub:clubName,player:target,amount:offer});
+  };
+
+  if(typeof CLUBS!=='undefined') window.initClubBudgets(CLUBS);
+  window.realisticClubBudget=realisticClubBudget;
+  window.maxSingleTransferSpend=maxSingleTransferSpend;
+})();
+</script>
+
+</body></html>
