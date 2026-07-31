@@ -207,21 +207,37 @@ input,select{background:#09130f;border-color:rgba(157,204,183,.18)}
 <section id="welcome" class="screen welcomeScreen"><div class="card hero gameHero"><div class="heroGrid"></div><span class="tag gameTag"><i></i> MODO CARRERA · SIMULACIÓN EXPLICABLE</span><h1><span>CONSTRUYE</span><br>TU LEGADO</h1><p>Empieza como juvenil, toma decisiones con consecuencias visibles y recorre una carrera completa: club, selección, mercado, lesiones, títulos, vida personal y retirada.</p><div class="row heroActions"><button class="btn mainCta" data-action="new-game"><span>NUEVA CARRERA</span><b>Crear futbolista →</b></button><button class="btn secondary loadCta" data-action="load"><span>CONTINUAR</span><b>Cargar partida</b></button></div><p class="small muted">Versión 0.17.0 · nueva interfaz de videojuego, optimizada para móvil y tablet.</p></div></section>
 <main id="game" class="hidden">
 <section id="view-home" class="view active">
-<div class="card">
-<div class="commandCard">
-<div class="commandAvatar">10</div>
-<div>
-<h2 style="margin:0">CENTRO DE MANDO</h2>
-<div class="muted">Esta será la nueva pantalla principal de LEGADO.</div>
-<div class="commandStats">
-<div class="commandStat"><span>Energía</span><div class="commandBar"><i style="width:92%"></i></div><b>92%</b></div>
-<div class="commandStat"><span>Moral</span><div class="commandBar"><i style="width:81%"></i></div><b>81%</b></div>
-<div class="commandStat"><span>Forma</span><div class="commandBar"><i style="width:76%"></i></div><b>76%</b></div>
-<div class="commandStat"><span>Lesión</span><div class="commandBar"><i style="width:14%"></i></div><b>Baja</b></div>
+<div class="dashboard">
+<div class="dashboardMain">
+<div class="card matchHub">
+<div class="eyebrow">PRÓXIMO PARTIDO</div>
+<h2 class="headline">Real Oviedo <span class="muted">vs</span> Málaga CF</h2>
+<div class="fixture">
+<div class="team"><div class="teamCrest">RO</div><b>REAL OVIEDO</b></div>
+<div class="versus">JORNADA 5</div>
+<div class="team"><div class="teamCrest">MC</div><b>MÁLAGA CF</b></div>
+</div>
+<div class="actionRail">
+<button class="actionTile primary"><span>MATCHDAY</span><strong>Jugar partido</strong><span>Titular confirmado</span></button>
+<button class="actionTile"><span>PREVIA</span><strong>Analizar rival</strong><span>Forma: W-D-W-W-L</span></button>
+<button class="actionTile"><span>OBJETIVOS</span><strong>7,5 de valoración</strong><span>1 ocasión creada</span></button>
 </div>
 </div>
 </div>
+<div class="dashboardSide">
+<div class="card playerBanner"><div class="avatar">10</div><div><b>Guillermo</b><div class="muted">MCO · 19 años</div></div><div class="overallRing" style="--ov:74"><b>74</b></div></div>
+<div class="card"><div class="panelTitle"><h3>Estado</h3></div>
+<div class="statusGrid">
+<div class="statusBox"><small>Energía</small><b>92%</b></div>
+<div class="statusBox"><small>Moral</small><b>81%</b></div>
+<div class="statusBox"><small>Forma</small><b>76%</b></div>
+<div class="statusBox"><small>Confianza</small><b>Alta</b></div>
+</div></div>
+<div class="card"><div class="panelTitle"><h3>Noticias</h3></div>
+<div class="inboxItem gold">El entrenador cuenta contigo para el próximo encuentro.</div>
+<div class="inboxItem">Tu valor de mercado aumenta un 3%.</div>
 </div>
+</div></div>
 </section><section id="view-career" class="view"></section><section id="view-train" class="view"></section><section id="view-world" class="view"></section><section id="view-legacy" class="view"></section>
 </main></div>
 <nav id="tabs" class="tabs hidden"><button class="active" data-tab="home"><span>⌂</span>Inicio</button><button data-tab="career"><span>⚽</span>Carrera</button><button data-tab="train"><span>↗</span>Entrenar</button><button data-tab="world"><span>◎</span>Mundo</button><button data-tab="legacy"><span>★</span>Legado</button></nav>
