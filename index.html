@@ -1811,6 +1811,78 @@ function settings(){openModal(`<h2>Partida y datos</h2><p class="pill">LEGADO v$
 function exportSave(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));a.download=`legado-${S.player.name.toLowerCase()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function runTests(){const out=[],assert=(n,v)=>{if(!v)throw new Error(n);out.push('✓ '+n)};try{assert('Estado centralizado',S&&S.player&&S.attributes);assert('Migración a esquema 16',S.version===16&&S.release===GAME_RELEASE);assert('Calendario disponible',seasonDate(1) instanceof Date);assert('Calendario diario',Number.isInteger(S.day)&&S.day>=0&&S.day<=6&&typeof advanceDay==='function');assert('Plantilla generada',generatedSquad(S.clubId).length>=20);assert('Base normalizada',REAL_PLAYERS.length>=300&&REAL_PLAYERS.every(p=>p.id&&p.schemaVersion===PLAYER_SCHEMA_VERSION&&Array.isArray(p.positions)&&p.contract));assert('IDs permanentes',new Set(REAL_PLAYERS.map(p=>p.id)).size===REAL_PLAYERS.length);assert('Sin duplicados exactos',new Set(REAL_PLAYERS.map(p=>playerIdentityKey(p.name))).size===REAL_PLAYERS.length);assert('Ficha individual',typeof showPlayerProfile==='function');assert('Once titular',typeof showClubLineup==='function'&&typeof bestEleven==='function');assert('Mercado autónomo de agentes libres',Array.isArray(FREE_AGENTS)&&typeof simulateFreeAgentMarket==='function');assert('Forma y moral persistentes',REAL_PLAYERS.every(p=>Number.isFinite(S.worldPlayers[p.id]?.form)&&Number.isFinite(S.worldPlayers[p.id]?.morale)));assert('Estadísticas mundiales completas',REAL_PLAYERS.every(p=>Number.isFinite(S.worldPlayers[p.id]?.seasonMinutes)&&Number.isFinite(S.worldPlayers[p.id]?.seasonYellow)));assert('IA de alineaciones avanzada',typeof playerSelectionScore==='function'&&typeof refreshSquadRoles==='function'&&typeof chooseLineup==='function');assert('Entrenadores persistentes',S.coaches&&Object.keys(S.coaches).length===CLUBS.length&&Object.values(S.coaches).every(c=>c.name&&c.formation&&c.style));assert('Tácticas múltiples',Object.keys(FORMATIONS).length>=5&&typeof tacticalFit==='function');assert('Cambios de entrenador',typeof evaluateCoaches==='function'&&Array.isArray(S.coachHistory));assert('Equilibrio semanal',typeof weeklyPlayerRecovery==='function'&&REAL_PLAYERS.every(p=>Number.isFinite(S.worldPlayers[p.id]?.lastMinutes)));assert('Lesiones y sanciones mundiales',REAL_PLAYERS.every(p=>Number.isFinite(S.worldPlayers[p.id]?.unavailableWeeks)&&Number.isFinite(S.worldPlayers[p.id]?.suspensionMatches)));assert('Once con estructura táctica',bestEleven(realPlayersForClub(CLUBS.find(c=>realPlayersForClub(c).length>=11))).length===11);assert('Plantillas auditadas',Object.keys(OFFICIAL_ROSTER_AUDIT).length===5&&Object.keys(PREMIER_ROSTER_2627).length>=10&&Object.values(PREMIER_ROSTER_2627).every(r=>r.length>=20));assert('Fran García en Betis',REAL_PLAYERS.some(p=>p.name==='Fran García'&&clubKey(p.club)===clubKey('Real Betis'))&&!REAL_PLAYERS.some(p=>p.name==='Fran García'&&clubKey(p.club)===clubKey('Real Madrid')));assert('Medias dinámicas',S.worldPlayers&&Object.keys(S.worldPlayers).length===REAL_PLAYERS.length);assert('Competencia por puesto',competitionForPlace().length>0);assert('Liga inicializada',S.league.rows.length>=4);assert('Pirámide española',S.spanishPyramid&&S.spanishPyramid.first.length===20&&S.spanishPyramid.second.length===22&&typeof processSpanishPromotionRelegation==='function');assert('Próximo rival',!!nextOpponent());assert('Motor determinista',hash('a')===hash('a'));assert('Navegación',$$('#tabs [data-tab]').length===5);assert('Escudos desactivados',typeof crestHTML==='function'&&crestHTML(club())==='');assert('Guardado serializable',JSON.stringify(S).length>1000);assert('Datos mundiales',COUNTRIES.length>=50&&CLUBS.length>=100);assert('Partidos detallados',typeof eventList==='function'&&typeof showMatch==='function');assert('Noticias',Array.isArray(S.news));assert('Sistema de mensajes',Array.isArray(S.inbox)&&typeof maybeGenerateMail==='function'&&typeof resolveMail==='function');assert('Retirada',typeof retire==='function');out.push('\nTodas las pruebas internas han pasado.')}catch(e){out.push('✗ '+e.message)}const el=$('#testOutput');el.textContent=out.join('\n');el.classList.remove('hidden')}
 
+
+// ===== LEGADO v0.20.2 · REALISMO DE MERCADO =====
+const TOP_MARKET_COUNTRIES=new Set(['ENG','ESP','ITA','GER','FRA']);
+const SECOND_MARKET_COUNTRIES=new Set(['POR','NED','BEL','TUR','BRA','ARG']);
+const RETIREMENT_MARKETS=new Set(['USA','KSA','QAT','UAE','CHN']);
+
+function marketPlayerOverall(p){
+ const w=S?.worldPlayers?.[p.id]||{};
+ return Math.round(Number(w.dynamicOverall||p.base||p.overall||65));
+}
+function marketClubScore(c){
+ if(!c)return 0;
+ const countryBoost=TOP_MARKET_COUNTRIES.has(c.country)?10:SECOND_MARKET_COUNTRIES.has(c.country)?4:0;
+ return Math.round((Number(c.level)||60)*.62+(Number(c.prestige)||60)*.38+countryBoost);
+}
+function minimumEliteValue(ov,age,potential){
+ let floor=0;
+ if(ov>=91)floor=180000000;
+ else if(ov>=89)floor=125000000;
+ else if(ov>=87)floor=85000000;
+ else if(ov>=85)floor=55000000;
+ else if(ov>=83)floor=32000000;
+ else if(ov>=81)floor=18000000;
+ else if(ov>=79)floor=9500000;
+ else if(ov>=76)floor=4000000;
+ else floor=750000;
+ if(age<=23)floor*=1.22;
+ else if(age>=32)floor*=.72;
+ if(potential>=90)floor*=1.18;
+ return Math.round(floor/50000)*50000;
+}
+function isRealisticTransferDestination(player,buyer){
+ if(!player||!buyer)return false;
+ const seller=CLUBS.find(c=>clubKey(c.name)===clubKey(player.club));
+ const ov=marketPlayerOverall(player),age=Number(player.age)||25;
+ const buyerScore=marketClubScore(buyer),sellerScore=marketClubScore(seller);
+
+ // Superestrellas en plenitud: solo gigantes de las principales ligas.
+ if(ov>=89&&age<31){
+  if(!TOP_MARKET_COUNTRIES.has(buyer.country))return false;
+  if(buyer.tier>2||buyerScore<91)return false;
+  if(seller&&buyerScore<sellerScore-4)return false;
+ }
+ // Jugadores de élite: no bajan bruscamente de nivel deportivo.
+ if(ov>=86&&age<30){
+  if(RETIREMENT_MARKETS.has(buyer.country))return false;
+  if(buyerScore<82)return false;
+  if(seller&&buyerScore<sellerScore-9)return false;
+ }
+ // Buenos titulares de liga top necesitan un destino razonable.
+ if(ov>=82&&age<29&&seller&&TOP_MARKET_COUNTRIES.has(seller.country)){
+  if(buyerScore<74)return false;
+  if(RETIREMENT_MARKETS.has(buyer.country))return false;
+ }
+ // MLS, Golfo y China se orientan a veteranos o jugadores de nivel asumible.
+ if(RETIREMENT_MARKETS.has(buyer.country)){
+  if(age<30&&ov>=80)return false;
+  if(age<28&&ov>=77)return false;
+ }
+ return true;
+}
+function playerWouldAcceptTransfer(player,buyer,fee){
+ if(!isRealisticTransferDestination(player,buyer))return false;
+ const ov=marketPlayerOverall(player),age=Number(player.age)||25;
+ const seller=CLUBS.find(c=>clubKey(c.name)===clubKey(player.club));
+ const buyerScore=marketClubScore(buyer),sellerScore=marketClubScore(seller);
+ const value=playerTransferValue(player);
+ if(fee<value*.94)return false;
+ if(age<30&&ov>=84&&seller&&buyerScore<sellerScore-6)return false;
+ return true;
+}
+
 // ====================== MERCADO VIVO Y NEGOCIACIONES ======================
 function ensureMarketEconomy(){
  if(!S.clubFinances)S.clubFinances={};
@@ -1851,11 +1923,25 @@ function addTransferRumour(player,from,to,fee,stage='contacto'){
 }
 function simulateTransferRumours(){
  ensureMarketEconomy();
- const chance=transferWindowInfo().open?.62:.22;if(Math.random()>chance)return;
- const buyers=CLUBS.filter(c=>S.clubFinances[c.id]?.budget>1800000).sort(()=>Math.random()-.5),buyer=buyers[0];if(!buyer)return;
- const fin=S.clubFinances[buyer.id],candidates=REAL_PLAYERS.filter(p=>clubKey(p.club)!==clubKey(buyer.name)&&playerTransferValue(p)<=fin.budget*.9&&playerTransferValue(p)>400000);
- if(!candidates.length)return;candidates.sort(()=>Math.random()-.5);const p=candidates[0],value=playerTransferValue(p),stage=Math.random()<.28?'negociacion':Math.random()<.55?'contacto':'interes';
- addTransferRumour(p,p.club,buyer.name,Math.round(value*(.9+Math.random()*.35)/50000)*50000,stage);
+ const chance=transferWindowInfo().open?.55:.14;if(Math.random()>chance)return;
+ const buyers=CLUBS.filter(c=>S.clubFinances[c.id]?.budget>2500000).sort(()=>Math.random()-.5);
+ const buyer=buyers.find(c=>{
+  const fin=S.clubFinances[c.id];
+  return REAL_PLAYERS.some(p=>clubKey(p.club)!==clubKey(c.name)&&isRealisticTransferDestination(p,c)&&playerTransferValue(p)<=fin.budget*.72);
+ });
+ if(!buyer)return;
+ const fin=S.clubFinances[buyer.id];
+ const candidates=REAL_PLAYERS.filter(p=>
+  clubKey(p.club)!==clubKey(buyer.name)&&
+  isRealisticTransferDestination(p,buyer)&&
+  playerTransferValue(p)<=fin.budget*.72&&
+  playerTransferValue(p)>750000
+ );
+ if(!candidates.length)return;
+ candidates.sort((a,b)=>(marketPlayerOverall(b)-marketPlayerOverall(a))+(Math.random()-.5)*4);
+ const p=candidates[Math.floor(Math.random()*Math.min(8,candidates.length))],value=playerTransferValue(p);
+ const stage=Math.random()<.28?'negociacion':Math.random()<.55?'contacto':'interes';
+ addTransferRumour(p,p.club,buyer.name,Math.round(value*(1.02+Math.random()*.22)/50000)*50000,stage);
 }
 function currentGameDate(){return seasonDate(S.week,S.day)}
 function transferWindowInfo(){
@@ -1864,12 +1950,13 @@ function transferWindowInfo(){
  return {open:summer||winter,name:summer?'Mercado de verano':winter?'Mercado de invierno':'Mercado cerrado',next:summer||winter?'Abierto':m<7?'1 de julio':'1 de enero'};
 }
 function dynamicWorldValue(p){
- const w=S.worldPlayers?.[p.id]||{},age=p.age||25,ov=Math.round(w.dynamicOverall||p.base||65),pot=p.potential||ov;
- const ageFactor=age<=21?1.35:age<=24?1.22:age<=28?1:age<=31?.78:.52;
- const performance=1+clamp(((w.seasonRating||6.5)-6.5)*.18+(w.seasonGoals||0)*.018+(w.seasonAssists||0)*.013,-.3,.65);
- const potentialFactor=1+Math.max(0,pot-ov)*.035;
- const base=Math.max(150000,Math.pow(Math.max(1,ov-47),2.55)*1050);
- return Math.round(base*ageFactor*performance*potentialFactor/50000)*50000;
+ const w=S.worldPlayers?.[p.id]||{},age=Number(p.age)||25,ov=Math.round(w.dynamicOverall||p.base||65),pot=Number(p.potential)||ov;
+ const ageFactor=age<=21?1.38:age<=24?1.24:age<=28?1:age<=31?.82:.58;
+ const performance=1+clamp(((w.seasonRating||6.5)-6.5)*.18+(w.seasonGoals||0)*.018+(w.seasonAssists||0)*.013,-.25,.7);
+ const potentialFactor=1+Math.max(0,pot-ov)*.04;
+ const curve=Math.max(250000,Math.pow(Math.max(1,ov-43),3.05)*690);
+ const calculated=Math.round(curve*ageFactor*performance*potentialFactor/50000)*50000;
+ return Math.max(calculated,minimumEliteValue(ov,age,pot));
 }
 function updateDynamicMarketValues(){
  if(!S||!S.worldPlayers)return;
@@ -1886,22 +1973,39 @@ function addTransferStory(player,from,to,fee,playerId=null,clauseUsed=false){
 }
 function simulateClubTransferMarket(){
  ensureMarketEconomy();simulateTransferRumours();const win=transferWindowInfo();if(!win.open)return;
- const attempts=1+(Math.random()<.45?1:0)+(Math.random()<.12?1:0);
+ const attempts=1+(Math.random()<.38?1:0)+(Math.random()<.08?1:0);
  for(let n=0;n<attempts;n++){
-  const buyers=CLUBS.filter(c=>S.clubFinances[c.id]?.budget>2500000).sort(()=>Math.random()-.5);
-  const buyer=buyers[0];if(!buyer)continue;
-  const fin=S.clubFinances[buyer.id],candidates=REAL_PLAYERS.filter(p=>clubKey(p.club)!==clubKey(buyer.name)&&playerTransferValue(p)<=fin.budget*.72&&playerTransferValue(p)>500000);
-  if(!candidates.length)continue;
-  candidates.sort((a,b)=>((b.base||0)+(b.potential||0)*.35+Math.random()*14)-((a.base||0)+(a.potential||0)*.35+Math.random()*14));
-  const p=candidates[Math.floor(Math.random()*Math.min(12,candidates.length))],seller=CLUBS.find(c=>clubKey(c.name)===clubKey(p.club));
-  if(!seller)continue;
-  const value=playerTransferValue(p),clause=clauseForPlayer(p);let fee=Math.round(value*(.88+Math.random()*.45)/50000)*50000,clauseUsed=false;
-  if(clause&&Math.random()<.22&&clause<=fin.budget){fee=clause;clauseUsed=true}
-  if(fee>fin.budget)continue;
-  fin.budget-=fee;fin.spent+=fee;
-  const sf=S.clubFinances[seller.id];if(sf){sf.budget+=Math.round(fee*.82);sf.income+=fee}
-  const old=p.club;p.club=buyer.name;
-  addTransferStory(p.name,old,buyer.name,fee,p.id,clauseUsed);
+  const buyers=CLUBS.filter(c=>S.clubFinances[c.id]?.budget>3000000).sort(()=>Math.random()-.5);
+  let completed=false;
+  for(const buyer of buyers){
+   const fin=S.clubFinances[buyer.id];
+   const candidates=REAL_PLAYERS.filter(p=>
+    clubKey(p.club)!==clubKey(buyer.name)&&
+    isRealisticTransferDestination(p,buyer)&&
+    playerTransferValue(p)<=fin.budget*.62&&
+    playerTransferValue(p)>750000
+   );
+   if(!candidates.length)continue;
+   candidates.sort((a,b)=>{
+    const needA=typeof scoreTransferCandidate==='function'?scoreTransferCandidate(a,buyer.name,normalizePositionGroup(a.position)):0;
+    const needB=typeof scoreTransferCandidate==='function'?scoreTransferCandidate(b,buyer.name,normalizePositionGroup(b.position)):0;
+    return (marketPlayerOverall(b)*2+(b.potential||0)*.3+needB+Math.random()*5)-
+           (marketPlayerOverall(a)*2+(a.potential||0)*.3+needA+Math.random()*5);
+   });
+   const shortlist=candidates.slice(0,Math.min(8,candidates.length));
+   const p=shortlist[Math.floor(Math.random()*shortlist.length)];
+   const seller=CLUBS.find(c=>clubKey(c.name)===clubKey(p.club));if(!seller)continue;
+   const value=playerTransferValue(p),clause=clauseForPlayer(p);
+   let fee=Math.round(value*(1.02+Math.random()*.28)/50000)*50000,clauseUsed=false;
+   if(clause&&clause>=value*.92&&Math.random()<.16&&clause<=fin.budget){fee=clause;clauseUsed=true}
+   if(fee>fin.budget||!playerWouldAcceptTransfer(p,buyer,fee))continue;
+   fin.budget-=fee;fin.spent+=fee;
+   const sf=S.clubFinances[seller.id];if(sf){sf.budget+=Math.round(fee*.86);sf.income+=fee}
+   const old=p.club;p.club=buyer.name;
+   addTransferStory(p.name,old,buyer.name,fee,p.id,clauseUsed);
+   completed=true;break;
+  }
+  if(!completed)continue;
  }
 }
 function romanoPanelHTML(){
@@ -2236,18 +2340,12 @@ for(const p of SERIE_A_FIRST_TEN_PLAYERS){
 const TRANSFER_HISTORY=[];
 
 function getPlayerMarketValue(player){
-  if(!player) return 0;
-  if(player.estimatedValue) return Number(player.estimatedValue)||0;
-  const base=Number(player.base)||Number(player.overall)||60;
-  const potential=Number(player.potential)||base;
-  const age=Number(player.age)||25;
-  return Math.round(
-    Math.max(250000,
-      Math.pow(Math.max(45,base)-40,2)*17000*
-      (1+Math.max(0,potential-base)*.055)*
-      (age<=23?1.28:age>=31?.72:1)
-    )
-  );
+ if(!player)return 0;
+ const base=Number(player.base)||Number(player.overall)||60;
+ const potential=Number(player.potential)||base;
+ const age=Number(player.age)||25;
+ const calculated=Math.round(Math.max(250000,Math.pow(Math.max(1,base-43),3.05)*690*(age<=23?1.24:age>=32?.68:1)*(1+Math.max(0,potential-base)*.04))/50000)*50000;
+ return Math.max(Number(player.estimatedValue)||0,calculated,minimumEliteValue(base,age,potential));
 }
 
 function calculateSellerDemand(player,buyerClub){
@@ -2257,10 +2355,13 @@ function calculateSellerDemand(player,buyerClub){
   const age=Number(player.age)||25;
   const potential=Number(player.potential)||Number(player.base)||60;
 
-  let multiplier=1.05;
-  if(age<=23) multiplier+=.12;
-  if(potential>=82) multiplier+=.12;
-  if((seller?.level||70)>(buyer?.level||70)) multiplier+=.08;
+  let multiplier=1.12;
+  const ov=Number(player.base)||Number(player.overall)||60;
+  if(age<=23) multiplier+=.16;
+  if(potential>=86) multiplier+=.15;
+  if(ov>=89) multiplier+=.22;
+  else if(ov>=86) multiplier+=.14;
+  if((seller?.level||70)>(buyer?.level||70)) multiplier+=.12;
   if(player.club===buyerClub) return Infinity;
 
   return Math.round(value*multiplier);
@@ -2291,7 +2392,11 @@ function submitTransferOffer({buyerClub,player,amount}){
     result.reason='Club comprador no válido';
   }else if(offer>budget.transfer){
     result.reason='Presupuesto insuficiente';
-  }else if(offer<Math.round(demand*.88)){
+  }else if(!isRealisticTransferDestination(player,CLUBS.find(c=>c.name===buyerClub))){
+    result.reason='Destino deportivo poco realista para el jugador';
+  }else if(!playerWouldAcceptTransfer(player,CLUBS.find(c=>c.name===buyerClub),offer)){
+    result.reason='El jugador rechaza el proyecto deportivo';
+  }else if(offer<Math.round(demand*.94)){
     result.reason='Oferta demasiado baja';
   }else{
     const acceptanceChance=Math.min(.95,.35+(offer/demand-.88)*2.4);
