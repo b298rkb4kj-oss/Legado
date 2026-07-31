@@ -3153,4 +3153,216 @@ window.TRANSFER_HISTORY=TRANSFER_HISTORY;
 })();
 </script>
 
+
+<script>
+// ===== LEGADO v0.20.7 · VALORACIÓN ÚNICA DE TODOS LOS JUGADORES =====
+(function(){
+  function clampValue(n,min,max){return Math.max(min,Math.min(max,n));}
+
+  function valueBaseByOverall(overall){
+    const ov=Math.round(Number(overall)||50);
+    if(ov>=92)return 180000000;
+    if(ov>=90)return 140000000;
+    if(ov>=88)return 100000000;
+    if(ov>=86)return 70000000;
+    if(ov>=84)return 47000000;
+    if(ov>=82)return 30000000;
+    if(ov>=80)return 19000000;
+    if(ov>=78)return 11500000;
+    if(ov>=76)return 6800000;
+    if(ov>=74)return 3900000;
+    if(ov>=72)return 2200000;
+    if(ov>=70)return 1200000;
+    if(ov>=68)return 650000;
+    if(ov>=66)return 350000;
+    if(ov>=64)return 200000;
+    if(ov>=62)return 125000;
+    if(ov>=60)return 80000;
+    if(ov>=57)return 55000;
+    if(ov>=54)return 40000;
+    if(ov>=50)return 25000;
+    return 10000;
+  }
+
+  function ageMultiplier(age){
+    const a=Number(age)||24;
+    if(a<=18)return 1.08;
+    if(a<=21)return 1.14;
+    if(a<=24)return 1.10;
+    if(a<=27)return 1.00;
+    if(a<=29)return .92;
+    if(a<=31)return .80;
+    if(a<=33)return .64;
+    if(a<=35)return .48;
+    return .34;
+  }
+
+  function performanceMultiplier(data){
+    const apps=Number(data.apps)||0;
+    const goals=Number(data.goals)||0;
+    const assists=Number(data.assists)||0;
+    const rating=Number(data.rating)||6.5;
+    const minutes=Number(data.minutes)||0;
+
+    if(apps<5 && minutes<300)return .88;
+
+    const sample=Math.max(5,apps);
+    const contribution=(goals+assists*.72)/sample;
+    let factor=1;
+    factor+=(rating-6.5)*.16;
+    factor+=Math.min(.24,contribution*.22);
+    if(apps>=25)factor+=.04;
+    if(apps>=40)factor+=.03;
+    return clampValue(factor,.68,1.34);
+  }
+
+  function experienceMultiplier(data){
+    const apps=Number(data.apps)||0;
+    const firstApps=Number(data.firstTeamApps)||0;
+    const minutes=Number(data.minutes)||0;
+    if(apps===0&&firstApps===0&&minutes===0)return .48;
+    if(apps<5&&firstApps<3)return .58;
+    if(apps<15&&firstApps<8)return .72;
+    if(apps<30&&firstApps<15)return .86;
+    return 1;
+  }
+
+  function potentialMultiplier(overall,potential,age){
+    const ov=Number(overall)||50;
+    const pot=Math.max(ov,Number(potential)||ov);
+    const gap=Math.max(0,pot-ov);
+    const youth=(Number(age)||24)<=23?1:.55;
+    return 1+Math.min(.32,gap*.022*youth);
+  }
+
+  function isReserveTeam(name){
+    const n=String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return [
+      'real sociedad b','celta fortuna','villarreal b','castilla',
+      'barca atletic','barcelona atletic','bilbao athletic',
+      'betis deportivo','sevilla atletico','valencia mestalla',
+      'osasuna promesas','deportivo fabril'
+    ].some(x=>n.includes(x))||/(^|\s)(b|ii|u21|u23)$/.test(n);
+  }
+
+  function unifiedPlayerValue(data){
+    const overall=Math.round(Number(data.overall ?? data.base ?? 50));
+    const potential=Math.round(Number(data.potential ?? overall));
+    const age=Number(data.age)||24;
+
+    let value=valueBaseByOverall(overall);
+    value*=ageMultiplier(age);
+    value*=potentialMultiplier(overall,potential,age);
+    value*=experienceMultiplier(data);
+    value*=performanceMultiplier(data);
+
+    if(isReserveTeam(data.club)){
+      value*=.58;
+      let cap=1500000;
+      if(overall>=74||potential>=82)cap=2500000;
+      if(overall>=77&&(Number(data.firstTeamApps)||0)>=8)cap=4500000;
+      if(overall>=80&&(Number(data.firstTeamApps)||0)>=20)cap=7500000;
+      value=Math.min(value,cap);
+    }
+
+    // Límites absolutos por media: evitan cualquier inflación incoherente.
+    const ceiling=
+      overall<55?75000:
+      overall<60?140000:
+      overall<65?300000:
+      overall<70?900000:
+      overall<75?4000000:
+      overall<80?14000000:
+      overall<85?52000000:
+      overall<90?145000000:
+      250000000;
+
+    value=Math.min(value,ceiling);
+    const step=value<1000000?5000:value<10000000?25000:50000;
+    return Math.max(5000,Math.round(value/step)*step);
+  }
+
+  function userPlayerValue(){
+    if(!S)return 0;
+    const ov=overall();
+    const seasonStats=S.stats?.season||{};
+    return unifiedPlayerValue({
+      overall:ov,
+      base:ov,
+      potential:Number(S.player?.potential)||ov,
+      age:Number(S.age)||18,
+      apps:Number(seasonStats.apps ?? S.stats?.apps)||0,
+      goals:Number(seasonStats.goals ?? S.stats?.goals)||0,
+      assists:Number(seasonStats.assists ?? S.stats?.assists)||0,
+      rating:Number(seasonStats.rating ?? S.lastMatch?.rating)||6.5,
+      minutes:Number(seasonStats.minutes)||0,
+      firstTeamApps:Number(S.stats?.apps)||0,
+      club:club()?.name||''
+    });
+  }
+
+  function worldPlayerValue(player){
+    const w=S?.worldPlayers?.[player?.id]||{};
+    const ov=Math.round(Number(w.dynamicOverall ?? player?.overall ?? player?.base ?? 50));
+    return unifiedPlayerValue({
+      overall:ov,
+      base:ov,
+      potential:Number(player?.potential)||ov,
+      age:Number(player?.age)||24,
+      apps:Number(w.seasonApps ?? player?.apps)||0,
+      goals:Number(w.seasonGoals ?? player?.goals)||0,
+      assists:Number(w.seasonAssists ?? player?.assists)||0,
+      rating:Number(w.seasonRating ?? player?.avgRating ?? player?.rating)||6.5,
+      minutes:Number(w.seasonMinutes ?? player?.minutes)||0,
+      firstTeamApps:Number(player?.firstTeamApps)||0,
+      club:player?.club||''
+    });
+  }
+
+  // Sustituye todas las rutas anteriores de valoración.
+  window.unifiedPlayerValue=unifiedPlayerValue;
+  window.getPlayerMarketValue=worldPlayerValue;
+  try{getPlayerMarketValue=worldPlayerValue;}catch(_){}
+  try{marketValue=userPlayerValue;}catch(_){}
+  try{playerValue=worldPlayerValue;}catch(_){}
+  try{dynamicWorldValue=worldPlayerValue;}catch(_){}
+  try{playerTransferValue=function(p){return worldPlayerValue(p);};}catch(_){}
+
+  // Recalcula todos los jugadores al cargar y elimina valores heredados inflados.
+  function recalculateAllPlayerValues(){
+    if(Array.isArray(REAL_PLAYERS)){
+      REAL_PLAYERS.forEach(p=>{
+        p.marketValue=worldPlayerValue(p);
+        if(S?.worldPlayers?.[p.id])S.worldPlayers[p.id].marketValue=p.marketValue;
+      });
+    }
+    if(S){
+      S.currentMarketValue=userPlayerValue();
+      if(Number(S.maxValue)>Math.max(5000000,S.currentMarketValue*12)){
+        S.maxValue=S.currentMarketValue;
+      }
+    }
+  }
+
+  recalculateAllPlayerValues();
+
+  const oldUpdate=window.updateDynamicMarketValues;
+  window.updateDynamicMarketValues=function(){
+    recalculateAllPlayerValues();
+  };
+  try{updateDynamicMarketValues=window.updateDynamicMarketValues;}catch(_){}
+
+  // Recalcula también al cargar una partida antigua.
+  const oldMigrate=window.migrateSave;
+  if(typeof oldMigrate==='function'){
+    window.migrateSave=function(saveData){
+      const migrated=oldMigrate(saveData);
+      setTimeout(recalculateAllPlayerValues,0);
+      return migrated;
+    };
+    try{migrateSave=window.migrateSave;}catch(_){}
+  }
+})();
+</script>
+
 </body></html>
