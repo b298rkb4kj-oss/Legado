@@ -2985,4 +2985,172 @@ window.TRANSFER_HISTORY=TRANSFER_HISTORY;
 })();
 </script>
 
+
+<script>
+// ===== LEGADO v0.20.6 · BLOQUEO DE REVENTA Y CONTROL DE FILIALES =====
+(function(){
+  const previousSubmit=window.submitTransferOffer;
+  const previousAI=window.runClubTransferAI;
+
+  function normalize(value){
+    return String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  }
+
+  function isReserveClub(name){
+    const n=normalize(name);
+    return [
+      'real sociedad b','celta fortuna','villarreal b','castilla',
+      'barca atletic','barcelona atletic','bilbao athletic',
+      'betis deportivo','sevilla atletico','valencia mestalla',
+      'osasuna promesas','deportivo fabril'
+    ].some(x=>n.includes(x)) || /(^|\s)(b|ii|u21|u23)$/.test(n);
+  }
+
+  function gameOrdinal(){
+    const season=Number(S?.season)||1;
+    const week=Number(S?.week)||1;
+    return season*60+week;
+  }
+
+  function weeksSinceLastPermanentTransfer(player){
+    const last=Number(player?.lastPermanentTransferOrdinal);
+    return Number.isFinite(last)?gameOrdinal()-last:999;
+  }
+
+  function reserveSaleCap(player){
+    const ov=Number(player?.base)||Number(player?.overall)||60;
+    const pot=Math.max(ov,Number(player?.potential)||ov);
+    const apps=Number(player?.apps)||0;
+    const firstApps=Number(player?.firstTeamApps)||0;
+
+    let cap=1200000;
+    if(ov>=75||pot>=83) cap=2200000;
+    if(ov>=78&&firstApps>=8) cap=3500000;
+    if(ov>=81&&firstApps>=20) cap=6000000;
+    if(ov>=84&&firstApps>=35) cap=9000000;
+
+    if(apps<10&&firstApps<5) cap=Math.min(cap,1500000);
+    return cap;
+  }
+
+  function rejectTransfer(args,reason){
+    const player=args?.player;
+    const result={
+      id:`T${Date.now()}${Math.floor(Math.random()*1000)}`,
+      buyerClub:args?.buyerClub,
+      sellerClub:player?.club||'Sin club',
+      playerName:player?.name||'Jugador',
+      amount:Math.round(Number(args?.amount)||0),
+      value:window.getPlayerMarketValue?window.getPlayerMarketValue(player):0,
+      demand:0,
+      status:'rejected',
+      reason,
+      date:new Date().toISOString(),
+      gameOrdinal:gameOrdinal()
+    };
+    if(typeof TRANSFER_HISTORY!=='undefined'){
+      TRANSFER_HISTORY.unshift(result);
+      if(TRANSFER_HISTORY.length>100)TRANSFER_HISTORY.length=100;
+    }
+    return result;
+  }
+
+  window.submitTransferOffer=function(args){
+    const player=args?.player;
+    const transferType=args?.transferType||'permanent';
+    const offer=Math.round(Number(args?.amount)||0);
+
+    if(!player) return rejectTransfer(args,'Jugador no válido');
+
+    // Un jugador comprado recientemente no puede volver a ser vendido de inmediato.
+    if(transferType==='permanent' && weeksSinceLastPermanentTransfer(player)<26){
+      return rejectTransfer(args,'El jugador fue fichado recientemente y no puede ser traspasado de nuevo todavía');
+    }
+
+    // Las cesiones sí pueden realizarse tras un fichaje, sin cambiar la propiedad.
+    if(transferType==='loan'){
+      player.loanClub=args.buyerClub;
+      player.loanStartOrdinal=gameOrdinal();
+      player.loanParentClub=player.club;
+      return {
+        id:`L${Date.now()}${Math.floor(Math.random()*1000)}`,
+        buyerClub:args.buyerClub,
+        sellerClub:player.club,
+        playerName:player.name,
+        amount:offer,
+        status:'accepted',
+        type:'loan',
+        reason:'Cesión acordada',
+        date:new Date().toISOString(),
+        gameOrdinal:gameOrdinal()
+      };
+    }
+
+    if(isReserveClub(player.club) && offer>reserveSaleCap(player)){
+      return rejectTransfer(args,'La oferta supera el valor máximo realista para un jugador de filial');
+    }
+
+    const sellerBefore=player.club;
+    const result=previousSubmit(args);
+
+    if(result?.status==='accepted'){
+      player.lastPermanentTransferOrdinal=gameOrdinal();
+      player.lastPermanentTransferWeek=Number(S?.week)||1;
+      player.lastPermanentTransferSeason=Number(S?.season)||1;
+      player.lastPermanentTransferFrom=sellerBefore;
+      player.lastPermanentTransferFee=Number(result.amount)||offer;
+      result.gameOrdinal=gameOrdinal();
+      result.type='permanent';
+    }
+    return result;
+  };
+
+  window.runClubTransferAI=function(clubName){
+    const targets=findTransferTargets(clubName,30)
+      .filter(p=>weeksSinceLastPermanentTransfer(p)>=26)
+      .filter(p=>!isReserveClub(p.club) || (window.getPlayerMarketValue?.(p)||0)<=reserveSaleCap(p));
+
+    if(!targets.length){
+      return {status:'no-target',club:clubName,reason:'No hay objetivos disponibles y transferibles'};
+    }
+
+    const originalFind=window.findTransferTargets;
+    window.findTransferTargets=function(name,limit){
+      if(name!==clubName) return originalFind(name,limit);
+      return targets.slice(0,limit||targets.length);
+    };
+
+    try{
+      return previousAI(clubName);
+    }finally{
+      window.findTransferTargets=originalFind;
+    }
+  };
+
+  // Limpia del historial operaciones imposibles ya generadas en la partida.
+  if(typeof TRANSFER_HISTORY!=='undefined'){
+    const seen={};
+    for(let i=TRANSFER_HISTORY.length-1;i>=0;i--){
+      const move=TRANSFER_HISTORY[i];
+      if(move.status!=='accepted')continue;
+
+      const key=normalize(move.playerName);
+      const sellerReserve=isReserveClub(move.sellerClub);
+      const impossibleReserve=sellerReserve&&Number(move.amount)>9000000;
+      const ordinal=Number(move.gameOrdinal)||0;
+      const repeated=seen[key]&&ordinal&&Math.abs(ordinal-seen[key])<26;
+
+      if(impossibleReserve||repeated){
+        TRANSFER_HISTORY.splice(i,1);
+      }else{
+        seen[key]=ordinal||seen[key]||0;
+      }
+    }
+  }
+
+  window.reserveSaleCap=reserveSaleCap;
+  window.weeksSinceLastPermanentTransfer=weeksSinceLastPermanentTransfer;
+})();
+</script>
+
 </body></html>
