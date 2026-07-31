@@ -2077,4 +2077,132 @@ if(typeof CLUBS!=='undefined'){
   window.detectSquadNeeds=detectSquadNeeds;
   window.findTransferTargets=findTransferTargets;
 }
+
+// ===== LEGADO v0.20.0c - Ofertas y resolución de fichajes IA =====
+const TRANSFER_HISTORY=[];
+
+function getPlayerMarketValue(player){
+  if(!player) return 0;
+  if(player.estimatedValue) return Number(player.estimatedValue)||0;
+  const base=Number(player.base)||Number(player.overall)||60;
+  const potential=Number(player.potential)||base;
+  const age=Number(player.age)||25;
+  return Math.round(
+    Math.max(250000,
+      Math.pow(Math.max(45,base)-40,2)*17000*
+      (1+Math.max(0,potential-base)*.055)*
+      (age<=23?1.28:age>=31?.72:1)
+    )
+  );
+}
+
+function calculateSellerDemand(player,buyerClub){
+  const value=getPlayerMarketValue(player);
+  const seller=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===player.club):null;
+  const buyer=typeof CLUBS!=='undefined'?CLUBS.find(c=>c.name===buyerClub):null;
+  const age=Number(player.age)||25;
+  const potential=Number(player.potential)||Number(player.base)||60;
+
+  let multiplier=1.05;
+  if(age<=23) multiplier+=.12;
+  if(potential>=82) multiplier+=.12;
+  if((seller?.level||70)>(buyer?.level||70)) multiplier+=.08;
+  if(player.club===buyerClub) return Infinity;
+
+  return Math.round(value*multiplier);
+}
+
+function submitTransferOffer({buyerClub,player,amount}){
+  const budget=getClubBudget(buyerClub);
+  const offer=Math.max(0,Math.round(Number(amount)||0));
+  const value=getPlayerMarketValue(player);
+  const demand=calculateSellerDemand(player,buyerClub);
+
+  const result={
+    id:`T${Date.now()}${Math.floor(Math.random()*1000)}`,
+    buyerClub,
+    sellerClub:player?.club||'Sin club',
+    playerName:player?.name||player?.player||'Jugador',
+    amount:offer,
+    value,
+    demand,
+    status:'rejected',
+    reason:'',
+    date:new Date().toISOString()
+  };
+
+  if(!player){
+    result.reason='Jugador no válido';
+  }else if(!CLUB_BUDGETS[buyerClub]){
+    result.reason='Club comprador no válido';
+  }else if(offer>budget.transfer){
+    result.reason='Presupuesto insuficiente';
+  }else if(offer<Math.round(demand*.88)){
+    result.reason='Oferta demasiado baja';
+  }else{
+    const acceptanceChance=Math.min(.95,.35+(offer/demand-.88)*2.4);
+    if(offer>=demand||Math.random()<acceptanceChance){
+      result.status='accepted';
+      result.reason='Oferta aceptada';
+      CLUB_BUDGETS[buyerClub].transfer=Math.max(0,budget.transfer-offer);
+
+      if(CLUB_BUDGETS[player.club]){
+        CLUB_BUDGETS[player.club].transfer+=Math.round(offer*.82);
+      }
+
+      player.previousClub=player.club;
+      player.club=buyerClub;
+      player.transferValue=offer;
+    }else{
+      result.reason='El club vendedor exige una oferta mejor';
+    }
+  }
+
+  TRANSFER_HISTORY.unshift(result);
+  if(TRANSFER_HISTORY.length>100) TRANSFER_HISTORY.length=100;
+  return result;
+}
+
+function runClubTransferAI(clubName){
+  const targets=findTransferTargets(clubName,5);
+  if(!targets.length){
+    return {status:'no-target',club:clubName,reason:'No hay objetivos adecuados'};
+  }
+
+  const target=targets[0];
+  const demand=calculateSellerDemand(target,clubName);
+  const budget=getClubBudget(clubName).transfer;
+  const maxOffer=Math.min(budget,Math.round(demand*(.92+Math.random()*.12)));
+
+  if(maxOffer<getPlayerMarketValue(target)*.9){
+    return {status:'no-budget',club:clubName,player:target.name,reason:'Presupuesto insuficiente'};
+  }
+
+  return submitTransferOffer({
+    buyerClub:clubName,
+    player:target,
+    amount:maxOffer
+  });
+}
+
+function runTransferWindowRound(maxDeals=4){
+  if(typeof CLUBS==='undefined'||!Array.isArray(CLUBS)) return [];
+  const candidates=[...CLUBS]
+    .filter(c=>getClubBudget(c.name).transfer>1000000)
+    .sort(()=>Math.random()-.5);
+
+  const results=[];
+  for(const club of candidates){
+    if(results.filter(r=>r.status==='accepted').length>=maxDeals) break;
+    results.push(runClubTransferAI(club.name));
+  }
+  return results;
+}
+
+window.getPlayerMarketValue=getPlayerMarketValue;
+window.calculateSellerDemand=calculateSellerDemand;
+window.submitTransferOffer=submitTransferOffer;
+window.runClubTransferAI=runClubTransferAI;
+window.runTransferWindowRound=runTransferWindowRound;
+window.TRANSFER_HISTORY=TRANSFER_HISTORY;
 </script></body></html>
