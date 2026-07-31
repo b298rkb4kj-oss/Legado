@@ -1975,4 +1975,22 @@ if(STORE.getItem(SAVE_KEY))$('#welcome .btn.secondary').disabled=false;
  window.addEventListener('load',()=>setTimeout(finish,520),{once:true});
  setTimeout(finish,1800);
 })();
+
+// ===== LEGADO v0.20.0a - Presupuestos IA =====
+window.CLUB_BUDGETS = window.CLUB_BUDGETS || {};
+function initClubBudgets(clubs){
+  if(!Array.isArray(clubs)) return;
+  clubs.forEach(c=>{
+    const name=c.name||c.nombre||c.id||("Club"+Math.random());
+    if(CLUB_BUDGETS[name]) return;
+    const rep=(c.reputation||c.rep||c.ovr||70);
+    CLUB_BUDGETS[name]={
+      transfer: Math.round((rep*rep*45000)+(Math.random()*8000000)),
+      wages: Math.round((rep*rep*25000)+(Math.random()*3000000))
+    };
+  });
+}
+function getClubBudget(name){
+ return CLUB_BUDGETS[name]||{transfer:0,wages:0};
+}
 </script></body></html>
