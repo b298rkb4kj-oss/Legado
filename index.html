@@ -4564,4 +4564,178 @@ window.legadoAddMoney=function(cant,motivo){
 @media(max-width:430px){.attributePicker{grid-template-columns:1fr!important}}
 </style>
 
+
+<script>
+// ===== LEGADO v0.23.1 · CONFIRMACIÓN POSTPARTIDO INDEPENDIENTE + LIGUE 1 COMPLETA =====
+(function(){
+  function ensureWeeklyProgress(){
+    if(!window.S || !Array.isArray(window.ATTRS)) return false;
+    S.trainingProgress=S.trainingProgress||{};
+    S.trainingHistory=Array.isArray(S.trainingHistory)?S.trainingHistory:[];
+    ATTRS.forEach(a=>{
+      const n=Number(S.trainingProgress[a]);
+      S.trainingProgress[a]=Number.isFinite(n)?Math.max(0,n):0;
+    });
+    return true;
+  }
+
+  function weeklyGain(attr){
+    const current=Number(S.attributes[attr])||0;
+    const age=Number(S.age)||18;
+    const professionalism=(Number(S.player?.professionalism)||60)/100;
+    const potential=(Number(S.player?.potential)||70)/100;
+    const ageFactor=age<=21?1.12:age<=25?1:age<=29?.82:.58;
+    const levelFactor=current<50?1.18:current<65?1:current<80?.78:.55;
+    const extra=typeof EXTRA_TRAINING!=='undefined'&&S.trainingPlan?.extra
+      ? EXTRA_TRAINING[S.trainingPlan.extra]
+      : null;
+    const extraFactor=Number(extra?.mult)||1;
+    return Math.max(.12,Math.min(.42,.20*professionalism*potential*ageFactor*levelFactor*extraFactor+.08));
+  }
+
+  function confirmPostMatchTrainingPlan(){
+    if(!ensureWeeklyProgress()) return;
+    const attrs=[...document.querySelectorAll('.attributePick.selected')]
+      .map(el=>el.dataset.attribute)
+      .filter(a=>ATTRS.includes(a));
+
+    if(attrs.length!==3){
+      toast('Debes seleccionar exactamente 3 atributos');
+      return;
+    }
+    if(S.trainingPlan?.week===S.week && S.trainingPlan?.applied){
+      S.trainingPlanRequired=false;
+      if(typeof closeModal==='function') closeModal();
+      if(typeof render==='function') render();
+      toast('El plan de esta semana ya estaba confirmado');
+      return;
+    }
+
+    const results=[];
+    attrs.forEach(attr=>{
+      const before=Math.floor(Number(S.attributes[attr])||0);
+      const earned=weeklyGain(attr);
+      S.trainingProgress[attr]=(Number(S.trainingProgress[attr])||0)+earned;
+      let points=0;
+      while(S.trainingProgress[attr]>=1 && Number(S.attributes[attr])<99){
+        S.trainingProgress[attr]-=1;
+        S.attributes[attr]=Math.min(99,Math.floor(Number(S.attributes[attr])||0)+1);
+        points++;
+      }
+      results.push({
+        attr,before,after:Math.floor(Number(S.attributes[attr])||0),
+        earned,points,progress:S.trainingProgress[attr]
+      });
+    });
+
+    S.trainingPlan={
+      week:S.week,
+      attributes:attrs,
+      extra:null,
+      sessions:1,
+      applied:true,
+      confirmedAfterMatch:true
+    };
+    S.trainingPlanRequired=false;
+    S.trainingHistory.unshift({season:S.season,week:S.week,attributes:results});
+    S.trainingHistory=S.trainingHistory.slice(0,80);
+    S.fatigue=Math.min(100,(Number(S.fatigue)||0)+5);
+    S.form=Math.min(100,(Number(S.form)||0)+1);
+
+    try{save()}catch(_){}
+    const summary=results.map(r=>r.points
+      ? `${r.attr} ${r.before}→${r.after}`
+      : `${r.attr} +${Math.round(r.earned*100)}%`
+    ).join(' · ');
+
+    // Cierre directo: no utiliza la cadena antigua que volvía a abrir el modal.
+    const modal=document.querySelector('.modal.open');
+    if(modal) modal.classList.remove('open');
+    document.body.classList.remove('modalOpen');
+    if(typeof render==='function') render();
+    toast(`Plan confirmado: ${summary}`);
+  }
+
+  window.confirmPostMatchTrainingPlan=confirmPostMatchTrainingPlan;
+  window.saveTrainingPlan=confirmPostMatchTrainingPlan;
+  try{saveTrainingPlan=confirmPostMatchTrainingPlan}catch(_){}
+
+  // Captura específica y permanente para cualquier modal generado después de un partido.
+  document.addEventListener('click',function(event){
+    const button=event.target.closest('[data-action="save-training-plan"]');
+    if(!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    confirmPostMatchTrainingPlan();
+  },true);
+
+  // Enlace directo adicional cuando el modal se crea o se vuelve a dibujar.
+  const observer=new MutationObserver(()=>{
+    document.querySelectorAll('[data-action="save-training-plan"]').forEach(button=>{
+      button.disabled=document.querySelectorAll('.attributePick.selected').length!==3;
+      button.onclick=function(event){
+        event.preventDefault();
+        confirmPostMatchTrainingPlan();
+      };
+    });
+  });
+  observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+
+  const REMAINING_CLUBS=[["Le Mans FC", "Stade Marie-Marvingt", 25064, 4, 68, 57], ["FC Lorient", "Stade du Moustoir", 18110, 4, 72, 64], ["Paris FC", "Stade Jean-Bouin", 20000, 3, 76, 70], ["Paris Saint-Germain", "Parc des Princes", 47929, 1, 94, 96], ["Stade Rennais", "Roazhon Park", 29778, 2, 82, 80], ["RC Strasbourg Alsace", "Stade de la Meinau", 32000, 2, 82, 78], ["Toulouse FC", "Stadium de Toulouse", 33150, 3, 78, 72], ["ESTAC Troyes", "Stade de l'Aube", 20400, 4, 69, 60]];
+  const existing=new Map((typeof CLUBS!=='undefined'?CLUBS:[]).map(c=>[c.name,c]));
+  REMAINING_CLUBS.forEach((r,i)=>{
+    if(existing.has(r[0])){
+      const c=existing.get(r[0]);
+      c.league='Ligue 1'; c.country='FRA'; c.stadium=r[1]; c.capacity=r[2];
+      c.tier=r[3]; c.level=r[4]; c.prestige=r[5];
+      return;
+    }
+    CLUBS.push({
+      id:'fra2627-rest-'+i,name:r[0],country:'FRA',confed:'UEFA',league:'Ligue 1',
+      tier:r[3],level:r[4],prestige:r[5],stadium:r[1],capacity:r[2],
+      budget:Math.max(18,Math.round((6-r[3])*24)),
+      fans:Math.min(100,r[5]+5),pressure:Math.min(100,r[5]+8),
+      history:'Club participante en Ligue 1 2026/27.',
+      objectives:r[3]<=2?'Europa y títulos':r[3]===3?'Zona media-alta':'Permanencia',
+      rivals:[]
+    });
+  });
+
+  const REMAINING_PLAYERS=[["Nicolas Kocik", "Le Mans FC", "Portero", 73, 74, 28], ["Ewan Hatfout", "Le Mans FC", "Portero", 69, 74, 25], ["Samuel Yohou", "Le Mans FC", "Defensa central", 72, 72, 34], ["Edwin Quarshie", "Le Mans FC", "Defensa central", 71, 77, 24], ["Harold Voyer", "Le Mans FC", "Defensa central", 71, 73, 29], ["Théo Eyoum", "Le Mans FC", "Lateral", 70, 77, 23], ["Yanis Zouaoui", "Le Mans FC", "Lateral", 72, 76, 28], ["Makan Aïko", "Le Mans FC", "Centrocampista", 72, 78, 25], ["Antoine Rabillard", "Le Mans FC", "Extremo", 72, 72, 30], ["Alexandre Lauray", "Le Mans FC", "Centrocampista defensivo", 71, 73, 29], ["Dame Guèye", "Le Mans FC", "Delantero", 73, 76, 30], ["Erwan Colas", "Le Mans FC", "Mediapunta", 70, 76, 28], ["Martin Rossignol", "Le Mans FC", "Centrocampista", 69, 76, 23], ["Arnold Vula", "Le Mans FC", "Delantero", 70, 76, 25], ["Yvon Mvogo", "FC Lorient", "Portero", 80, 80, 32], ["Benjamin Leroy", "FC Lorient", "Portero", 73, 73, 37], ["Montassar Talbi", "FC Lorient", "Defensa central", 78, 80, 28], ["Julien Laporte", "FC Lorient", "Defensa central", 77, 77, 32], ["Bamo Meïté", "FC Lorient", "Defensa central", 76, 82, 24], ["Igor Silva", "FC Lorient", "Lateral", 76, 77, 29], ["Darlin Yongwa", "FC Lorient", "Lateral", 76, 81, 25], ["Laurent Abergel", "FC Lorient", "Centrocampista defensivo", 79, 79, 33], ["Jean-Victor Makengo", "FC Lorient", "Centrocampista", 77, 79, 28], ["Arthur Avom", "FC Lorient", "Centrocampista", 74, 82, 21], ["Aiyegun Tosin", "FC Lorient", "Extremo", 77, 79, 28], ["Pablo Pagis", "FC Lorient", "Segundo delantero", 75, 81, 23], ["Mohamed Bamba", "FC Lorient", "Delantero", 78, 82, 24], ["Eli Junior Kroupi", "FC Lorient", "Delantero", 79, 87, 20], ["Obed Nkambadio", "Paris FC", "Portero", 78, 84, 23], ["Rémy Riou", "Paris FC", "Portero", 73, 73, 38], ["Moustapha Mbow", "Paris FC", "Defensa central", 75, 80, 26], ["Timothée Kolodziejczak", "Paris FC", "Defensa central", 75, 75, 34], ["Samir Chergui", "Paris FC", "Defensa central", 74, 78, 27], ["Tuomas Ollila", "Paris FC", "Lateral", 74, 79, 26], ["Sofiane Alakouch", "Paris FC", "Lateral", 74, 76, 28], ["Vincent Marchetti", "Paris FC", "Centrocampista", 75, 75, 29], ["Adama Camara", "Paris FC", "Centrocampista", 76, 82, 23], ["Ilan Kebbal", "Paris FC", "Mediapunta", 79, 82, 28], ["Nouha Dicko", "Paris FC", "Delantero", 75, 75, 34], ["Alimamy Gory", "Paris FC", "Extremo", 75, 76, 30], ["Jean-Philippe Krasso", "Paris FC", "Delantero", 78, 78, 29], ["Mathieu Cafaro", "Paris FC", "Extremo", 77, 78, 29], ["Lucas Chevalier", "Paris Saint-Germain", "Portero", 85, 89, 24], ["Matvey Safonov", "Paris Saint-Germain", "Portero", 82, 84, 27], ["Alessandro Longoni", "Paris Saint-Germain", "Portero", 70, 82, 18], ["Achraf Hakimi", "Paris Saint-Germain", "Lateral", 88, 88, 27], ["Marquinhos", "Paris Saint-Germain", "Defensa central", 86, 86, 32], ["Willian Pacho", "Paris Saint-Germain", "Defensa central", 85, 88, 24], ["Illia Zabarnyi", "Paris Saint-Germain", "Defensa central", 84, 88, 23], ["Lucas Beraldo", "Paris Saint-Germain", "Defensa central", 81, 87, 22], ["Nuno Mendes", "Paris Saint-Germain", "Lateral", 87, 89, 24], ["Lucas Hernández", "Paris Saint-Germain", "Defensa central", 83, 83, 30], ["Vitinha", "Paris Saint-Germain", "Centrocampista", 88, 90, 26], ["João Neves", "Paris Saint-Germain", "Centrocampista", 87, 92, 21], ["Fabián Ruiz", "Paris Saint-Germain", "Centrocampista", 86, 86, 30], ["Warren Zaïre-Emery", "Paris Saint-Germain", "Centrocampista", 85, 91, 20], ["Senny Mayulu", "Paris Saint-Germain", "Centrocampista", 80, 89, 20], ["Kang-In Lee", "Paris Saint-Germain", "Mediapunta", 83, 86, 25], ["Ousmane Dembélé", "Paris Saint-Germain", "Extremo", 90, 90, 29], ["Khvicha Kvaratskhelia", "Paris Saint-Germain", "Extremo", 88, 90, 25], ["Désiré Doué", "Paris Saint-Germain", "Extremo", 87, 93, 21], ["Bradley Barcola", "Paris Saint-Germain", "Extremo", 86, 91, 23], ["Ibrahim Mbaye", "Paris Saint-Germain", "Extremo", 76, 88, 18], ["Quentin Ndjantou", "Paris Saint-Germain", "Delantero", 73, 85, 19], ["Brice Samba", "Stade Rennais", "Portero", 82, 82, 32], ["Gauthier Gallon", "Stade Rennais", "Portero", 75, 75, 33], ["Anthony Rouault", "Stade Rennais", "Defensa central", 80, 84, 25], ["Christopher Wooh", "Stade Rennais", "Defensa central", 78, 82, 24], ["Mikayil Faye", "Stade Rennais", "Defensa central", 78, 87, 22], ["Lorenz Assignon", "Stade Rennais", "Lateral", 79, 84, 26], ["Adrien Truffert", "Stade Rennais", "Lateral", 81, 84, 24], ["Azor Matusiwa", "Stade Rennais", "Centrocampista defensivo", 80, 82, 28], ["Glen Kamara", "Stade Rennais", "Centrocampista", 79, 79, 30], ["Djaoui Cissé", "Stade Rennais", "Centrocampista", 77, 86, 22], ["Ludovic Blas", "Stade Rennais", "Mediapunta", 82, 82, 28], ["Albert Grønbæk", "Stade Rennais", "Mediapunta", 79, 84, 25], ["Arnaud Kalimuendo", "Stade Rennais", "Delantero", 82, 85, 24], ["Amine Gouiri", "Stade Rennais", "Delantero", 81, 84, 26], ["Đorđe Petrović", "RC Strasbourg Alsace", "Portero", 82, 86, 26], ["Alaa Bellaarouch", "RC Strasbourg Alsace", "Portero", 74, 82, 24], ["Mamadou Sarr", "RC Strasbourg Alsace", "Defensa central", 80, 89, 20], ["Abakar Sylla", "RC Strasbourg Alsace", "Defensa central", 78, 85, 23], ["Saidou Sow", "RC Strasbourg Alsace", "Defensa central", 77, 82, 24], ["Guéla Doué", "RC Strasbourg Alsace", "Lateral", 80, 86, 23], ["Diego Moreira", "RC Strasbourg Alsace", "Lateral", 79, 86, 22], ["Andrey Santos", "RC Strasbourg Alsace", "Centrocampista", 83, 90, 22], ["Habib Diarra", "RC Strasbourg Alsace", "Centrocampista", 82, 88, 22], ["Valentín Barco", "RC Strasbourg Alsace", "Centrocampista", 79, 87, 22], ["Sebastian Nanasi", "RC Strasbourg Alsace", "Mediapunta", 81, 86, 24], ["Dilane Bakwa", "RC Strasbourg Alsace", "Extremo", 81, 86, 23], ["Emanuel Emegha", "RC Strasbourg Alsace", "Delantero", 82, 87, 23], ["Félix Lemaréchal", "RC Strasbourg Alsace", "Mediapunta", 78, 84, 22], ["Guillaume Restes", "Toulouse FC", "Portero", 81, 88, 21], ["Alex Domínguez", "Toulouse FC", "Portero", 74, 79, 28], ["Rasmus Nicolaisen", "Toulouse FC", "Defensa central", 79, 79, 29], ["Charlie Cresswell", "Toulouse FC", "Defensa central", 79, 85, 23], ["Mark McKenzie", "Toulouse FC", "Defensa central", 78, 80, 27], ["Warren Kamanzi", "Toulouse FC", "Lateral", 76, 82, 25], ["Gabriel Suazo", "Toulouse FC", "Lateral", 79, 80, 28], ["Vincent Sierro", "Toulouse FC", "Centrocampista", 81, 81, 30], ["Cristian Cásseres Jr.", "Toulouse FC", "Centrocampista", 79, 81, 26], ["Niklas Schmidt", "Toulouse FC", "Centrocampista", 77, 79, 28], ["Aron Dønnum", "Toulouse FC", "Extremo", 80, 81, 28], ["Yann Gboho", "Toulouse FC", "Extremo", 79, 83, 25], ["Frank Magri", "Toulouse FC", "Delantero", 77, 79, 26], ["Joshua King", "Toulouse FC", "Delantero", 77, 77, 34], ["Nicolas Lemaître", "ESTAC Troyes", "Portero", 72, 72, 29], ["Zacharie Boucher", "ESTAC Troyes", "Portero", 73, 73, 34], ["Adrien Monfray", "ESTAC Troyes", "Defensa central", 73, 73, 35], ["Mehdi Tahrat", "ESTAC Troyes", "Defensa central", 72, 72, 36], ["Ismaël Boura", "ESTAC Troyes", "Lateral", 74, 78, 26], ["Thierno Baldé", "ESTAC Troyes", "Lateral", 73, 79, 24], ["Xavier Chavalerin", "ESTAC Troyes", "Centrocampista", 75, 75, 35], ["Mouhamed Diop", "ESTAC Troyes", "Centrocampista", 74, 81, 25], ["Rafiki Saïd", "ESTAC Troyes", "Extremo", 75, 77, 26], ["Renaud Ripart", "ESTAC Troyes", "Segundo delantero", 73, 73, 33], ["Jaures Assoumou", "ESTAC Troyes", "Extremo", 73, 81, 23], ["Pape Ibnou Ba", "ESTAC Troyes", "Delantero", 73, 74, 33], ["Kyliane Dong", "ESTAC Troyes", "Extremo", 73, 82, 21], ["Martin Adeline", "ESTAC Troyes", "Centrocampista", 74, 81, 22]].map((r,i)=>({
+    id:'ligue1-rest-2627-'+i,
+    name:r[0],club:r[1],position:r[2],
+    base:r[3],overall:r[3],potential:r[4],age:r[5],
+    goals:0,assists:0,apps:0,firstTeamApps:0,
+    season:'2026/27',rosterDate:'2026-08-01',
+    rosterStatus:'official-provisional-market-open'
+  }));
+
+  if(Array.isArray(REAL_PLAYERS)){
+    REMAINING_PLAYERS.forEach(p=>{
+      const same=REAL_PLAYERS.find(x=>x.name===p.name&&x.club===p.club);
+      if(same) Object.assign(same,p);
+      else REAL_PLAYERS.push(p);
+    });
+  }
+
+  if(typeof window.initClubBudgets==='function') window.initClubBudgets(CLUBS);
+  window.LIGUE1_REMAINING_CLUBS=REMAINING_CLUBS;
+  window.LIGUE1_REMAINING_PLAYERS=REMAINING_PLAYERS;
+})();
+</script>
+<style>
+[data-action="save-training-plan"]{
+  min-height:56px!important;
+  font-size:16px!important;
+  border:1px solid rgba(119,243,170,.5)!important;
+}
+[data-action="save-training-plan"]:not(:disabled){
+  animation:confirmPlanPulse 1.6s ease-in-out infinite;
+}
+@keyframes confirmPlanPulse{
+  50%{box-shadow:0 0 0 5px rgba(119,243,170,.09),0 14px 34px rgba(0,0,0,.34)}
+}
+</style>
+
 </body></html>
