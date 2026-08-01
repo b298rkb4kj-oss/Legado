@@ -4569,7 +4569,7 @@ window.legadoAddMoney=function(cant,motivo){
 // ===== LEGADO v0.23.1 · CONFIRMACIÓN POSTPARTIDO INDEPENDIENTE + LIGUE 1 COMPLETA =====
 (function(){
   function ensureWeeklyProgress(){
-    if(!window.S || !Array.isArray(window.ATTRS)) return false;
+    if(typeof S==='undefined' || typeof ATTRS==='undefined' || !Array.isArray(ATTRS) || !S) return false;
     S.trainingProgress=S.trainingProgress||{};
     S.trainingHistory=Array.isArray(S.trainingHistory)?S.trainingHistory:[];
     ATTRS.forEach(a=>{
@@ -4737,5 +4737,27 @@ window.legadoAddMoney=function(cant,motivo){
   50%{box-shadow:0 0 0 5px rgba(119,243,170,.09),0 14px 34px rgba(0,0,0,.34)}
 }
 </style>
+
+
+<script>
+// ===== LEGADO v0.23.2 · CORRECCIÓN DEFINITIVA DEL PLAN SEMANAL =====
+(function(){
+  function syncTrainingConfirmButton(){
+    const selected=document.querySelectorAll('.attributePick.selected').length;
+    document.querySelectorAll('[data-action="save-training-plan"]').forEach(btn=>{
+      btn.disabled=selected!==3;
+      btn.setAttribute('aria-disabled',String(selected!==3));
+    });
+    const count=document.querySelector('#planCount');
+    if(count)count.textContent=`${selected}/3`;
+  }
+  document.addEventListener('click',function(e){
+    if(e.target.closest('[data-action="toggle-training-attribute"]')){
+      setTimeout(syncTrainingConfirmButton,0);
+    }
+  },false);
+  window.syncTrainingConfirmButton=syncTrainingConfirmButton;
+})();
+</script>
 
 </body></html>
