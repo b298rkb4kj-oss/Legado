@@ -4995,4 +4995,85 @@ window.legadoAddMoney=function(cant,motivo){
 })();
 </script>
 
+
+<script>
+// ===== LEGADO · PARCHE MÍNIMO CHAMPIONSHIP + MENSAJES EN MATCHDAY =====
+(function(){
+  // 1) ÚNICO CAMBIO FUNCIONAL:
+  // No genera mensajes diarios automáticos al entrar en el sábado de partido.
+  // No bloquea botones, buzón, mensajes existentes ni ninguna otra función.
+  const originalMaybeGenerateDailyMail = maybeGenerateDailyMail;
+  maybeGenerateDailyMail = function(){
+    if (S && S.day === 5 && !S.dayAction) return null;
+    return originalMaybeGenerateDailyMail();
+  };
+  window.maybeGenerateDailyMail = maybeGenerateDailyMail;
+
+  // 2) Datos de Championship: clubes y jugadores. No modifica calendarios,
+  // autoavance, entrenamiento, economía, navegación ni motor de partidos.
+  const CHAMPIONSHIP_CLUBS = [["Birmingham City", "St Andrew's @ Knighthead Park", 29409, 2, 79, 78], ["Blackburn Rovers", "Ewood Park", 31367, 3, 75, 76], ["Bolton Wanderers", "Toughsheet Community Stadium", 28723, 3, 75, 75], ["Bristol City", "Ashton Gate", 27000, 3, 76, 74], ["Burnley", "Turf Moor", 21944, 1, 82, 82], ["Cardiff City", "Cardiff City Stadium", 33280, 3, 75, 77], ["Charlton Athletic", "The Valley", 27111, 3, 73, 73], ["Derby County", "Pride Park", 33597, 2, 77, 78], ["Lincoln City", "LNER Stadium", 10669, 4, 70, 67], ["Middlesbrough", "Riverside Stadium", 34742, 2, 78, 79], ["Millwall", "The Den", 20146, 2, 76, 77], ["Norwich City", "Carrow Road", 27244, 2, 78, 80]];
+  const clubMap = new Map(CLUBS.map(c => [clubKey(c.name), c]));
+
+  CHAMPIONSHIP_CLUBS.forEach((r, i) => {
+    const key = clubKey(r[0]);
+    const existing = clubMap.get(key);
+    if (existing) {
+      Object.assign(existing, {
+        country:'ENG', confed:'UEFA', league:'Championship',
+        stadium:r[1], capacity:r[2], tier:r[3], level:r[4], prestige:r[5]
+      });
+      return;
+    }
+    const c = {
+      id:'eng2-2627-'+i, name:r[0], country:'ENG', confed:'UEFA',
+      league:'Championship', stadium:r[1], capacity:r[2],
+      tier:r[3], level:r[4], prestige:r[5],
+      budget:Math.max(12, Math.round((6-r[3])*16)),
+      fans:Math.min(100,r[5]+3), pressure:Math.min(100,r[5]+6),
+      history:'Club participante en la EFL Championship 2026/27.',
+      objectives:r[3]===1?'Ascenso directo':r[3]===2?'Play-off de ascenso':'Permanencia y progreso',
+      rivals:[]
+    };
+    CLUBS.push(c);
+    clubMap.set(key,c);
+  });
+
+  const RAW_PLAYERS = [["Ryan Allsop", "Birmingham City", "Portero", 75, 75, 34], ["Bailey Peacock-Farrell", "Birmingham City", "Portero", 76, 77, 29], ["Christoph Klarer", "Birmingham City", "Defensa central", 78, 80, 26], ["Phil Neumann", "Birmingham City", "Defensa central", 77, 79, 29], ["Krystian Bielik", "Birmingham City", "Defensa central", 79, 79, 28], ["Ethan Laird", "Birmingham City", "Lateral", 77, 81, 24], ["Alex Cochrane", "Birmingham City", "Lateral", 77, 80, 26], ["Paik Seung-ho", "Birmingham City", "Centrocampista", 79, 81, 29], ["Tomoki Iwata", "Birmingham City", "Centrocampista defensivo", 78, 79, 29], ["Willum Thor Willumsson", "Birmingham City", "Mediapunta", 78, 81, 27], ["Keshi Anderson", "Birmingham City", "Extremo", 75, 75, 31], ["Ayumu Yokoyama", "Birmingham City", "Extremo", 75, 83, 23], ["Jay Stansfield", "Birmingham City", "Delantero", 81, 86, 23], ["Marvin Ducksch", "Birmingham City", "Delantero", 78, 78, 32], ["Balázs Tóth", "Blackburn Rovers", "Portero", 78, 82, 28], ["Aynsley Pears", "Blackburn Rovers", "Portero", 75, 77, 28], ["Dominic Hyam", "Blackburn Rovers", "Defensa central", 77, 78, 30], ["Scott Wharton", "Blackburn Rovers", "Defensa central", 76, 77, 28], ["Connor O'Riordan", "Blackburn Rovers", "Defensa central", 74, 81, 22], ["Matty Litherland", "Blackburn Rovers", "Lateral", 72, 80, 20], ["Callum Brittain", "Blackburn Rovers", "Lateral", 77, 79, 28], ["Sondre Tronstad", "Blackburn Rovers", "Centrocampista defensivo", 78, 78, 30], ["Lewis Travis", "Blackburn Rovers", "Centrocampista", 78, 78, 28], ["Todd Cantwell", "Blackburn Rovers", "Mediapunta", 80, 81, 28], ["Ryoya Morishita", "Blackburn Rovers", "Extremo", 77, 79, 29], ["Yuki Ohashi", "Blackburn Rovers", "Delantero", 77, 79, 30], ["Makhtar Gueye", "Blackburn Rovers", "Delantero", 76, 78, 28], ["Adam Khan", "Blackburn Rovers", "Portero", 69, 78, 20], ["Luke Southwood", "Bolton Wanderers", "Portero", 74, 76, 28], ["Joel Coleman", "Bolton Wanderers", "Portero", 71, 71, 30], ["Eoin Toal", "Bolton Wanderers", "Defensa central", 76, 80, 27], ["Chris Forino", "Bolton Wanderers", "Defensa central", 75, 80, 26], ["Gethin Jones", "Bolton Wanderers", "Defensa central", 74, 74, 30], ["Max Conway", "Bolton Wanderers", "Lateral", 73, 80, 23], ["Josh Sheehan", "Bolton Wanderers", "Centrocampista", 77, 77, 31], ["Ethan Erhahon", "Bolton Wanderers", "Centrocampista defensivo", 76, 80, 25], ["Xavier Simons", "Bolton Wanderers", "Centrocampista", 74, 82, 23], ["Ruben Rodrigues", "Bolton Wanderers", "Mediapunta", 76, 77, 29], ["Thierry Gale", "Bolton Wanderers", "Extremo", 74, 79, 24], ["John McAtee", "Bolton Wanderers", "Delantero", 76, 79, 27], ["Sam Dalby", "Bolton Wanderers", "Delantero", 75, 77, 26], ["Nathan Baxter", "Bolton Wanderers", "Portero", 75, 77, 27], ["Max O'Leary", "Bristol City", "Portero", 77, 79, 29], ["Stefan Bajić", "Bristol City", "Portero", 72, 78, 24], ["Zak Vyner", "Bristol City", "Defensa central", 78, 79, 29], ["Rob Dickie", "Bristol City", "Defensa central", 78, 78, 30], ["Luke McNally", "Bristol City", "Defensa central", 77, 80, 26], ["George Tanner", "Bristol City", "Lateral", 75, 78, 26], ["Cameron Pring", "Bristol City", "Lateral", 77, 78, 28], ["Jason Knight", "Bristol City", "Centrocampista", 79, 82, 25], ["Max Bird", "Bristol City", "Centrocampista", 78, 82, 25], ["Marcus McGuane", "Bristol City", "Centrocampista defensivo", 76, 78, 27], ["Anis Mehmeti", "Bristol City", "Extremo", 78, 82, 25], ["Sam Bell", "Bristol City", "Extremo", 75, 81, 24], ["Sinclair Armstrong", "Bristol City", "Delantero", 76, 82, 23], ["Nahki Wells", "Bristol City", "Delantero", 75, 75, 36], ["James Trafford", "Burnley", "Portero", 82, 87, 23], ["Václav Hladký", "Burnley", "Portero", 76, 76, 35], ["Maxime Estève", "Burnley", "Defensa central", 81, 85, 24], ["Hjalmar Ekdal", "Burnley", "Defensa central", 78, 81, 27], ["CJ Egan-Riley", "Burnley", "Defensa central", 77, 83, 23], ["Connor Roberts", "Burnley", "Lateral", 78, 78, 30], ["Lucas Pires", "Burnley", "Lateral", 78, 82, 25], ["Josh Cullen", "Burnley", "Centrocampista defensivo", 80, 80, 30], ["Josh Brownhill", "Burnley", "Centrocampista", 81, 81, 30], ["Hannibal Mejbri", "Burnley", "Centrocampista", 79, 84, 23], ["Jaidon Anthony", "Burnley", "Extremo", 79, 81, 26], ["Luca Koleosho", "Burnley", "Extremo", 78, 86, 21], ["Lyle Foster", "Burnley", "Delantero", 79, 82, 25], ["Zian Flemming", "Burnley", "Segundo delantero", 79, 80, 28], ["Jak Alnwick", "Cardiff City", "Portero", 75, 75, 33], ["Ethan Horvath", "Cardiff City", "Portero", 76, 76, 31], ["Calum Chambers", "Cardiff City", "Defensa central", 78, 78, 31], ["Dimitrios Goutas", "Cardiff City", "Defensa central", 77, 77, 32], ["Jesper Daland", "Cardiff City", "Defensa central", 75, 80, 26], ["Perry Ng", "Cardiff City", "Lateral", 77, 78, 30], ["Callum O'Dowda", "Cardiff City", "Lateral", 76, 76, 31], ["Joe Ralls", "Cardiff City", "Centrocampista", 76, 76, 32], ["Manolis Siopis", "Cardiff City", "Centrocampista defensivo", 77, 77, 32], ["Rubin Colwill", "Cardiff City", "Mediapunta", 78, 83, 24], ["Alex Robertson", "Cardiff City", "Centrocampista", 76, 82, 23], ["Chris Willock", "Cardiff City", "Extremo", 77, 79, 28], ["Callum Robinson", "Cardiff City", "Delantero", 77, 77, 31], ["Youcef Salech", "Cardiff City", "Delantero", 75, 81, 24], ["Will Mannion", "Charlton Athletic", "Portero", 73, 76, 28], ["Ashley Maynard-Brewer", "Charlton Athletic", "Portero", 72, 75, 27], ["Lloyd Jones", "Charlton Athletic", "Defensa central", 75, 76, 30], ["Macauley Gillesphey", "Charlton Athletic", "Defensa central", 74, 74, 30], ["Alex Mitchell", "Charlton Athletic", "Defensa central", 74, 79, 24], ["Kayne Ramsay", "Charlton Athletic", "Lateral", 75, 80, 25], ["Josh Edwards", "Charlton Athletic", "Lateral", 74, 78, 26], ["Conor Coventry", "Charlton Athletic", "Centrocampista defensivo", 76, 78, 26], ["Luke Berry", "Charlton Athletic", "Centrocampista", 76, 76, 34], ["Karoy Anderson", "Charlton Athletic", "Centrocampista", 74, 82, 21], ["Tyreece Campbell", "Charlton Athletic", "Extremo", 75, 81, 22], ["Miles Leaburn", "Charlton Athletic", "Delantero", 76, 84, 22], ["Matty Godden", "Charlton Athletic", "Delantero", 75, 75, 35], ["Daniel Kanu", "Charlton Athletic", "Delantero", 73, 81, 21], ["Jacob Widell Zetterström", "Derby County", "Portero", 77, 82, 28], ["Josh Vickers", "Derby County", "Portero", 73, 73, 30], ["Curtis Nelson", "Derby County", "Defensa central", 77, 77, 33], ["Eiran Cashin", "Derby County", "Defensa central", 78, 83, 24], ["Sonny Bradley", "Derby County", "Defensa central", 75, 75, 34], ["Kane Wilson", "Derby County", "Lateral", 76, 78, 26], ["Callum Elder", "Derby County", "Lateral", 75, 75, 31], ["Ebou Adams", "Derby County", "Centrocampista defensivo", 77, 78, 30], ["Kenzo Goudmijn", "Derby County", "Centrocampista", 77, 82, 24], ["Liam Thompson", "Derby County", "Centrocampista", 74, 80, 24], ["Nathaniel Méndez-Laing", "Derby County", "Extremo", 77, 77, 34], ["Kayden Jackson", "Derby County", "Extremo", 75, 75, 32], ["Jerry Yates", "Derby County", "Delantero", 77, 77, 29], ["Dajaune Brown", "Derby County", "Delantero", 73, 82, 21], ["George Wickens", "Lincoln City", "Portero", 73, 78, 24], ["Jordan Wright", "Lincoln City", "Portero", 70, 73, 27], ["Paudie O'Connor", "Lincoln City", "Defensa central", 75, 76, 29], ["Adam Jackson", "Lincoln City", "Defensa central", 73, 73, 32], ["Sean Roughan", "Lincoln City", "Defensa central", 74, 80, 23], ["Tendayi Darikwa", "Lincoln City", "Lateral", 73, 73, 34], ["Reeco Hackett", "Lincoln City", "Lateral", 74, 75, 28], ["Ethan Hamilton", "Lincoln City", "Centrocampista", 75, 77, 27], ["Conor McGrandles", "Lincoln City", "Centrocampista", 73, 73, 30], ["Tom Bayliss", "Lincoln City", "Centrocampista", 74, 77, 27], ["Jack Moylan", "Lincoln City", "Mediapunta", 74, 79, 24], ["Ben House", "Lincoln City", "Delantero", 75, 78, 27], ["Freddie Draper", "Lincoln City", "Delantero", 74, 82, 22], ["Jovon Makama", "Lincoln City", "Delantero", 73, 81, 22], ["Seny Dieng", "Middlesbrough", "Portero", 79, 79, 31], ["Sol Brynn", "Middlesbrough", "Portero", 75, 81, 25], ["Dael Fry", "Middlesbrough", "Defensa central", 79, 80, 28], ["Rav van den Berg", "Middlesbrough", "Defensa central", 80, 86, 22], ["Matt Clarke", "Middlesbrough", "Defensa central", 77, 77, 29], ["Anfernee Dijksteel", "Middlesbrough", "Lateral", 76, 77, 29], ["Neto Borges", "Middlesbrough", "Lateral", 77, 79, 29], ["Hayden Hackney", "Middlesbrough", "Centrocampista", 81, 86, 24], ["Aidan Morris", "Middlesbrough", "Centrocampista defensivo", 79, 84, 24], ["Finn Azaz", "Middlesbrough", "Mediapunta", 80, 83, 25], ["Riley McGree", "Middlesbrough", "Mediapunta", 79, 80, 27], ["Delano Burgzorg", "Middlesbrough", "Extremo", 77, 79, 27], ["Tommy Conway", "Middlesbrough", "Delantero", 79, 84, 24], ["Emmanuel Latte Lath", "Middlesbrough", "Delantero", 81, 83, 27], ["Lukas Jensen", "Millwall", "Portero", 76, 80, 27], ["George Long", "Millwall", "Portero", 73, 73, 32], ["Jake Cooper", "Millwall", "Defensa central", 78, 78, 31], ["Japhet Tanganga", "Millwall", "Defensa central", 79, 81, 27], ["Murray Wallace", "Millwall", "Defensa central", 75, 75, 33], ["Ryan Leonard", "Millwall", "Lateral", 76, 76, 34], ["Joe Bryan", "Millwall", "Lateral", 77, 77, 32], ["Casper De Norre", "Millwall", "Centrocampista defensivo", 78, 79, 29], ["George Saville", "Millwall", "Centrocampista", 77, 77, 33], ["Billy Mitchell", "Millwall", "Centrocampista", 76, 80, 25], ["Romain Esse", "Millwall", "Mediapunta", 78, 86, 21], ["Femi Azeez", "Millwall", "Extremo", 76, 80, 25], ["Mihailo Ivanović", "Millwall", "Delantero", 77, 84, 21], ["Macauley Langstaff", "Millwall", "Delantero", 75, 77, 29], ["Angus Gunn", "Norwich City", "Portero", 79, 79, 30], ["George Long", "Norwich City", "Portero", 73, 73, 32], ["Shane Duffy", "Norwich City", "Defensa central", 77, 77, 34], ["José Córdoba", "Norwich City", "Defensa central", 78, 84, 25], ["Callum Doyle", "Norwich City", "Defensa central", 79, 85, 22], ["Jack Stacey", "Norwich City", "Lateral", 76, 77, 30], ["Kellen Fisher", "Norwich City", "Lateral", 75, 83, 22], ["Marcelino Núñez", "Norwich City", "Centrocampista", 79, 83, 26], ["Kenny McLean", "Norwich City", "Centrocampista defensivo", 78, 78, 34], ["Gabriel Forsyth", "Norwich City", "Centrocampista", 74, 82, 20], ["Borja Sainz", "Norwich City", "Extremo", 81, 85, 25], ["Ante Crnac", "Norwich City", "Delantero", 78, 85, 22], ["Josh Sargent", "Norwich City", "Delantero", 81, 83, 26], ["Onel Hernández", "Norwich City", "Extremo", 75, 75, 33]].map((r,i)=>({
+    id:'champ-2627-raw-'+i,
+    name:r[0], club:r[1], position:r[2],
+    base:r[3], overall:r[3], potential:r[4], age:r[5],
+    verified:true, season:'2026/27', rosterDate:'2026-08-01',
+    rosterStatus:'official-confirmed-snapshot',
+    goals:0, assists:0, apps:0, firstTeamApps:0
+  }));
+
+  RAW_PLAYERS.forEach(raw => {
+    const key = playerIdentityKey(raw.name);
+    const same = REAL_PLAYERS.find(p => playerIdentityKey(p.name) === key);
+    if (same) {
+      // Solo actualiza si ya es exactamente el mismo jugador del mismo club.
+      if (clubKey(same.club) === clubKey(raw.club)) {
+        const updated = normalisePlayerRecord({...same,...raw,id:same.id,legacyIds:same.legacyIds});
+        Object.assign(same,updated);
+        if (typeof PLAYER_BY_ID!=='undefined') PLAYER_BY_ID.set(same.id,same);
+        if (typeof PLAYER_BY_NAME!=='undefined') PLAYER_BY_NAME.set(key,same);
+      }
+      return;
+    }
+    const p = normalisePlayerRecord(raw);
+    REAL_PLAYERS.push(p);
+    if (typeof PLAYER_BY_ID!=='undefined') PLAYER_BY_ID.set(p.id,p);
+    if (typeof PLAYER_BY_NAME!=='undefined') PLAYER_BY_NAME.set(key,p);
+  });
+
+  // Inicializa únicamente los nuevos registros en partidas que ya estén cargadas.
+  if (typeof S!=='undefined' && S) {
+    if (typeof initCoaches==='function') initCoaches(S);
+    if (typeof initWorldPlayers==='function') initWorldPlayers(S);
+  }
+
+  window.CHAMPIONSHIP_FIRST_12_2627 = CHAMPIONSHIP_CLUBS;
+})();
+</script>
+
 </body></html>
