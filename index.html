@@ -4273,4 +4273,141 @@ window.legadoAddMoney=function(cant,motivo){
 })();
 </script>
 
+
+<script>
+// ===== LEGADO v0.22.4 · PROGRESIÓN GRADUAL Y VISIBLE =====
+(function(){
+  const previousEnsureLifeState=typeof ensureLifeState==='function'?ensureLifeState:null;
+  const previousOpenTrainingPlan=typeof openTrainingPlan==='function'?openTrainingPlan:null;
+  const previousRenderHome=window.renderHome;
+  const previousMigrate=window.migrateSave;
+
+  function ensureTrainingProgress(x=S){
+    if(!x)return;
+    x.trainingProgress=x.trainingProgress||{};
+    x.trainingHistory=Array.isArray(x.trainingHistory)?x.trainingHistory:[];
+    ATTRS.forEach(a=>{
+      const v=Number(x.trainingProgress[a]);
+      x.trainingProgress[a]=Number.isFinite(v)?Math.max(0,v):0;
+    });
+  }
+
+  function developmentRate(attr,extra){
+    const current=Number(S.attributes[attr])||30;
+    const professionalism=Math.max(.45,(Number(S.player?.professionalism)||50)/100);
+    const potential=Math.max(.55,(Number(S.player?.potential)||60)/100);
+    const age=Number(S.age)||18;
+    const ageFactor=age<=21?1.08:age<=24?1:age<=28?.78:age<=31?.52:.30;
+    const difficulty=current<50?1.16:current<65?1:current<75?.78:current<85?.54:.32;
+    const coaching=1+Math.max(-.15,Math.min(.22,(Number(S.careerEffects?.training)||0)*.02));
+    const extraMult=Number(extra?.mult)||1;
+    const base=.23;
+    return Math.max(.12,Math.min(.78,base*professionalism*potential*ageFactor*difficulty*coaching*extraMult));
+  }
+
+  function applyWeeklyDevelopment(attrs,extra){
+    ensureTrainingProgress();
+    const results=[];
+    attrs.forEach(attr=>{
+      const before=Math.floor(Number(S.attributes[attr])||0);
+      const earned=developmentRate(attr,extra);
+      S.trainingProgress[attr]+=earned;
+      let points=0;
+      while(S.trainingProgress[attr]>=1 && S.attributes[attr]<99){
+        S.trainingProgress[attr]-=1;
+        S.attributes[attr]=Math.min(99,Math.floor(Number(S.attributes[attr])||0)+1);
+        points++;
+      }
+      const after=Math.floor(Number(S.attributes[attr])||0);
+      results.push({attr,earned,points,before,after,progress:S.trainingProgress[attr]});
+    });
+    S.trainingHistory.unshift({season:S.season,week:S.week,attributes:results.map(r=>({...r}))});
+    S.trainingHistory=S.trainingHistory.slice(0,80);
+    return results;
+  }
+
+  function progressText(attr){
+    ensureTrainingProgress();
+    const pct=Math.round((S.trainingProgress[attr]||0)*100);
+    return `${pct}% hacia el siguiente punto`;
+  }
+
+  function trainingProgressMarkup(attr){
+    ensureTrainingProgress();
+    const pct=Math.max(0,Math.min(100,Math.round((S.trainingProgress[attr]||0)*100)));
+    return `<div class="trainingProgressMini"><div><span>${attr}</span><b>${Math.floor(S.attributes[attr])}</b></div><div class="trainingProgressTrack"><i style="width:${pct}%"></i></div><small>${pct}% hacia +1</small></div>`;
+  }
+
+  window.saveTrainingPlan=function(){
+    const attrs=[...document.querySelectorAll('.attributePick.selected')].map(b=>b.dataset.attribute);
+    if(attrs.length!==3){toast('Debes elegir exactamente 3 atributos');return}
+    ensureLifeState();ensureTrainingProgress();
+    if(S.trainingPlan.week===S.week&&S.trainingPlan.applied){toast('Ya has completado el entrenamiento de esta semana');return}
+
+    const extra=EXTRA_TRAINING[S.trainingPlan.extra]||{mult:1,fatigue:0,risk:0,name:'Plan normal'};
+    const results=applyWeeklyDevelopment(attrs,extra);
+    S.trainingPlan={week:S.week,attributes:attrs,extra:null,sessions:1,applied:true};
+    S.trainingPlanRequired=false;
+    S.fatigue=clamp(S.fatigue+5+(Number(extra.fatigue)||0));
+    S.form=clamp(S.form+1);
+    if(extra.risk&&Math.random()<extra.risk&&!S.injury)S.injury={name:'Sobrecarga muscular',weeks:1};
+
+    const visible=results.map(r=>r.points>0?`${r.attr} ${r.before}→${r.after}`:`${r.attr} +${Math.round(r.earned*100)}%`).join(' · ');
+    closeModal();render();
+    toast(results.some(r=>r.points>0)?`¡Mejora conseguida! ${visible}`:`Progreso semanal: ${visible}`);
+  };
+  try{saveTrainingPlan=window.saveTrainingPlan}catch(_){}
+
+  window.openTrainingPlan=function(){
+    ensureLifeState();ensureTrainingProgress();
+    const chosen=new Set(S.trainingPlan.week===S.week?S.trainingPlan.attributes:[]);
+    openModal(`<div class="panelTitle"><div><span class="eyebrow">PLAN SEMANAL</span><h2 style="margin:4px 0">Elige 3 atributos</h2></div><span class="pill" id="planCount">${chosen.size}/3</span></div><p class="muted">El progreso se acumula cada semana. Al llegar al 100%, el atributo sube un punto.</p><div class="attributePicker">${ATTRS.map(a=>`<button class="choice btn secondary attributePick ${chosen.has(a)?'selected':''}" data-action="toggle-training-attribute" data-attribute="${a}"><b>${a}</b><span>Actual: ${Math.floor(S.attributes[a])} · ${progressText(a)}</span><div class="trainingProgressTrack"><i style="width:${Math.round((S.trainingProgress[a]||0)*100)}%"></i></div></button>`).join('')}</div><button class="btn" data-action="save-training-plan" style="width:100%;margin-top:12px" ${chosen.size===3?'':'disabled'}>Confirmar y entrenar esta semana</button>`);
+  };
+  try{openTrainingPlan=window.openTrainingPlan}catch(_){}
+
+  window.renderHome=function(){
+    previousRenderHome();
+    if(!S)return;
+    ensureTrainingProgress();
+    const home=document.querySelector('#view-home .careerMain');
+    if(!home)return;
+    const attrs=S.trainingPlan?.attributes?.length?S.trainingPlan.attributes:ATTRS.slice(0,3);
+    const card=document.createElement('section');
+    card.className='card developmentCard';
+    card.innerHTML=`<div class="panelTitle"><div><span class="eyebrow">DESARROLLO</span><h3 style="margin:3px 0">Progreso de atributos</h3></div><span class="pill">Semana ${S.week}</span></div><div class="developmentGrid">${attrs.map(trainingProgressMarkup).join('')}</div><p class="muted small" style="margin-bottom:0">Las mejoras son lentas: normalmente se necesita entrenar un atributo entre 3 y 7 semanas para conseguir +1, según edad, potencial, profesionalidad y nivel actual.</p>`;
+    home.appendChild(card);
+  };
+  try{renderHome=window.renderHome}catch(_){}
+
+  window.migrateSave=function(x){
+    const r=previousMigrate(x);
+    ensureTrainingProgress(r);
+    // Convierte cualquier decimal antiguo del atributo en progreso acumulado sin perderlo.
+    ATTRS.forEach(a=>{
+      const raw=Number(r.attributes?.[a]);
+      if(Number.isFinite(raw)){
+        const whole=Math.floor(raw);
+        const fraction=Math.max(0,raw-whole);
+        r.attributes[a]=whole;
+        r.trainingProgress[a]=Math.max(r.trainingProgress[a]||0,fraction);
+      }
+    });
+    return r;
+  };
+  try{migrateSave=window.migrateSave}catch(_){}
+
+  ensureTrainingProgress();
+  ATTRS.forEach(a=>{
+    const raw=Number(S.attributes[a]);
+    if(Number.isFinite(raw)&&raw%1){
+      S.trainingProgress[a]=Math.max(S.trainingProgress[a]||0,raw-Math.floor(raw));
+      S.attributes[a]=Math.floor(raw);
+    }
+  });
+})();
+</script>
+<style>
+.trainingProgressTrack{height:7px;border-radius:999px;background:#1b2b24;overflow:hidden;margin-top:7px}.trainingProgressTrack i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent2),var(--accent),var(--gold));transition:width .25s ease}.developmentGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.trainingProgressMini{padding:12px;border-radius:14px;background:#09150f;border:1px solid var(--line)}.trainingProgressMini>div:first-child{display:flex;justify-content:space-between;gap:8px}.trainingProgressMini b{color:var(--gold);font-size:20px}.trainingProgressMini small{display:block;color:var(--muted);margin-top:6px}.attributePick .trainingProgressTrack{grid-column:1/-1;width:100%}@media(max-width:720px){.developmentGrid{grid-template-columns:1fr}}
+</style>
+
 </body></html>
