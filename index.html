@@ -6461,4 +6461,216 @@ button:active,[data-action]:active,[data-tab]:active{
 .crestFallbackOnly .crestMonogram{position:absolute}
 </style>
 
+
+<script>
+// ===== LEGADO · ESCUDOS LALIGA HD DESDE WEBS OFICIALES =====
+(function(){
+  const OFFICIAL_LALIGA_HD_SITES={"Real Madrid": "https://www.realmadrid.com", "Barcelona": "https://www.fcbarcelona.com", "Atlético de Madrid": "https://www.atleticodemadrid.com", "Athletic Club": "https://www.athletic-club.eus", "Real Sociedad": "https://www.realsociedad.eus", "Sevilla": "https://www.sevillafc.es", "Valencia": "https://www.valenciacf.com", "Villarreal": "https://villarrealcf.es", "Real Betis": "https://www.realbetisbalompie.es", "CA Osasuna": "https://www.osasuna.es", "Celta": "https://rccelta.es", "Deportivo Alavés": "https://www.deportivoalaves.com", "Levante UD": "https://www.levanteud.com", "Rayo Vallecano": "https://www.rayovallecano.es", "Getafe CF": "https://www.getafecf.com", "RCD Espanyol": "https://www.rcdespanyol.com", "Elche CF": "https://www.elchecf.es", "Málaga CF": "https://www.malagacf.com", "Racing de Santander": "https://www.realracingclub.es", "RC Deportivo": "https://www.rcdeportivo.es"};
+
+  function esc(value){
+    return String(value??'')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  function keyOf(name){
+    return typeof clubKey==='function'
+      ? clubKey(name)
+      : String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+          .toLowerCase().replace(/[^a-z0-9]/g,'');
+  }
+
+  const aliases={
+    [keyOf('FC Barcelona')]:keyOf('Barcelona'),
+    [keyOf('Real Madrid CF')]:keyOf('Real Madrid'),
+    [keyOf('Atlético Madrid')]:keyOf('Atlético de Madrid'),
+    [keyOf('Athletic Bilbao')]:keyOf('Athletic Club'),
+    [keyOf('Real Betis Balompié')]:keyOf('Real Betis'),
+    [keyOf('RC Celta')]:keyOf('Celta'),
+    [keyOf('Celta de Vigo')]:keyOf('Celta'),
+    [keyOf('Alavés')]:keyOf('Deportivo Alavés'),
+    [keyOf('Osasuna')]:keyOf('CA Osasuna'),
+    [keyOf('Espanyol')]:keyOf('RCD Espanyol'),
+    [keyOf('Getafe')]:keyOf('Getafe CF'),
+    [keyOf('Elche')]:keyOf('Elche CF'),
+    [keyOf('Málaga')]:keyOf('Málaga CF'),
+    [keyOf('Racing Santander')]:keyOf('Racing de Santander'),
+    [keyOf('Deportivo La Coruña')]:keyOf('RC Deportivo')
+  };
+
+  const siteByKey=new Map();
+  Object.entries(OFFICIAL_LALIGA_HD_SITES).forEach(([name,site])=>{
+    siteByKey.set(keyOf(name),site.replace(/\/$/,''));
+  });
+
+  function officialSiteFor(club){
+    if(!club)return null;
+    let key=keyOf(club.name);
+    key=aliases[key]||key;
+    return siteByKey.get(key)||club.officialWebsite||null;
+  }
+
+  function officialCandidates(site){
+    if(!site)return[];
+    const root=String(site).replace(/\/$/,'');
+    // Se priorizan recursos estándar de alta resolución alojados
+    // directamente en el dominio oficial. El favicon queda como último recurso.
+    return [
+      root+'/apple-touch-icon.png',
+      root+'/apple-touch-icon-precomposed.png',
+      root+'/android-chrome-512x512.png',
+      root+'/android-chrome-384x384.png',
+      root+'/android-chrome-192x192.png',
+      root+'/favicon-512x512.png',
+      root+'/favicon-256x256.png',
+      root+'/favicon-192x192.png',
+      root+'/favicon-128x128.png',
+      root+'/favicon.png',
+      root+'/favicon.ico'
+    ];
+  }
+
+  CLUBS.forEach(club=>{
+    const site=officialSiteFor(club);
+    if(!site)return;
+    club.officialWebsite=site;
+    club.crestSourcesHD=officialCandidates(site);
+    club.crestSource='official-club-website';
+    club.crestUpdatedAt='2026-08-01';
+  });
+
+  function fallbackCrest(c,size){
+    const initials=(String(c?.name||'?').match(/\b[\p{L}\p{N}]/gu)||['?'])
+      .slice(0,3).join('').toUpperCase();
+    return `<span class="crestFallback crestFallbackHD" aria-hidden="true">${esc(initials)}</span>`;
+  }
+
+  window.crestHTML=function(c,size=58,label=true){
+    if(!c)return'';
+    const site=officialSiteFor(c);
+    const sources=site?officialCandidates(site):[];
+    if(!sources.length){
+      return `<span class="clubCrest crestFallbackOnly" style="--crest-size:${Number(size)||58}px">${fallbackCrest(c,size)}</span>`;
+    }
+
+    const safeName=esc(c.name);
+    const encoded=esc(JSON.stringify(sources));
+    return `<span class="clubCrest real officialHD loading" style="--crest-size:${Number(size)||58}px"
+      role="img" aria-label="Escudo oficial de ${safeName}" title="${safeName}">
+      ${fallbackCrest(c,size)}
+      <img
+        src="${esc(sources[0])}"
+        data-crest-sources="${encoded}"
+        data-crest-index="0"
+        alt="${label?'Escudo oficial de '+safeName:''}"
+        width="${Number(size)||58}"
+        height="${Number(size)||58}"
+        decoding="async"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        onload="this.closest('.clubCrest')?.classList.replace('loading','loaded')"
+        onerror="window.tryNextOfficialCrest?.(this)">
+    </span>`;
+  };
+  try{crestHTML=window.crestHTML}catch(_){}
+
+  window.tryNextOfficialCrest=function(img){
+    let sources=[];
+    try{sources=JSON.parse(img.dataset.crestSources||'[]')}catch(_){}
+    let index=Number(img.dataset.crestIndex||0)+1;
+
+    if(index>=sources.length){
+      img.remove();
+      const box=img.closest?.('.clubCrest');
+      box?.classList.remove('loading','loaded');
+      box?.classList.add('failed');
+      return;
+    }
+
+    img.dataset.crestIndex=String(index);
+    img.src=sources[index];
+  };
+
+  // Precarga únicamente los escudos visibles para no ralentizar el juego.
+  const observer=('IntersectionObserver' in window)
+    ? new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+          if(!entry.isIntersecting)return;
+          const img=entry.target;
+          if(img.dataset.deferredSrc&&!img.src)img.src=img.dataset.deferredSrc;
+          observer.unobserve(img);
+        });
+      },{rootMargin:'180px'})
+    : null;
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.querySelectorAll('.clubCrest.officialHD img').forEach(img=>observer?.observe(img));
+  });
+
+  window.OFFICIAL_LALIGA_HD_SITES=OFFICIAL_LALIGA_HD_SITES;
+  window.OFFICIAL_LALIGA_HD_COUNT=Object.keys(OFFICIAL_LALIGA_HD_SITES).length;
+})();
+</script>
+
+<style>
+/* ===== ESCUDOS OFICIALES EN ALTA DEFINICIÓN ===== */
+.clubCrest.real.officialHD,
+.clubCrest.crestFallbackOnly{
+  position:relative!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  width:var(--crest-size)!important;
+  height:var(--crest-size)!important;
+  min-width:var(--crest-size)!important;
+  overflow:visible!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+.clubCrest.real.officialHD img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-width:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  image-rendering:auto!important;
+  transform:translateZ(0);
+  backface-visibility:hidden;
+  opacity:0;
+  filter:none!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  transition:opacity .12s ease!important;
+}
+.clubCrest.real.officialHD.loaded img{opacity:1!important}
+.clubCrest.real.officialHD.loaded .crestFallbackHD{display:none!important}
+.clubCrest.real.officialHD.failed .crestFallbackHD,
+.clubCrest.real.officialHD.loading .crestFallbackHD{display:grid!important}
+.crestFallbackHD{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  place-items:center!important;
+  border-radius:22%!important;
+  background:linear-gradient(145deg,#1b352a,#0d1b15)!important;
+  border:1px solid rgba(119,243,170,.22)!important;
+  color:var(--gold)!important;
+  font-size:calc(var(--crest-size)*.25)!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  letter-spacing:-.05em!important;
+}
+.tvCrest .clubCrest,
+.matchStageBadge .clubCrest{
+  width:100%!important;
+  height:100%!important;
+}
+</style>
+
 </body></html>
