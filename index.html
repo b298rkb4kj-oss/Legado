@@ -6673,4 +6673,114 @@ button:active,[data-action]:active,[data-tab]:active{
 }
 </style>
 
+
+<script>
+// ===== LEGADO · CORRECCIÓN DEFINITIVA DE 11 ESCUDOS =====
+(function(){
+  const FIXED_CRESTS={"Barcelona": "https://commons.wikimedia.org/wiki/Special:Redirect/file/FC_Barcelona_(crest).svg", "Celta": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Escudo_RC_Celta_de_Vigo.svg", "Deportivo Alavés": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Deportivo_Alaves_logo.svg", "Racing de Santander": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Real_Racing_Club_de_Santander_logo.svg", "Rayo Vallecano": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Rayo_Vallecano_logo.svg", "RCD Espanyol": "https://commons.wikimedia.org/wiki/Special:Redirect/file/RCD_Espanyol_logo.svg", "Real Betis": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Real_Betis_logo.svg", "Real Madrid": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Real_Madrid_CF.svg", "Sevilla": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Sevilla_FC_logo.svg", "Valencia": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Valencia_CF.svg", "Villarreal": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Villarreal_CF_logo.svg"};
+
+  function k(name){
+    return typeof clubKey==='function'
+      ? clubKey(name)
+      : String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+          .toLowerCase().replace(/[^a-z0-9]/g,'');
+  }
+
+  const aliases={
+    [k('FC Barcelona')]:k('Barcelona'),
+    [k('RC Celta')]:k('Celta'),
+    [k('Celta de Vigo')]:k('Celta'),
+    [k('Alavés')]:k('Deportivo Alavés'),
+    [k('Racing Santander')]:k('Racing de Santander'),
+    [k('RCD Espanyol de Barcelona')]:k('RCD Espanyol'),
+    [k('Espanyol')]:k('RCD Espanyol'),
+    [k('Real Betis Balompié')]:k('Real Betis'),
+    [k('Real Madrid CF')]:k('Real Madrid'),
+    [k('Sevilla FC')]:k('Sevilla'),
+    [k('Valencia CF')]:k('Valencia'),
+    [k('Villarreal CF')]:k('Villarreal')
+  };
+
+  const byKey=new Map(
+    Object.entries(FIXED_CRESTS).map(([name,url])=>[k(name),url])
+  );
+
+  function fixedUrl(club){
+    let key=k(club?.name);
+    key=aliases[key]||key;
+    return byKey.get(key)||null;
+  }
+
+  CLUBS.forEach(club=>{
+    const url=fixedUrl(club);
+    if(url){
+      club.fixedCrestUrl=url;
+      club.crestUrl=url;
+      club.crestSourcesHD=[url];
+      club.crestUpdatedAt='2026-08-01';
+    }
+  });
+
+  const previousCrestHTML=window.crestHTML||crestHTML;
+
+  window.crestHTML=function(club,size=58,label=true){
+    const url=fixedUrl(club);
+    if(!url)return previousCrestHTML(club,size,label);
+
+    const safeName=String(club?.name||'Club')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+    const initials=(String(club?.name||'?').match(/\b[\p{L}\p{N}]/gu)||['?'])
+      .slice(0,3).join('').toUpperCase();
+
+    return `<span class="clubCrest real fixedVectorCrest loading"
+      style="--crest-size:${Number(size)||58}px"
+      role="img" aria-label="Escudo de ${safeName}">
+      <span class="crestFallback crestFallbackHD">${initials}</span>
+      <img src="${url}"
+        alt="${label?'Escudo de '+safeName:''}"
+        width="${Number(size)||58}" height="${Number(size)||58}"
+        loading="lazy" decoding="async"
+        onload="this.closest('.clubCrest')?.classList.replace('loading','loaded')"
+        onerror="this.remove();this.closest('.clubCrest')?.classList.add('failed')">
+    </span>`;
+  };
+
+  try{crestHTML=window.crestHTML}catch(_){}
+
+  window.FIXED_LALIGA_CRESTS_11=FIXED_CRESTS;
+})();
+</script>
+
+<style>
+.clubCrest.fixedVectorCrest{
+  position:relative!important;
+  display:inline-grid!important;
+  place-items:center!important;
+  width:var(--crest-size)!important;
+  height:var(--crest-size)!important;
+  min-width:var(--crest-size)!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+  overflow:visible!important;
+}
+.clubCrest.fixedVectorCrest img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  image-rendering:auto!important;
+  filter:none!important;
+  opacity:0;
+  transition:opacity .1s ease!important;
+}
+.clubCrest.fixedVectorCrest.loaded img{opacity:1!important}
+.clubCrest.fixedVectorCrest.loaded .crestFallbackHD{display:none!important}
+.clubCrest.fixedVectorCrest.failed .crestFallbackHD{display:grid!important}
+</style>
+
 </body></html>
