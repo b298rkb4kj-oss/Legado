@@ -6322,4 +6322,91 @@ button:active,[data-action]:active,[data-tab]:active{
 }
 </style>
 
+
+<script>
+// ===== LEGADO · ENTRENADORES REALES DE CLUBES CON PLANTILLAS COMPLETAS =====
+(function(){
+  const REAL_CLUB_COACHES={"Arsenal": "Mikel Arteta", "Aston Villa": "Unai Emery", "Bournemouth": "Marco Rose", "Brentford": "Keith Andrews", "Brighton": "Fabian Hürzeler", "Chelsea": "Xabi Alonso", "Coventry City": "Frank Lampard", "Crystal Palace": "Pierre Sage", "Everton": "David Moyes", "Fulham": "Álvaro Arbeloa", "Hull City": "Sergej Jakirović", "Ipswich Town": "Gary O'Neil", "Leeds United": "Daniel Farke", "Liverpool": "Andoni Iraola", "Manchester City": "Enzo Maresca", "Manchester United": "Michael Carrick", "Newcastle United": "Eddie Howe", "Nottingham Forest": "Oliver Glasner", "Sunderland": "Régis Le Bris", "Tottenham Hotspur": "Roberto De Zerbi", "Birmingham City": "Chris Davies", "Blackburn Rovers": "Valérien Ismaël", "Bolton Wanderers": "Steven Schumacher", "Bristol City": "Gerhard Struber", "Burnley": "Scott Parker", "Cardiff City": "Brian Barry-Murphy", "Charlton Athletic": "Nathan Jones", "Derby County": "John Eustace", "Lincoln City": "Michael Skubala", "Middlesbrough": "Rob Edwards", "Millwall": "Alex Neil", "Norwich City": "Liam Manning", "Portsmouth": "John Mousinho", "Preston North End": "Paul Heckingbottom", "Queens Park Rangers": "Julien Stéphan", "Sheffield United": "Rubén Sellés", "Southampton": "Will Still", "Stoke City": "Mark Robins", "Swansea City": "Alan Sheehan", "Watford": "Paulo Pezzolano", "West Bromwich Albion": "Ryan Mason", "Wrexham": "Phil Parkinson", "Wolverhampton Wanderers": "Vítor Pereira", "West Ham United": "Nuno Espírito Santo", "Atalanta": "Maurizio Sarri", "Bologna": "Domenico Tedesco", "Cagliari": "Fabio Pisacane", "Como": "Cesc Fàbregas", "Fiorentina": "Fabio Grosso", "Frosinone": "Massimiliano Alvini", "Genoa": "Daniele De Rossi", "Inter": "Cristian Chivu", "Juventus": "Luciano Spalletti", "Lazio": "Gennaro Gattuso", "Lecce": "Eusebio Di Francesco", "Milan": "Rúben Amorim", "Monza": "Ivan Jurić", "Napoli": "Massimiliano Allegri", "Parma": "Carlos Cuesta", "Roma": "Gian Piero Gasperini", "Sassuolo": "Alberto Aquilani", "Torino": "Ignazio Abate", "Udinese": "Kosta Runjaić", "Venezia": "Giovanni Stroppa", "Arezzo": "Cristian Bucchi", "Ascoli": "Domenico Di Carlo", "Avellino": "Raffaele Biancolino", "Benevento": "Gaetano Auteri", "Carrarese": "Antonio Calabro", "Catanzaro": "Alberto Aquilani", "Cesena": "Michele Mignani", "Cremonese": "Davide Nicola", "Empoli": "Guido Pagliuca", "Hellas Verona": "Paolo Zanetti", "Juve Stabia": "Ignazio Abate", "Mantova": "Davide Possanzini", "Modena": "Andrea Sottil", "Padova": "Matteo Andreoletti", "Palermo": "Filippo Inzaghi", "Pisa": "Alberto Gilardino", "Sampdoria": "Massimo Donati", "Südtirol": "Fabrizio Castori", "L.R. Vicenza": "Stefano Vecchi", "Virtus Entella": "Andrea Chiappella", "Angers SCO": "Alexandre Dujeux", "AJ Auxerre": "Christophe Pélissier", "Stade Brestois 29": "Éric Roy", "Le Havre AC": "Didier Digard", "Le Mans FC": "Patrick Videira", "RC Lens": "Pierre Sage", "FC Lorient": "Olivier Pantaloni", "LOSC Lille": "Bruno Génésio", "Olympique Lyonnais": "Paulo Fonseca", "Olympique de Marseille": "Roberto De Zerbi", "AS Monaco": "Adi Hütter", "OGC Nice": "Franck Haise", "Paris FC": "Stéphane Gilli", "Paris Saint-Germain": "Luis Enrique", "Stade Rennais": "Habib Beye", "RC Strasbourg Alsace": "Liam Rosenior", "Toulouse FC": "Carles Martínez Novell", "ESTAC Troyes": "Stéphane Dumont", "Aldosivi": "Mariano Charlier", "Argentinos Juniors": "Nicolás Diez", "Atlético Tucumán": "Lucas Pusineri", "Banfield": "Pedro Troglio", "Barracas Central": "Rubén Darío Insúa", "Belgrano": "Ricardo Zielinski", "Boca Juniors": "Miguel Ángel Russo", "Central Córdoba": "Omar De Felippe", "Defensa y Justicia": "Mariano Soso", "Deportivo Riestra": "Cristian Fabbiani", "Estudiantes de La Plata": "Eduardo Domínguez", "Estudiantes de Río Cuarto": "Iván Delfino", "Gimnasia y Esgrima La Plata": "Alejandro Orfila", "Gimnasia y Esgrima de Mendoza": "Ezequiel Medrán", "Huracán": "Frank Darío Kudelka", "Independiente": "Julio Vaccari", "Independiente Rivadavia": "Alfredo Berti", "Instituto": "Daniel Oldrá", "Lanús": "Mauricio Pellegrino", "Newell's Old Boys": "Cristian Fabbiani", "Platense": "Cristian González", "Racing Club": "Gustavo Costas", "River Plate": "Marcelo Gallardo", "Rosario Central": "Ariel Holan", "San Lorenzo": "Damián Ayude", "Sarmiento": "Javier Sanguinetti", "Talleres de Córdoba": "Carlos Tevez", "Tigre": "Diego Dabove", "Unión de Santa Fe": "Leonardo Madelón", "Vélez Sarsfield": "Guillermo Barros Schelotto", "AD Ceuta FC": "José Juan Romero", "Albacete BP": "Alberto González", "Burgos CF": "Luis Miguel Ramis", "Cádiz CF": "Gaizka Garitano", "CD Castellón": "Pablo Hernández", "CD Eldense": "Dani Ponz", "CD Leganés": "Paco López", "CD Tenerife": "Álvaro Cervera", "CE Sabadell": "David Català", "Celta Fortuna": "Fredi Álvarez", "Córdoba CF": "Iván Ania", "FC Andorra": "Ibai Gómez", "Girona FC": "Míchel Sánchez", "Granada CF": "José Rojo Martín 'Pacheta'", "R. Sociedad B": "Jon Ansotegi", "RCD Mallorca": "Jagoba Arrasate", "Real Oviedo": "Veljko Paunović", "Real Sporting": "Asier Garitano", "Real Valladolid CF": "Guillermo Almada", "SD Eibar": "Beñat San José", "UD Almería": "Rubi", "UD Las Palmas": "Luis García Fernández"};
+
+  function findCoachName(club){
+    if(!club)return null;
+    const direct=REAL_CLUB_COACHES[club.name];
+    if(direct)return direct;
+    const key=typeof clubKey==='function'?clubKey(club.name):String(club.name||'').toLowerCase();
+    const entry=Object.entries(REAL_CLUB_COACHES).find(([name])=>{
+      const other=typeof clubKey==='function'?clubKey(name):name.toLowerCase();
+      return other===key;
+    });
+    return entry?.[1]||null;
+  }
+
+  // Guarda también el nombre en el propio club para que otras pantallas
+  // puedan utilizarlo sin consultar continuamente el estado de la partida.
+  CLUBS.forEach(club=>{
+    const name=findCoachName(club);
+    if(name){
+      club.coachName=name;
+      club.realCoach=true;
+      club.coachDataDate='2026-08-01';
+    }
+  });
+
+  const originalMakeCoach=window.makeCoach||makeCoach;
+  window.makeCoach=function(club,index=0){
+    const coach=originalMakeCoach(club,index);
+    const realName=findCoachName(club);
+    if(realName&&index===0){
+      coach.name=realName;
+      coach.real=true;
+      coach.appointedFromDatabase=true;
+      coach.dataDate='2026-08-01';
+    }
+    return coach;
+  };
+  try{makeCoach=window.makeCoach}catch(_){}
+
+  const originalInitCoaches=window.initCoaches||initCoaches;
+  window.initCoaches=function(state=S){
+    originalInitCoaches(state);
+    if(!state?.coaches)return;
+
+    CLUBS.forEach(club=>{
+      const realName=findCoachName(club);
+      if(!realName)return;
+
+      let coach=state.coaches[club.id];
+      if(!coach){
+        coach=window.makeCoach(club,0);
+        state.coaches[club.id]=coach;
+      }
+
+      // Solo sustituye nombres generados por el juego o asignaciones antiguas
+      // de la base. Si durante la carrera el club ya despidió al entrenador,
+      // conserva al nuevo técnico.
+      const generatedName=COACH_FIRST?.some?.(first=>String(coach.name||'').startsWith(first+' '));
+      const neverChanged=(coach.dismissals||0)===0&&(coach.tenureWeeks||0)===0;
+      const databaseCoach=coach.appointedFromDatabase||coach.real;
+
+      if(generatedName||neverChanged||databaseCoach){
+        coach.name=realName;
+        coach.real=true;
+        coach.appointedFromDatabase=true;
+        coach.dataDate='2026-08-01';
+      }
+    });
+
+    return state.coaches;
+  };
+  try{initCoaches=window.initCoaches}catch(_){}
+
+  // Aplica los nombres inmediatamente a una partida ya cargada.
+  try{
+    if(typeof S!=='undefined'&&S)window.initCoaches(S);
+  }catch(_){}
+
+  window.REAL_CLUB_COACHES_2026=REAL_CLUB_COACHES;
+  window.REAL_CLUB_COACH_COUNT=Object.keys(REAL_CLUB_COACHES).length;
+})();
+</script>
+
 </body></html>
