@@ -3748,7 +3748,7 @@ window.legadoAddMoney=function(cant,motivo){
   x.trainingPlan.attributes=Array.isArray(x.trainingPlan.attributes)?x.trainingPlan.attributes.slice(0,3):[];
   x.trainingPlan.week=Number(x.trainingPlan.week)||0;
   x.trainingPlan.sessions=Number(x.trainingPlan.sessions)||0;
-  x.autoAdvance=false;
+  if(typeof x.autoAdvance!=='boolean')x.autoAdvance=false;
   x.trainingPlanRequired=!!x.trainingPlanRequired;
   syncMoney(x);
  }
@@ -4169,6 +4169,107 @@ window.legadoAddMoney=function(cant,motivo){
   };
   try{handleAction=window.handleAction}catch(_){ }
   try{autoAdvance=window.autoAdvance}catch(_){ }
+})();
+</script>
+
+
+<script>
+// ===== LEGADO v0.22.3 · AUTOAVANCE PERSISTENTE ENTRE DÍAS =====
+(function(){
+  let persistentTimer=null;
+
+  function importantPendingMail(){
+    return (S?.inbox||[]).find(m=>
+      !m.read &&
+      m.templateId!=='salary-payment' &&
+      (!m.resolved || (Array.isArray(m.choices)&&m.choices.length>0))
+    )||null;
+  }
+
+  function pendingMatch(){return !!S&&S.day===5&&!S.dayAction}
+
+  function halt(){
+    if(persistentTimer){clearTimeout(persistentTimer);persistentTimer=null}
+    if(S)S.autoAdvance=false;
+    render();
+  }
+
+  function openDestination(type,payload){
+    halt();
+    setTimeout(()=>{
+      if(type==='mail'){
+        if(payload&&typeof openMail==='function')openMail(payload.id);
+        else if(typeof openInbox==='function')openInbox();
+      }else if(type==='match'&&typeof matchDecision==='function'){
+        matchDecision();
+      }else if(type==='training'&&typeof openTrainingPlan==='function'){
+        openTrainingPlan();
+      }
+    },70);
+  }
+
+  function autoAdvancePersistent(){
+    if(!S||S.autoAdvance)return;
+    const mail=importantPendingMail();
+    if(mail){openDestination('mail',mail);return}
+    if(pendingMatch()){openDestination('match');return}
+    if(S.trainingPlanRequired){openDestination('training');return}
+    if(document.querySelector('#modal.open')){toast('Resuelve la decisión actual antes de avanzar');return}
+
+    S.autoAdvance=true;
+    render();
+    // renderHome llama a ensureLifeState; mantenemos el estado activo expresamente.
+    S.autoAdvance=true;
+    toast('Avanzando día a día…');
+    let steps=0;
+
+    const tick=()=>{
+      if(!S||!S.autoAdvance)return;
+      const beforeDay=S.day;
+      const beforeWeek=S.week;
+      const beforeIds=new Set((S.inbox||[]).map(m=>m.id));
+
+      if(pendingMatch()){openDestination('match');return}
+
+      window.advanceDay();
+      // El render del avance no debe cancelar el bucle.
+      S.autoAdvance=true;
+      steps++;
+
+      const actuallyAdvanced=S.day!==beforeDay||S.week!==beforeWeek;
+      if(!actuallyAdvanced){
+        halt();
+        toast('No se pudo avanzar el calendario');
+        return;
+      }
+
+      const newMail=(S.inbox||[]).find(m=>
+        !beforeIds.has(m.id)&&
+        m.templateId!=='salary-payment'&&
+        (!m.resolved||(Array.isArray(m.choices)&&m.choices.length>0))
+      );
+      if(newMail){openDestination('mail',newMail);return}
+      if(pendingMatch()){openDestination('match');return}
+      if(S.trainingPlanRequired){openDestination('training');return}
+      if(document.querySelector('#modal.open')){halt();return}
+      if(steps>=180){halt();toast('Autoavance detenido tras 180 días');return}
+
+      persistentTimer=setTimeout(tick,300);
+    };
+
+    persistentTimer=setTimeout(tick,300);
+  }
+
+  window.autoAdvance=autoAdvancePersistent;
+  window.stopAutoAdvance=halt;
+
+  const priorHandle=window.handleAction;
+  window.handleAction=function(el){
+    if(el?.dataset?.action==='auto-advance')return autoAdvancePersistent();
+    if(el?.dataset?.action==='stop-auto-advance')return halt();
+    return priorHandle(el);
+  };
+  try{autoAdvance=window.autoAdvance;handleAction=window.handleAction}catch(_){ }
 })();
 </script>
 
