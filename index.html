@@ -3923,4 +3923,128 @@ window.legadoAddMoney=function(cant,motivo){
 .attributePicker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.attributePick.selected{border-color:var(--accent)!important;background:rgba(119,243,170,.16)!important}.shopGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.shopItem{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;text-align:left;padding:12px;border-radius:14px;border:1px solid var(--line);background:#0b1712;color:var(--txt)}.shopItem>span{font-size:25px}.shopItem small,.assetRow small{display:block;color:var(--muted)}.shopItem:disabled{opacity:.55}.financeSummary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.financeSummary>div{padding:11px;border-radius:13px;background:#0a1712;border:1px solid var(--line)}.financeSummary small{display:block;color:var(--muted)}.financeSummary b{display:block;margin-top:3px;font-size:17px}.assetRow,.transactionRow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.transactionRow{grid-template-columns:1fr auto}.financeHome .row{margin-top:12px}@media(max-width:650px){.attributePicker,.shopGrid{grid-template-columns:1fr}.financeSummary{grid-template-columns:repeat(2,1fr)}}
 </style>
 
+
+<script>
+// ===== LEGADO v0.22.1 · AUTOAVANCE REAL Y ENTRENAMIENTO SEMANAL =====
+(function(){
+  const previousRenderHome=window.renderHome;
+  const previousRenderTrain=window.renderTrain;
+  const previousSavePlan=typeof saveTrainingPlan==='function'?saveTrainingPlan:null;
+
+  function activeDecisionModal(){
+    const modal=document.querySelector('.modal.open');
+    return !!modal;
+  }
+
+  function replaceHomeTrainingWithAutoAdvance(){
+    const root=document.querySelector('#view-home');
+    if(!root)return;
+    root.querySelectorAll('[data-action="open-home-training"],[data-action="train"]').forEach(btn=>{
+      btn.dataset.action='auto-advance';
+      btn.removeAttribute('data-training');
+      btn.innerHTML='<span>CONTINUAR</span><strong>▶ Auto avanzar</strong><span>Hasta partido, mensaje o decisión</span>';
+      btn.disabled=false;
+    });
+  }
+
+  function hideDailyTrainingAccess(){
+    document.querySelectorAll('#tabs [data-tab="train"]').forEach(btn=>btn.classList.add('hidden'));
+    const trainView=document.querySelector('#view-train');
+    if(trainView){
+      trainView.innerHTML=`<div class="card"><span class="eyebrow">PLANIFICACIÓN SEMANAL</span><h2>Entrenamiento semanal</h2><p class="muted">El entrenamiento diario está desactivado. Después de cada partido eliges tres atributos y esos son los únicos que progresan durante la semana.</p><div class="row"><button class="btn" data-action="training-plan">Elegir 3 atributos</button><button class="btn secondary" data-action="extra-training">Contratar entrenamiento extra</button><button class="btn secondary" data-tab="home">Volver al inicio</button></div></div>`;
+    }
+  }
+
+  // El plan semanal aplica una única progresión a los tres atributos elegidos.
+  window.saveTrainingPlan=function(){
+    const attrs=[...document.querySelectorAll('.attributePick.selected')].map(b=>b.dataset.attribute);
+    if(attrs.length!==3){toast('Debes elegir exactamente 3 atributos');return}
+    ensureLifeState();
+    if(S.trainingPlan.week===S.week&&S.trainingPlan.applied){toast('Ya has completado el entrenamiento de esta semana');return}
+    const extra=EXTRA_TRAINING[S.trainingPlan.extra]||{mult:1,fatigue:0,risk:0,name:'Plan normal'};
+    const pro=S.player.professionalism/100,pot=S.player.potential/100,ageFactor=S.age<24?1:S.age<29?.72:.35;
+    const gains=[];
+    attrs.forEach(a=>{
+      const margin=(100-S.attributes[a])/100;
+      const gain=Math.max(.08,(1.05+(S.careerEffects?.training||0)*.025)*pro*pot*ageFactor*margin*extra.mult);
+      S.attributes[a]=clamp(S.attributes[a]+gain);
+      gains.push(`${a} +${gain.toFixed(1)}`);
+    });
+    S.trainingPlan={week:S.week,attributes:attrs,extra:null,sessions:1,applied:true};
+    S.trainingPlanRequired=false;
+    S.fatigue=clamp(S.fatigue+5+extra.fatigue);
+    if(extra.risk&&Math.random()<extra.risk&&!S.injury)S.injury={name:'Sobrecarga muscular',weeks:1};
+    closeModal();render();toast(`Plan semanal aplicado: ${gains.join(' · ')}`);
+  };
+  try{saveTrainingPlan=window.saveTrainingPlan}catch(_){ }
+
+  // Bloqueo completo del entrenamiento diario tradicional.
+  window.train=function(){
+    toast('Solo puedes entrenar mediante el plan semanal de 3 atributos');
+    openTrainingPlan();
+  };
+  try{train=window.train}catch(_){ }
+
+  window.autoAdvance=function(){
+    ensureLifeState();
+    if(S.autoAdvance)return;
+    S.autoAdvance=true;
+    render();
+    toast('Avanzando hasta el próximo evento…');
+    let steps=0;
+
+    const stop=(destination)=>{
+      S.autoAdvance=false;
+      render();
+      if(destination==='inbox')setTimeout(()=>openInbox(),40);
+      else if(destination==='match')setTimeout(()=>matchDecision(),40);
+      else if(destination==='training')setTimeout(()=>openTrainingPlan(),40);
+    };
+
+    const tick=()=>{
+      if(!S||!S.autoAdvance)return;
+
+      // Decisiones ya pendientes antes de avanzar.
+      if(S.trainingPlanRequired){stop('training');return}
+      if(unreadMailCount()>0){stop('inbox');return}
+      if(S.day===5&&!S.dayAction){stop('match');return}
+      if(activeDecisionModal()){S.autoAdvance=false;render();return}
+
+      const unreadBefore=unreadMailCount();
+      window.advanceDay();
+      steps++;
+
+      // Se detiene inmediatamente cuando aparece una decisión.
+      if(S.trainingPlanRequired){stop('training');return}
+      if(unreadMailCount()>unreadBefore||unreadMailCount()>0){stop('inbox');return}
+      if(S.day===5&&!S.dayAction){stop('match');return}
+      if(activeDecisionModal()){S.autoAdvance=false;render();return}
+      if(steps>=120){S.autoAdvance=false;render();toast('No se encontró ningún evento próximo');return}
+
+      setTimeout(tick,70);
+    };
+    setTimeout(tick,40);
+  };
+  try{autoAdvance=window.autoAdvance}catch(_){ }
+
+  window.renderHome=function(){
+    previousRenderHome();
+    replaceHomeTrainingWithAutoAdvance();
+    hideDailyTrainingAccess();
+  };
+  try{renderHome=window.renderHome}catch(_){ }
+
+  window.renderTrain=function(){hideDailyTrainingAccess()};
+  try{renderTrain=window.renderTrain}catch(_){ }
+
+  // Ajusta partidas existentes.
+  if(S?.trainingPlan){
+    S.trainingPlan.applied=!!S.trainingPlan.applied;
+    if(S.trainingPlan.sessions>1)S.trainingPlan.sessions=1;
+  }
+
+  setTimeout(()=>{replaceHomeTrainingWithAutoAdvance();hideDailyTrainingAccess()},0);
+})();
+</script>
+
 </body></html>
