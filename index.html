@@ -6409,4 +6409,56 @@ button:active,[data-action]:active,[data-tab]:active{
 })();
 </script>
 
+
+<script>
+// ===== LEGADO · ESCUDOS OFICIALES DE LALIGA 2026/27 =====
+(function(){
+  const OFFICIAL_LALIGA_CRESTS={"Real Madrid": ["https://www.realmadrid.com", "https://www.realmadrid.com/favicon.ico"], "Barcelona": ["https://www.fcbarcelona.com", "https://www.fcbarcelona.com/favicon.ico"], "Atlético de Madrid": ["https://www.atleticodemadrid.com", "https://www.atleticodemadrid.com/favicon.ico"], "Athletic Club": ["https://www.athletic-club.eus", "https://www.athletic-club.eus/favicon.ico"], "Real Sociedad": ["https://www.realsociedad.eus", "https://www.realsociedad.eus/favicon.ico"], "Sevilla": ["https://www.sevillafc.es", "https://www.sevillafc.es/favicon.ico"], "Valencia": ["https://www.valenciacf.com", "https://www.valenciacf.com/favicon.ico"], "Villarreal": ["https://villarrealcf.es", "https://villarrealcf.es/favicon.ico"], "Real Betis": ["https://www.realbetisbalompie.es", "https://www.realbetisbalompie.es/favicon.ico"], "CA Osasuna": ["https://www.osasuna.es", "https://www.osasuna.es/favicon.ico"], "Celta": ["https://rccelta.es", "https://rccelta.es/favicon.ico"], "Deportivo Alavés": ["https://www.deportivoalaves.com", "https://www.deportivoalaves.com/favicon.ico"], "Levante UD": ["https://www.levanteud.com", "https://www.levanteud.com/favicon.ico"], "Rayo Vallecano": ["https://www.rayovallecano.es", "https://www.rayovallecano.es/favicon.ico"], "Getafe CF": ["https://www.getafecf.com", "https://www.getafecf.com/favicon.ico"], "RCD Espanyol": ["https://www.rcdespanyol.com", "https://www.rcdespanyol.com/favicon.ico"], "Elche CF": ["https://www.elchecf.es", "https://www.elchecf.es/favicon.ico"], "Málaga CF": ["https://www.malagacf.com", "https://www.malagacf.com/favicon.ico"], "Racing de Santander": ["https://www.realracingclub.es", "https://www.realracingclub.es/favicon.ico"], "RC Deportivo": ["https://www.rcdeportivo.es", "https://www.rcdeportivo.es/favicon.ico"]};
+  const byKey=new Map(Object.entries(OFFICIAL_LALIGA_CRESTS).map(([name,data])=>[clubKey(name),data]));
+
+  CLUBS.forEach(c=>{
+    const data=byKey.get(clubKey(c.name));
+    if(!data)return;
+    c.officialWebsite=data[0];
+    c.crestUrl=data[1];
+    c.crestSource='official-club-website';
+    c.crestDataDate='2026-08-01';
+  });
+
+  window.crestHTML=function(c,size=58,label=true){
+    if(!c)return'';
+    const data=byKey.get(clubKey(c.name));
+    const initials=clubInitials(c);
+    const safeName=String(c.name||'Club').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if(!data){
+      return `<span class="clubCrest crestFallbackOnly" style="--crest-size:${size}px;${clubStyle(c)}" role="img" aria-label="${safeName}"><span class="crestMonogram">${initials}</span></span>`;
+    }
+    const url=data[1];
+    return `<span class="clubCrest real loading" style="--crest-size:${size}px;${clubStyle(c)}" role="img" aria-label="Escudo de ${safeName}">
+      <span class="crestFallback crestMonogram">${initials}</span>
+      <img src="${url}" alt="Escudo de ${safeName}" loading="lazy" decoding="async"
+        onload="this.parentElement.classList.remove('loading');this.parentElement.classList.add('loaded')"
+        onerror="this.style.display='none';this.parentElement.classList.remove('loading')">
+    </span>${label?'' : ''}`;
+  };
+  try{crestHTML=window.crestHTML}catch(_){}
+
+  window.hydrateRealClubLogos=function(root=document){
+    root.querySelectorAll?.('.clubCrest.real img').forEach(img=>{
+      if(img.complete&&img.naturalWidth>0){img.parentElement.classList.remove('loading');img.parentElement.classList.add('loaded')}
+    });
+  };
+  try{hydrateRealClubLogos=window.hydrateRealClubLogos}catch(_){}
+
+  window.OFFICIAL_LALIGA_CRESTS_2026=OFFICIAL_LALIGA_CRESTS;
+})();
+</script>
+<style>
+.clubCrest.real,.clubCrest.crestFallbackOnly{position:relative!important;overflow:visible!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
+.clubCrest.real img{display:block;width:100%!important;height:100%!important;object-fit:contain!important;opacity:0;transition:opacity .15s ease;filter:drop-shadow(0 4px 7px rgba(0,0,0,.45))!important}
+.clubCrest.real.loaded img{opacity:1}.clubCrest.real.loaded .crestFallback{display:none!important}
+.crestFallback,.crestMonogram{position:absolute;inset:0;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#1b352a,#0e1c16);border:1px solid rgba(119,243,170,.16);color:var(--gold);font-weight:1000;font-size:calc(var(--crest-size)*.24);letter-spacing:-.04em}
+.crestFallbackOnly .crestMonogram{position:absolute}
+</style>
+
 </body></html>
