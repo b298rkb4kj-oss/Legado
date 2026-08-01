@@ -3365,4 +3365,321 @@ window.TRANSFER_HISTORY=TRANSFER_HISTORY;
 })();
 </script>
 
+
+<script>
+// ===== LEGADO v0.21.0 · SERIE A COMPLETA · CORTE 01/08/2026 =====
+(function(){
+  const SERIE_A_REMAINING_SNAPSHOT=[
+["Wladimiro Falcone", "Lecce", "Portero", 78, 78, 31],
+["Christian Früchtl", "Lecce", "Portero", 75, 80, 26],
+["Federico Baschirotto", "Lecce", "Defensa central", 77, 77, 29],
+["Kialonda Gaspar", "Lecce", "Defensa central", 76, 80, 28],
+["Tiago Gabriel", "Lecce", "Defensa central", 75, 82, 22],
+["Antonino Gallo", "Lecce", "Lateral", 77, 80, 26],
+["Frédéric Guilbert", "Lecce", "Lateral", 76, 76, 31],
+["Ylber Ramadani", "Lecce", "Centrocampista defensivo", 77, 78, 30],
+["Balthazar Pierret", "Lecce", "Centrocampista", 75, 80, 26],
+["Medon Berisha", "Lecce", "Centrocampista", 75, 84, 22],
+["Hamza Rafia", "Lecce", "Mediapunta", 75, 78, 27],
+["Santiago Pierotti", "Lecce", "Extremo", 77, 82, 25],
+["Tete Morente", "Lecce", "Extremo", 76, 76, 29],
+["Nikola Krstović", "Lecce", "Delantero", 80, 84, 26],
+["Rémi Oudin", "Lecce", "Extremo", 76, 77, 29],
+["Lameck Banda", "Lecce", "Extremo", 77, 82, 25],
+["Mohamed Kaba", "Lecce", "Centrocampista", 76, 82, 24],
+["Patrick Dorgu", "Lecce", "Lateral", 80, 87, 21],
+["Mike Maignan", "Milan", "Portero", 86, 86, 31],
+["Lorenzo Torriani", "Milan", "Portero", 72, 82, 21],
+["Strahinja Pavlović", "Milan", "Defensa central", 82, 85, 25],
+["Fikayo Tomori", "Milan", "Defensa central", 83, 84, 28],
+["Matteo Gabbia", "Milan", "Defensa central", 80, 82, 26],
+["Álex Jiménez", "Milan", "Lateral", 79, 86, 21],
+["Theo Hernández", "Milan", "Lateral", 86, 86, 28],
+["Emerson Royal", "Milan", "Lateral", 79, 80, 27],
+["Youssouf Fofana", "Milan", "Centrocampista defensivo", 83, 85, 27],
+["Tijjani Reijnders", "Milan", "Centrocampista", 85, 87, 28],
+["Ruben Loftus-Cheek", "Milan", "Centrocampista", 81, 81, 30],
+["Luka Modrić", "Milan", "Centrocampista", 84, 84, 40],
+["Christian Pulisic", "Milan", "Extremo", 85, 86, 27],
+["Rafael Leão", "Milan", "Extremo", 87, 89, 27],
+["Christopher Nkunku", "Milan", "Segundo delantero", 84, 85, 28],
+["Samuel Chukwueze", "Milan", "Extremo", 80, 82, 27],
+["Santiago Giménez", "Milan", "Delantero", 83, 87, 25],
+["Noah Okafor", "Milan", "Delantero", 79, 81, 26],
+["Yunus Musah", "Milan", "Centrocampista", 80, 85, 23],
+["Filippo Terracciano", "Milan", "Lateral", 76, 82, 23],
+["Semuel Pizzignacco", "Monza", "Portero", 75, 80, 24],
+["Stefano Turati", "Monza", "Portero", 77, 82, 24],
+["Armando Izzo", "Monza", "Defensa central", 78, 78, 34],
+["Andrea Carboni", "Monza", "Defensa central", 76, 81, 25],
+["Pedro Pereira", "Monza", "Lateral", 75, 76, 28],
+["Georgios Kyriakopoulos", "Monza", "Lateral", 77, 77, 30],
+["Samuele Birindelli", "Monza", "Lateral", 76, 80, 27],
+["Matteo Pessina", "Monza", "Centrocampista", 80, 80, 29],
+["Roberto Gagliardini", "Monza", "Centrocampista defensivo", 77, 77, 32],
+["Alessandro Bianco", "Monza", "Centrocampista", 77, 83, 23],
+["Gianluca Caprari", "Monza", "Mediapunta", 77, 77, 33],
+["Dany Mota", "Monza", "Segundo delantero", 78, 80, 28],
+["Patrick Ciurria", "Monza", "Extremo", 76, 76, 31],
+["Milan Đurić", "Monza", "Delantero", 76, 76, 36],
+["Andrea Petagna", "Monza", "Delantero", 76, 76, 31],
+["Daniel Maldini", "Monza", "Mediapunta", 79, 84, 24],
+["Omari Forson", "Monza", "Mediapunta", 74, 83, 22],
+["Warren Bondo", "Monza", "Centrocampista", 78, 85, 22],
+["Vanja Milinković-Savić", "Napoli", "Portero", 84, 85, 29],
+["Alex Meret", "Napoli", "Portero", 82, 83, 29],
+["Giovanni Di Lorenzo", "Napoli", "Lateral", 84, 84, 32],
+["Amir Rrahmani", "Napoli", "Defensa central", 84, 84, 32],
+["Alessandro Buongiorno", "Napoli", "Defensa central", 85, 87, 27],
+["Juan Jesus", "Napoli", "Defensa central", 78, 78, 35],
+["Mathías Olivera", "Napoli", "Lateral", 82, 84, 28],
+["Leonardo Spinazzola", "Napoli", "Lateral", 80, 80, 33],
+["Stanislav Lobotka", "Napoli", "Centrocampista defensivo", 86, 86, 31],
+["André-Frank Zambo Anguissa", "Napoli", "Centrocampista", 84, 84, 30],
+["Scott McTominay", "Napoli", "Centrocampista", 85, 85, 29],
+["Billy Gilmour", "Napoli", "Centrocampista", 81, 84, 25],
+["Giacomo Raspadori", "Napoli", "Segundo delantero", 81, 84, 26],
+["Matteo Politano", "Napoli", "Extremo", 82, 82, 32],
+["David Neres", "Napoli", "Extremo", 83, 83, 29],
+["Khvicha Kvaratskhelia", "Napoli", "Extremo", 88, 90, 25],
+["Romelu Lukaku", "Napoli", "Delantero", 84, 84, 33],
+["Giovanni Simeone", "Napoli", "Delantero", 80, 80, 31],
+["Cyril Ngonge", "Napoli", "Extremo", 78, 81, 26],
+["Pasquale Mazzocchi", "Napoli", "Lateral", 77, 77, 31],
+["Zion Suzuki", "Parma", "Portero", 80, 86, 23],
+["Edoardo Corvi", "Parma", "Portero", 71, 78, 25],
+["Enrico Delprato", "Parma", "Defensa central", 79, 83, 26],
+["Botond Balogh", "Parma", "Defensa central", 78, 84, 24],
+["Lautaro Valenti", "Parma", "Defensa central", 77, 80, 27],
+["Emanuele Valeri", "Parma", "Lateral", 78, 80, 27],
+["Woyo Coulibaly", "Parma", "Lateral", 77, 82, 27],
+["Nahuel Estévez", "Parma", "Centrocampista defensivo", 77, 77, 30],
+["Adrián Bernabé", "Parma", "Centrocampista", 81, 87, 25],
+["Mandela Keita", "Parma", "Centrocampista", 79, 85, 24],
+["Simon Sohm", "Parma", "Centrocampista", 79, 84, 25],
+["Dennis Man", "Parma", "Extremo", 81, 82, 27],
+["Pontus Almqvist", "Parma", "Extremo", 77, 79, 27],
+["Valentin Mihăilă", "Parma", "Extremo", 78, 80, 26],
+["Ange-Yoan Bonny", "Parma", "Delantero", 81, 88, 22],
+["Milan Đurić", "Parma", "Delantero", 76, 76, 36],
+["Matteo Cancellieri", "Parma", "Extremo", 78, 84, 24],
+["Antoine Hainaut", "Parma", "Centrocampista", 74, 81, 24],
+["Mile Svilar", "Roma", "Portero", 86, 89, 26],
+["Pierluigi Gollini", "Roma", "Portero", 78, 78, 31],
+["Gianluca Mancini", "Roma", "Defensa central", 84, 84, 30],
+["Evan Ndicka", "Roma", "Defensa central", 84, 86, 26],
+["Daniele Ghilardi", "Roma", "Defensa central", 79, 86, 23],
+["Konstantinos Koulierakis", "Roma", "Defensa central", 82, 89, 22],
+["Zeki Çelik", "Roma", "Lateral", 79, 80, 29],
+["Angeliño", "Roma", "Lateral", 82, 82, 29],
+["Bryan Cristante", "Roma", "Centrocampista", 82, 82, 31],
+["Manu Koné", "Roma", "Centrocampista", 84, 88, 25],
+["Lorenzo Pellegrini", "Roma", "Mediapunta", 82, 82, 30],
+["Niccolò Pisilli", "Roma", "Centrocampista", 79, 87, 21],
+["Matías Soulé", "Roma", "Extremo", 83, 90, 23],
+["Paulo Dybala", "Roma", "Segundo delantero", 86, 86, 32],
+["Stephan El Shaarawy", "Roma", "Extremo", 79, 79, 33],
+["Santiago Castro", "Roma", "Delantero", 82, 89, 21],
+["Artem Dovbyk", "Roma", "Delantero", 83, 84, 29],
+["Tommaso Baldanzi", "Roma", "Mediapunta", 79, 86, 23],
+["Eldor Shomurodov", "Roma", "Delantero", 77, 77, 31],
+["Samuel Dahl", "Roma", "Lateral", 76, 84, 23],
+["Stefano Turati", "Sassuolo", "Portero", 77, 82, 24],
+["Giacomo Satalino", "Sassuolo", "Portero", 72, 74, 27],
+["Martin Erlić", "Sassuolo", "Defensa central", 78, 80, 28],
+["Filippo Romagna", "Sassuolo", "Defensa central", 76, 77, 29],
+["Tarik Muharemović", "Sassuolo", "Defensa central", 76, 84, 23],
+["Jeremy Toljan", "Sassuolo", "Lateral", 77, 77, 31],
+["Josh Doig", "Sassuolo", "Lateral", 78, 84, 24],
+["Pedro Obiang", "Sassuolo", "Centrocampista defensivo", 75, 75, 34],
+["Kristian Thorstvedt", "Sassuolo", "Centrocampista", 80, 83, 27],
+["Luca Lipani", "Sassuolo", "Centrocampista", 75, 85, 21],
+["Daniel Boloca", "Sassuolo", "Centrocampista", 78, 81, 27],
+["Domenico Berardi", "Sassuolo", "Extremo", 83, 83, 31],
+["Armand Laurienté", "Sassuolo", "Extremo", 81, 83, 27],
+["Samuele Mulattieri", "Sassuolo", "Delantero", 77, 81, 25],
+["Andrea Pinamonti", "Sassuolo", "Delantero", 80, 82, 27],
+["Cristian Volpato", "Sassuolo", "Mediapunta", 77, 85, 22],
+["Janis Antiste", "Sassuolo", "Delantero", 75, 81, 24],
+["Nedim Bajrami", "Sassuolo", "Mediapunta", 78, 80, 27],
+["Franco Israel", "Torino", "Portero", 78, 82, 26],
+["Alberto Paleari", "Torino", "Portero", 75, 75, 34],
+["Saúl Coco", "Torino", "Defensa central", 80, 83, 27],
+["Guillermo Maripán", "Torino", "Defensa central", 81, 81, 32],
+["Ardian Ismajli", "Torino", "Defensa central", 79, 79, 29],
+["Valentino Lazaro", "Torino", "Lateral", 79, 79, 30],
+["Cristiano Biraghi", "Torino", "Lateral", 79, 79, 33],
+["Samuele Ricci", "Torino", "Centrocampista defensivo", 84, 89, 24],
+["Ivan Ilić", "Torino", "Centrocampista", 81, 86, 25],
+["Adrien Tameze", "Torino", "Centrocampista defensivo", 78, 78, 32],
+["Nikola Vlašić", "Torino", "Mediapunta", 81, 82, 28],
+["Ché Adams", "Torino", "Delantero", 80, 80, 30],
+["Duván Zapata", "Torino", "Delantero", 81, 81, 35],
+["Antonio Sanabria", "Torino", "Delantero", 79, 79, 30],
+["Yann Karamoh", "Torino", "Extremo", 76, 77, 28],
+["Alieu Njie", "Torino", "Extremo", 73, 83, 21],
+["Gvidas Gineitis", "Torino", "Centrocampista", 76, 84, 22],
+["Ali Dembélé", "Torino", "Lateral", 74, 82, 22],
+["Maduka Okoye", "Udinese", "Portero", 80, 84, 26],
+["Răzvan Sava", "Udinese", "Portero", 76, 82, 24],
+["Jaka Bijol", "Udinese", "Defensa central", 82, 85, 27],
+["Thomas Kristensen", "Udinese", "Defensa central", 77, 83, 24],
+["Christian Kabasele", "Udinese", "Defensa central", 77, 77, 35],
+["Kingsley Ehizibue", "Udinese", "Lateral", 76, 76, 31],
+["Hassane Kamara", "Udinese", "Lateral", 77, 77, 32],
+["Sandi Lovrić", "Udinese", "Centrocampista", 80, 81, 28],
+["Jesper Karlström", "Udinese", "Centrocampista defensivo", 79, 79, 31],
+["Martín Payero", "Udinese", "Centrocampista", 79, 83, 27],
+["Arthur Atta", "Udinese", "Centrocampista", 76, 85, 23],
+["Florian Thauvin", "Udinese", "Mediapunta", 81, 81, 33],
+["Lorenzo Lucca", "Udinese", "Delantero", 82, 86, 25],
+["Keinan Davis", "Udinese", "Delantero", 77, 78, 28],
+["Iker Bravo", "Udinese", "Delantero", 76, 85, 21],
+["Jurgen Ekkelenkamp", "Udinese", "Mediapunta", 78, 81, 26],
+["Oier Zarraga", "Udinese", "Centrocampista", 76, 78, 27],
+["Jordan Zemura", "Udinese", "Lateral", 76, 81, 26],
+["Jesse Joronen", "Venezia", "Portero", 77, 77, 33],
+["Filip Stanković", "Venezia", "Portero", 77, 84, 24],
+["Jay Idzes", "Venezia", "Defensa central", 79, 83, 26],
+["Michael Svoboda", "Venezia", "Defensa central", 75, 77, 27],
+["Giorgio Altare", "Venezia", "Defensa central", 75, 77, 27],
+["Francesco Zampano", "Venezia", "Lateral", 75, 75, 32],
+["Mikael Egill Ellertsson", "Venezia", "Lateral", 77, 82, 24],
+["Alfred Duncan", "Venezia", "Centrocampista", 78, 78, 33],
+["Magnus Kofod Andersen", "Venezia", "Centrocampista", 76, 79, 27],
+["Gianluca Busio", "Venezia", "Centrocampista", 79, 84, 24],
+["Hans Nicolussi Caviglia", "Venezia", "Centrocampista defensivo", 78, 83, 26],
+["Gaetano Oristanio", "Venezia", "Mediapunta", 79, 85, 23],
+["John Yeboah", "Venezia", "Extremo", 76, 81, 26],
+["Joel Pohjanpalo", "Venezia", "Delantero", 80, 80, 31],
+["Christian Gytkjær", "Venezia", "Delantero", 75, 75, 36],
+["Richie Sagrado", "Venezia", "Lateral", 74, 82, 22],
+["Bjarki Steinn Bjarkason", "Venezia", "Extremo", 74, 78, 26],
+["Issa Doumbia", "Venezia", "Centrocampista", 73, 82, 22]
+  ].map((r,i)=>({
+    id:'serie-a-remaining-2026-'+i,
+    name:r[0],club:r[1],position:r[2],
+    base:r[3],overall:r[3],potential:r[4],age:r[5],
+    goals:0,assists:0,apps:0,firstTeamApps:0,
+    season:'2026/27',rosterDate:'2026-08-01',
+    rosterStatus:'provisional-market-open'
+  }));
+
+  const targetClubs=new Set(['Lecce','Milan','Monza','Napoli','Parma','Roma','Sassuolo','Torino','Udinese','Venezia']);
+  if(Array.isArray(REAL_PLAYERS)){
+    // Sustituye únicamente la tanda provisional anterior de estos clubes.
+    for(let i=REAL_PLAYERS.length-1;i>=0;i--){
+      const p=REAL_PLAYERS[i];
+      if(targetClubs.has(p.club)&&String(p.id||'').startsWith('serie-a-remaining-2026-')) REAL_PLAYERS.splice(i,1);
+    }
+    SERIE_A_REMAINING_SNAPSHOT.forEach(p=>{
+      const duplicate=REAL_PLAYERS.some(x=>x.name===p.name&&x.club===p.club);
+      if(!duplicate) REAL_PLAYERS.push(p);
+    });
+  }
+
+  window.SERIE_A_REMAINING_SNAPSHOT=SERIE_A_REMAINING_SNAPSHOT;
+})();
+</script>
+
+
+<style>
+/* ===== LEGADO v0.21.0 · PULIDO VISUAL DEL CENTRO DE CARRERA ===== */
+:root{
+  --surface-glow:rgba(119,243,170,.14);
+  --surface-gold:rgba(245,203,97,.11);
+}
+.careerCenter{gap:22px!important}
+.careerMain,.careerRail{gap:22px!important}
+.card{
+  border-color:rgba(165,214,191,.13)!important;
+  background:
+    linear-gradient(145deg,rgba(18,34,27,.97),rgba(7,14,10,.985))!important;
+}
+.card:after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(120deg,rgba(255,255,255,.018),transparent 35%);
+}
+.matchdayHero{
+  box-shadow:0 28px 75px rgba(0,0,0,.42),0 0 0 1px rgba(119,243,170,.08)!important
+}
+.matchdayTop{
+  padding:30px 32px 22px!important;
+  background:
+    radial-gradient(circle at 72% 10%,rgba(245,203,97,.10),transparent 28%),
+    radial-gradient(circle at 20% 0,rgba(119,243,170,.22),transparent 40%),
+    linear-gradient(135deg,#173b2a,#07110d 72%)!important
+}
+.broadcastFixture{padding:32px!important}
+.broadcastTeam b{font-size:17px!important;letter-spacing:.055em}
+.matchStatus{box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 8px 24px rgba(0,0,0,.25)}
+.playerIdentityCard{
+  background:
+    radial-gradient(circle at 85% 0,rgba(245,203,97,.08),transparent 28%),
+    linear-gradient(145deg,#13271f,#08130f)!important
+}
+.playerNumber{transform:skew(-4deg);border-radius:14px!important}
+.playerNumber>*{transform:skew(4deg)}
+.metricCard{
+  min-height:82px;display:flex;flex-direction:column;justify-content:center;
+  transition:transform .18s ease,border-color .18s ease
+}
+.metricCard:hover{transform:translateY(-2px);border-color:rgba(119,243,170,.3)}
+.metricCard b{font-size:22px!important}
+.railCardTitle{padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.leagueRow{min-height:42px;padding:9px 8px!important}
+.leagueRow:hover{background:rgba(119,243,170,.045);border-radius:10px}
+.newsTweet{
+  border:1px solid rgba(157,204,183,.13)!important;
+  box-shadow:0 12px 32px rgba(0,0,0,.20)
+}
+.newsTweet:hover{border-color:rgba(119,243,170,.30)!important;transform:translateY(-1px)}
+.teamBrowser{gap:16px!important}
+.teamFilters{
+  padding:14px;border-radius:18px;
+  background:linear-gradient(145deg,#102019,#08130f);
+  border:1px solid var(--line)
+}
+.teamSummary{gap:10px!important}
+.teamSummary>div,.teamSummary .miniStat{
+  min-height:86px;border-radius:16px!important;
+  background:linear-gradient(145deg,#13271f,#09140f)!important
+}
+.teamRosterScroll{
+  border-radius:18px!important;
+  border-color:rgba(119,243,170,.14)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.03)
+}
+.teamPlayerRow{
+  min-height:58px!important;padding:11px 13px!important;
+  transition:background .14s ease
+}
+.teamPlayerRow.header{
+  background:rgba(8,19,14,.97)!important;
+  backdrop-filter:blur(12px)
+}
+.teamPlayerRow:hover:not(.header){background:rgba(119,243,170,.065)!important}
+.ovBadge{
+  border-radius:10px!important;
+  background:linear-gradient(145deg,#294c3c,#183126)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)
+}
+.clubSelectCard{
+  padding:18px!important;border-radius:20px!important;
+  background:
+    radial-gradient(circle at 90% 0,rgba(245,203,97,.09),transparent 30%),
+    linear-gradient(145deg,#17352a,#08130f)!important
+}
+@media(max-width:900px){
+  .careerCenter{gap:16px!important}
+  .careerMain,.careerRail{gap:16px!important}
+  .broadcastFixture{padding:22px 14px!important}
+}
+@media(max-width:650px){
+  .matchdayTop{padding:22px 18px 16px!important}
+  .teamFilters{padding:10px}
+  .teamPlayerRow{min-height:54px!important}
+}
+</style>
+
 </body></html>
