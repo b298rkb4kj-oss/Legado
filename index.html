@@ -6120,4 +6120,206 @@ window.legadoAddMoney=function(cant,motivo){
 }
 </style>
 
+
+<script>
+// ===== LEGADO · RESPUESTA INMEDIATA DE BOTONES Y RENDERIZADO PARCIAL =====
+(function(){
+  const FAST={
+    saveTimer:null,
+    savePending:false,
+    lastSavedAt:0,
+    rendering:false,
+    lastTab:null,
+    renderers:{
+      home:()=>renderHome(),
+      career:()=>renderCareer(),
+      train:()=>renderTrain(),
+      world:()=>renderWorld(),
+      legacy:()=>renderLegacy()
+    }
+  };
+
+  // El guardado completo puede ser pesado porque la partida incluye la base
+  // mundial. Se agrupa en una sola escritura después de terminar la acción.
+  const originalSave=window.save||save;
+  window.save=function(silent=false){
+    if(!silent){
+      clearTimeout(FAST.saveTimer);
+      FAST.savePending=false;
+      return originalSave(false);
+    }
+    FAST.savePending=true;
+    clearTimeout(FAST.saveTimer);
+    FAST.saveTimer=setTimeout(()=>{
+      if(!S||!FAST.savePending)return;
+      FAST.savePending=false;
+      const perform=()=>{
+        try{
+          originalSave(true);
+          FAST.lastSavedAt=Date.now();
+        }catch(_){}
+      };
+      if('requestIdleCallback' in window){
+        requestIdleCallback(perform,{timeout:1200});
+      }else{
+        setTimeout(perform,0);
+      }
+    },500);
+  };
+  try{save=window.save}catch(_){}
+
+  window.autoSave=function(){
+    if(S?.settings?.autoSave)window.save(true);
+  };
+  try{autoSave=window.autoSave}catch(_){}
+
+  function renderTopBar(){
+    const top=document.querySelector('#topSeason');
+    if(!top||!S)return;
+    top.textContent=`${S.player.name} ${S.player.surname} · ${fmtDate(seasonDate(S.week,S.day),{
+      weekday:'long',day:'numeric',month:'long'
+    })} · Semana ${S.week}`;
+  }
+
+  // Sustituye el render global: solo dibuja la pantalla activa.
+  window.render=function(options={}){
+    if(!S||FAST.rendering)return;
+    FAST.rendering=true;
+    try{
+      initLeague();
+      S.peakOverall=Math.max(S.peakOverall,overall());
+      S.maxValue=Math.max(S.maxValue,marketValue());
+      renderTopBar();
+
+      const tab=activeTab||'home';
+      const renderer=FAST.renderers[tab]||FAST.renderers.home;
+      renderer();
+
+      // Actualiza únicamente el estado visual de navegación.
+      document.querySelectorAll('.view').forEach(v=>{
+        v.classList.toggle('active',v.id===`view-${tab}`);
+      });
+      document.querySelectorAll('#tabs [data-tab]').forEach(b=>{
+        b.classList.toggle('active',b.dataset.tab===tab);
+      });
+
+      FAST.lastTab=tab;
+      window.autoSave();
+
+      if(S.day===5&&!S.dayAction&&!document.querySelector('#modal')?.classList.contains('open')){
+        setTimeout(()=>matchDecision(),0);
+      }
+    }finally{
+      FAST.rendering=false;
+    }
+  };
+  try{render=window.render}catch(_){}
+
+  // Cambio de pestaña rápido: hace visible la pantalla inmediatamente y
+  // retrasa su trabajo pesado al siguiente frame.
+  document.addEventListener('click',event=>{
+    const tab=event.target.closest('[data-tab]');
+    if(!tab)return;
+
+    event.stopImmediatePropagation();
+    event.preventDefault();
+
+    activeTab=tab.dataset.tab;
+    document.querySelectorAll('.view').forEach(v=>{
+      v.classList.toggle('active',v.id===`view-${activeTab}`);
+    });
+    document.querySelectorAll('#tabs [data-tab]').forEach(b=>{
+      b.classList.toggle('active',b.dataset.tab===activeTab);
+    });
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>window.render());
+    });
+  },true);
+
+  // Respuesta táctil instantánea antes de ejecutar la acción real.
+  document.addEventListener('pointerdown',event=>{
+    const button=event.target.closest('button,[data-action],[data-tab]');
+    if(!button||button.disabled)return;
+    button.classList.add('legadoPressed');
+  },{passive:true,capture:true});
+
+  const clearPressed=event=>{
+    const button=event.target.closest?.('button,[data-action],[data-tab]');
+    if(button)button.classList.remove('legadoPressed');
+  };
+  document.addEventListener('pointerup',clearPressed,{passive:true,capture:true});
+  document.addEventListener('pointercancel',clearPressed,{passive:true,capture:true});
+
+  // Evita pulsaciones dobles accidentales mientras una misma acción sigue
+  // ejecutándose. No bloquea botones de selección múltiple ni navegación.
+  document.addEventListener('click',event=>{
+    const button=event.target.closest('[data-action]');
+    if(!button||button.disabled)return;
+    const action=button.dataset.action;
+    const reusable=[
+      'toggle-training-attribute','player-profile','browse-club',
+      'open-mail','open-inbox','close-modal'
+    ].includes(action);
+    if(reusable)return;
+
+    if(button.dataset.fastBusy==='1'){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+    button.dataset.fastBusy='1';
+    setTimeout(()=>{
+      delete button.dataset.fastBusy;
+    },280);
+  },true);
+
+  // Fuerza un guardado real antes de abandonar o esconder la página.
+  function flushSave(){
+    if(!S||!S.settings?.autoSave)return;
+    clearTimeout(FAST.saveTimer);
+    FAST.savePending=false;
+    try{originalSave(true)}catch(_){}
+  }
+  window.addEventListener('pagehide',flushSave);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden')flushSave();
+  });
+
+  window.LEGADO_FAST_UI=true;
+})();
+</script>
+<style>
+/* Quita animaciones que retrasan la percepción de respuesta. */
+.view.active{animation:none!important}
+.btn,.actionTile,.tabs button,.choice,.mailCard,.decisionCard,.broadcastChoice{
+  transition:transform .06s ease,filter .06s ease,background-color .06s ease!important;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.legadoPressed{
+  transform:scale(.975)!important;
+  filter:brightness(1.12)!important;
+}
+button:active,[data-action]:active,[data-tab]:active{
+  transform:scale(.975)!important;
+}
+.card:hover,.actionTile:hover,.choice:hover,.broadcastChoice:hover{
+  transform:none!important;
+}
+@media(max-width:1180px){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+  }
+  .card,.modalBox,.tvCrest,.matchStageBadge{
+    box-shadow:none!important;
+  }
+  .modal,.top,.tabs{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+}
+</style>
+
 </body></html>
