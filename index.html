@@ -5886,4 +5886,238 @@ window.legadoAddMoney=function(cant,motivo){
 })();
 </script>
 
+
+<script>
+// ===== LEGADO · OPTIMIZACIÓN DE RENDIMIENTO =====
+(function(){
+  const PERF = {
+    clubById: new Map(),
+    countryByCode: new Map(),
+    playersByClub: new Map(),
+    playerById: new Map(),
+    leagues: null,
+    clubsVersion: -1,
+    playersVersion: -1,
+    worldReadyForState: null,
+    searchTimer: null
+  };
+
+  function normalizedClubKey(name){
+    return typeof clubKey==='function'
+      ? clubKey(name)
+      : String(name||'').toLowerCase().normalize('NFD')
+          .replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+  }
+
+  function rebuildClubIndexes(){
+    if(PERF.clubsVersion===CLUBS.length)return;
+    PERF.clubById.clear();
+    CLUBS.forEach(c=>PERF.clubById.set(c.id,c));
+    PERF.countryByCode.clear();
+    COUNTRIES.forEach(c=>PERF.countryByCode.set(c.code,c));
+    PERF.leagues=null;
+    PERF.clubsVersion=CLUBS.length;
+  }
+
+  function rebuildPlayerIndexes(){
+    if(PERF.playersVersion===REAL_PLAYERS.length)return;
+    PERF.playersByClub.clear();
+    PERF.playerById.clear();
+
+    REAL_PLAYERS.forEach(p=>{
+      PERF.playerById.set(p.id,p);
+      const key=normalizedClubKey(p.club);
+      if(!PERF.playersByClub.has(key))PERF.playersByClub.set(key,[]);
+      PERF.playersByClub.get(key).push(p);
+    });
+
+    PERF.playersVersion=REAL_PLAYERS.length;
+  }
+
+  function ensureIndexes(){
+    rebuildClubIndexes();
+    rebuildPlayerIndexes();
+  }
+
+  // Inicialización mundial idempotente: evita recorrer miles de jugadores
+  // cada vez que se consulta una fila o se redibuja una pantalla.
+  const originalInitWorldPlayers = window.initWorldPlayers || initWorldPlayers;
+  window.initWorldPlayers = function(state){
+    if(!state)return;
+    const signature=REAL_PLAYERS.length+'|'+(state.playerDatabaseVersion||'');
+    if(PERF.worldReadyForState===state && state.__legadoWorldSignature===signature && state.worldPlayers){
+      return state.worldPlayers;
+    }
+    const result=originalInitWorldPlayers(state);
+    state.__legadoWorldSignature=REAL_PLAYERS.length+'|'+(state.playerDatabaseVersion||'');
+    PERF.worldReadyForState=state;
+    return result;
+  };
+  try{initWorldPlayers=window.initWorldPlayers}catch(_){}
+
+  window.worldPlayer = function(player){
+    if(!S||!player)return null;
+    if(!S.worldPlayers || PERF.worldReadyForState!==S){
+      window.initWorldPlayers(S);
+    }
+    return S.worldPlayers?.[player.id]||null;
+  };
+  try{worldPlayer=window.worldPlayer}catch(_){}
+
+  window.realPlayersForClub = function(club){
+    if(!club)return[];
+    ensureIndexes();
+    if(S && (!S.worldPlayers || PERF.worldReadyForState!==S)){
+      window.initWorldPlayers(S);
+    }
+
+    const source=PERF.playersByClub.get(normalizedClubKey(club.name))||[];
+    return source.map(p=>{
+      const w=S?.worldPlayers?.[p.id]||null;
+      const fallbackBase=Number(p.base??p.overall)||realisticBaseOverall(p);
+      return {
+        ...p,
+        overall:w?.currentOverall??Number(p.overall)??fallbackBase,
+        baseOverall:w?.baseOverall??fallbackBase,
+        potential:w?.potential??Number(p.potential)??playerPotential(p,fallbackBase),
+        form:Math.round(w?.form??65),
+        fitness:Math.round(w?.fitness??88),
+        morale:Math.round(w?.morale??65),
+        squadRole:w?.squadRole||null,
+        age:w?.age??Number(p.age)??inferredAge(p),
+        real:true
+      };
+    });
+  };
+  try{realPlayersForClub=window.realPlayersForClub}catch(_){}
+
+  // Cachea ligas y clubes para que los selectores no recorran toda la base
+  // en cada pulsación o cambio de filtro.
+  window.coveredClubs = function(){
+    rebuildClubIndexes();
+    return CLUBS;
+  };
+  try{coveredClubs=window.coveredClubs}catch(_){}
+
+  const previousLeagueOptions=window.leagueOptions;
+  window.leagueOptions=function(){
+    rebuildClubIndexes();
+    if(PERF.leagues)return PERF.leagues.slice();
+    PERF.leagues=(previousLeagueOptions?previousLeagueOptions():[...new Set(CLUBS.map(c=>c.league).filter(Boolean))]);
+    return PERF.leagues.slice();
+  };
+  try{leagueOptions=window.leagueOptions}catch(_){}
+
+  window.clubsForLeague=function(league){
+    rebuildClubIndexes();
+    if(!league)return CLUBS.slice();
+    return CLUBS.filter(c=>c.league===league);
+  };
+  try{clubsForLeague=window.clubsForLeague}catch(_){}
+
+  // Renderizado de plantilla optimizado: una sola lectura del club y del estado.
+  window.renderTeamBrowser=function(){
+    const el=document.querySelector('#teamBrowserContent');
+    if(!el||!S)return;
+
+    ensureIndexes();
+    window.initWorldPlayers(S);
+
+    const clubId=document.querySelector('#teamBrowserClub')?.value||S.uiWorldClub;
+    S.uiWorldClub=clubId;
+    const c=PERF.clubById.get(clubId);
+    if(!c){
+      el.innerHTML='<p class="muted">No hay equipo seleccionado.</p>';
+      return;
+    }
+
+    const pos=document.querySelector('#teamBrowserPosition')?.value||'';
+    const q=(document.querySelector('#teamBrowserSearch')?.value||'').trim().toLocaleLowerCase('es');
+    const all=window.realPlayersForClub(c);
+
+    let players=all;
+    if(pos)players=players.filter(p=>p.position===pos);
+    if(q)players=players.filter(p=>String(p.name).toLocaleLowerCase('es').includes(q));
+    players=players.slice().sort((a,b)=>b.overall-a.overall||b.potential-a.potential||a.name.localeCompare(b.name,'es'));
+
+    let totalOverall=0,totalAge=0,unavailable=0;
+    for(const p of all){
+      totalOverall+=Number(p.overall)||0;
+      totalAge+=Number(p.age)||0;
+      const w=S.worldPlayers?.[p.id];
+      if(availabilityLabel(w)!=='Disponible')unavailable++;
+    }
+
+    const avg=all.length?Math.round(totalOverall/all.length):0;
+    const avgAge=all.length?(totalAge/all.length).toFixed(1):'-';
+    const country=PERF.countryByCode.get(c.country);
+
+    const rows=players.map(p=>{
+      const w=S.worldPlayers?.[p.id]||null;
+      const state=availabilityLabel(w);
+      return `<tr>
+        <td><button class="link" data-action="player-profile" data-player="${p.id}"><b>${p.name}</b></button></td>
+        <td>${p.position}</td><td>${p.age}</td><td><b>${p.overall}</b></td><td>${p.potential}</td>
+        <td>${playerRole(p,all)}</td><td>${p.form}</td><td>${p.morale}</td><td>${p.fitness}</td>
+        <td>${w?.seasonApps||0}</td><td>${w?.seasonGoals||0}</td><td>${w?.seasonAssists||0}</td>
+        <td><span class="pill ${state==='Disponible'?'good':'warn'}">${state}</span></td>
+      </tr>`;
+    }).join('');
+
+    el.innerHTML=`<div class="clubSelectCard clubHead" style="${clubStyle(c)}">
+      <div class="row between"><div>
+        <span class="eyebrow">${country?.name||''} · ${c.league}</span>
+        <h2 style="margin:4px 0">${c.name}</h2>
+        <div class="muted small">${c.stadium||'Estadio pendiente'} · ${(Number(c.capacity)||0).toLocaleString('es-ES')} espectadores</div>
+      </div>${crestHTML(c,66)}</div>
+      <button class="btn gold" data-action="club-lineup" data-club="${c.id}" style="width:100%;margin-top:12px">Ver once titular y roles</button>
+    </div>
+    <div class="teamSummary">
+      <div class="miniStat"><b>${all.length}</b><span>Jugadores</span></div>
+      <div class="miniStat"><b>${avg||'-'}</b><span>Media equipo</span></div>
+      <div class="miniStat"><b>${avgAge}</b><span>Edad media</span></div>
+      <div class="miniStat"><b>${unavailable}</b><span>No disponibles</span></div>
+    </div>
+    <div class="small muted">Mostrando ${players.length} de ${all.length} jugadores.</div>
+    <div class="teamRosterScroll"><table>
+      <tr><th>Jugador</th><th>Pos.</th><th>Edad</th><th>Med.</th><th>Pot.</th><th>Rol</th><th>Forma</th><th>Moral</th><th>Cond.</th><th>PJ</th><th>G</th><th>A</th><th>Estado</th></tr>
+      ${rows||'<tr><td colspan="13">No hay jugadores que coincidan con los filtros.</td></tr>'}
+    </table></div>`;
+  };
+  try{renderTeamBrowser=window.renderTeamBrowser}catch(_){}
+
+  // Evita un render por cada tecla escrita. Solo redibuja cuando el usuario
+  // deja de escribir durante 180 ms.
+  document.addEventListener('input',event=>{
+    if(event.target?.id!=='teamBrowserSearch')return;
+    event.stopImmediatePropagation();
+    clearTimeout(PERF.searchTimer);
+    PERF.searchTimer=setTimeout(()=>window.renderTeamBrowser(),180);
+  },true);
+
+  // Invalida índices solo cuando realmente cambia la base.
+  window.invalidateLegadoPerformanceCache=function(){
+    PERF.clubsVersion=-1;
+    PERF.playersVersion=-1;
+    PERF.leagues=null;
+    PERF.worldReadyForState=null;
+  };
+
+  ensureIndexes();
+  window.LEGADO_PERFORMANCE_OPTIMIZED=true;
+})();
+</script>
+<style>
+/* Reduce el coste de pintar las pantallas no visibles y las listas largas. */
+.view:not(.active){content-visibility:hidden}
+.teamRosterScroll{contain:layout paint style;overflow:auto}
+.teamRosterScroll tr{content-visibility:auto;contain-intrinsic-size:42px}
+.squadCards,.rosterAuditList,.mailList{contain:layout paint style}
+@media(max-width:1180px){
+  body:before,body:after{display:none!important}
+  .card{box-shadow:0 8px 24px rgba(0,0,0,.2)}
+  .top,.tabs{backdrop-filter:none!important}
+}
+</style>
+
 </body></html>
