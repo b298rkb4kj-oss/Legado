@@ -4047,4 +4047,129 @@ window.legadoAddMoney=function(cant,motivo){
 })();
 </script>
 
+
+<script>
+// ===== LEGADO v0.22.2 · AUTOAVANCE DIARIO CORREGIDO =====
+(function(){
+  const previousHandleAction=window.handleAction;
+  let autoTimer=null;
+
+  function importantUnreadMail(){
+    const inbox=Array.isArray(S?.inbox)?S.inbox:[];
+    return inbox.find(mail=>
+      !mail.read &&
+      mail.templateId!=='salary-payment' &&
+      (!mail.resolved || (Array.isArray(mail.choices)&&mail.choices.length>0))
+    )||null;
+  }
+
+  function isMatchDayPending(){
+    return !!S && S.day===5 && !S.dayAction;
+  }
+
+  function stopAutoAdvance(){
+    if(autoTimer){clearTimeout(autoTimer);autoTimer=null}
+    if(S)S.autoAdvance=false;
+    render();
+  }
+
+  function goToMail(mail){
+    stopAutoAdvance();
+    setTimeout(()=>{
+      if(mail&&typeof openMail==='function')openMail(mail.id);
+      else if(typeof openInbox==='function')openInbox();
+    },80);
+  }
+
+  function goToMatch(){
+    stopAutoAdvance();
+    setTimeout(()=>{
+      const modal=document.querySelector('#modal');
+      if(!modal?.classList.contains('open')&&typeof matchDecision==='function')matchDecision();
+    },80);
+  }
+
+  function correctedAutoAdvance(){
+    if(!S||S.autoAdvance)return;
+
+    // Si ya existe una decisión pendiente, no se avanza ni un día.
+    const pendingMail=importantUnreadMail();
+    if(pendingMail){goToMail(pendingMail);return}
+    if(isMatchDayPending()){goToMatch();return}
+    if(S.trainingPlanRequired){
+      S.autoAdvance=false;
+      render();
+      setTimeout(()=>typeof openTrainingPlan==='function'&&openTrainingPlan(),80);
+      return;
+    }
+    if(document.querySelector('#modal.open')){
+      toast('Cierra o resuelve la decisión actual antes de avanzar');
+      return;
+    }
+
+    S.autoAdvance=true;
+    render();
+    toast('Avanzando día a día…');
+    let steps=0;
+
+    const tick=()=>{
+      if(!S||!S.autoAdvance)return;
+
+      const beforeIds=new Set((S.inbox||[]).map(m=>m.id));
+
+      // Al llegar al sábado se abre el partido sin intentar saltarlo.
+      if(isMatchDayPending()){goToMatch();return}
+
+      // Avanza exactamente un día utilizando el calendario original.
+      window.advanceDay();
+      steps++;
+
+      // Busca únicamente mensajes nuevos e importantes generados ese día.
+      const newImportant=(S.inbox||[]).find(m=>
+        !beforeIds.has(m.id) &&
+        m.templateId!=='salary-payment' &&
+        (!m.resolved || (Array.isArray(m.choices)&&m.choices.length>0))
+      );
+      if(newImportant){goToMail(newImportant);return}
+
+      if(isMatchDayPending()){goToMatch();return}
+
+      if(S.trainingPlanRequired){
+        stopAutoAdvance();
+        setTimeout(()=>typeof openTrainingPlan==='function'&&openTrainingPlan(),80);
+        return;
+      }
+
+      // Cualquier modal abierto por el propio juego implica una decisión.
+      if(document.querySelector('#modal.open')){
+        stopAutoAdvance();
+        return;
+      }
+
+      if(steps>=180){
+        stopAutoAdvance();
+        toast('Autoavance detenido tras 180 días sin eventos');
+        return;
+      }
+
+      // Pausa visible para que el calendario avance realmente día a día.
+      autoTimer=setTimeout(tick,260);
+    };
+
+    autoTimer=setTimeout(tick,260);
+  }
+
+  window.autoAdvance=correctedAutoAdvance;
+  window.stopAutoAdvance=stopAutoAdvance;
+
+  window.handleAction=function(el){
+    if(el?.dataset?.action==='auto-advance')return correctedAutoAdvance();
+    if(el?.dataset?.action==='stop-auto-advance')return stopAutoAdvance();
+    return previousHandleAction(el);
+  };
+  try{handleAction=window.handleAction}catch(_){ }
+  try{autoAdvance=window.autoAdvance}catch(_){ }
+})();
+</script>
+
 </body></html>
