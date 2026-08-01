@@ -4504,4 +4504,64 @@ window.legadoAddMoney=function(cant,motivo){
 @media(max-width:720px){.trainingWeekSummary{align-items:flex-start}.trainingWeekSummary small{font-size:11px}}
 </style>
 
+
+<script>
+// ===== LEGADO v0.23.0 · CONFIRMACIÓN PLAN + LIGUE 1 (10 CLUBES) =====
+(function(){
+  // Interceptor en captura: evita que manejadores antiguos bloqueen el botón.
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('[data-action="save-training-plan"]');
+    if(!btn)return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if(btn.disabled)return;
+    if(typeof window.saveTrainingPlan==='function')window.saveTrainingPlan();
+  },true);
+
+  const LIGUE1_FIRST_TEN=[["Angers SCO", "Stade Raymond-Kopa", 18752, 4], ["AJ Auxerre", "Stade de l'Abbé-Deschamps", 17897, 4], ["Stade Brestois 29", "Stade Francis-Le Blé", 15220, 3], ["Le Havre AC", "Stade Océane", 25178, 4], ["RC Lens", "Stade Bollaert-Delelis", 38223, 2], ["LOSC Lille", "Decathlon Arena – Stade Pierre-Mauroy", 50186, 2], ["Olympique Lyonnais", "Groupama Stadium", 59186, 3], ["Olympique de Marseille", "Orange Vélodrome", 67394, 2], ["AS Monaco", "Stade Louis-II", 18523, 2], ["OGC Nice", "Allianz Riviera", 35624, 3]];
+  const existingNames=new Set((typeof CLUBS!=='undefined'?CLUBS:[]).map(c=>c.name));
+  LIGUE1_FIRST_TEN.forEach((r,i)=>{
+    if(existingNames.has(r[0]))return;
+    CLUBS.push({
+      id:'fra2627-'+i,name:r[0],country:'FRA',confed:'UEFA',league:'Ligue 1',
+      tier:r[3],level:100-r[3]*10+(i%5),prestige:100-r[3]*12,
+      budget:Math.max(20,Math.round((6-r[3])*28)),stadium:r[1],capacity:r[2],
+      fans:Math.min(100,108-r[3]*11),pressure:Math.min(100,104-r[3]*10),
+      history:'Club participante en Ligue 1 2026/27.',
+      objectives:r[3]<=2?'Clasificación europea y títulos':r[3]===3?'Zona media-alta y progreso':'Permanencia',
+      rivals:[]
+    });
+  });
+
+  const LIGUE1_PLAYERS=[["Hervé Koffi", "Angers SCO", "Portero", 77, 79, 29], ["Melvin Zinga", "Angers SCO", "Portero", 70, 76, 24], ["Jordan Lefort", "Angers SCO", "Defensa central", 75, 75, 32], ["Emmanuel Biumla", "Angers SCO", "Defensa central", 74, 82, 21], ["Florent Hanin", "Angers SCO", "Lateral", 72, 72, 36], ["Carlens Arcus", "Angers SCO", "Lateral", 74, 75, 30], ["Haris Belkebla", "Angers SCO", "Centrocampista defensivo", 75, 75, 32], ["Pierrick Capelle", "Angers SCO", "Centrocampista", 72, 72, 39], ["Himad Abdelli", "Angers SCO", "Centrocampista", 78, 80, 26], ["Yassin Belkhdim", "Angers SCO", "Centrocampista", 73, 80, 24], ["Jim Allevinah", "Angers SCO", "Extremo", 75, 75, 31], ["Esteban Lepaul", "Angers SCO", "Delantero", 79, 82, 26], ["Amine El Ouazzani", "Angers SCO", "Delantero", 76, 82, 24], ["Ibrahima Niane", "Angers SCO", "Delantero", 74, 76, 27], ["Donovan Léon", "AJ Auxerre", "Portero", 77, 77, 33], ["Théo De Percin", "AJ Auxerre", "Portero", 71, 77, 25], ["Jubal", "AJ Auxerre", "Defensa central", 78, 78, 32], ["Sinaly Diomandé", "AJ Auxerre", "Defensa central", 77, 80, 25], ["Clément Akpa", "AJ Auxerre", "Defensa central", 75, 80, 24], ["Paul Joly", "AJ Auxerre", "Lateral", 76, 80, 26], ["Gideon Mensah", "AJ Auxerre", "Lateral", 77, 78, 28], ["Elisha Owusu", "AJ Auxerre", "Centrocampista defensivo", 77, 78, 28], ["Kévin Danois", "AJ Auxerre", "Centrocampista", 75, 83, 22], ["Rayan Raveloson", "AJ Auxerre", "Centrocampista", 77, 77, 29], ["Gaëtan Perrin", "AJ Auxerre", "Extremo", 78, 79, 30], ["Lassine Sinayoko", "AJ Auxerre", "Delantero", 78, 80, 26], ["Ado Onaiwu", "AJ Auxerre", "Delantero", 75, 75, 30], ["Aristide Zossou", "AJ Auxerre", "Extremo", 72, 82, 21], ["Marco Bizot", "Stade Brestois 29", "Portero", 80, 80, 35], ["Grégoire Coudert", "Stade Brestois 29", "Portero", 71, 75, 27], ["Brendan Chardonnet", "Stade Brestois 29", "Defensa central", 79, 79, 31], ["Julien Le Cardinal", "Stade Brestois 29", "Defensa central", 76, 77, 28], ["Soumaïla Coulibaly", "Stade Brestois 29", "Defensa central", 76, 83, 22], ["Kenny Lala", "Stade Brestois 29", "Lateral", 78, 78, 34], ["Massadio Haïdara", "Stade Brestois 29", "Lateral", 76, 76, 33], ["Hugo Magnetti", "Stade Brestois 29", "Centrocampista", 79, 79, 28], ["Mahdi Camara", "Stade Brestois 29", "Centrocampista", 80, 81, 28], ["Jonas Martin", "Stade Brestois 29", "Centrocampista defensivo", 75, 75, 36], ["Romain Del Castillo", "Stade Brestois 29", "Extremo", 81, 81, 30], ["Kamory Doumbia", "Stade Brestois 29", "Mediapunta", 78, 83, 23], ["Ludovic Ajorque", "Stade Brestois 29", "Delantero", 79, 79, 32], ["Mama Baldé", "Stade Brestois 29", "Delantero", 77, 77, 30], ["Arthur Desmas", "Le Havre AC", "Portero", 77, 77, 32], ["Mathieu Gorgelin", "Le Havre AC", "Portero", 72, 72, 35], ["Arouna Sangante", "Le Havre AC", "Defensa central", 77, 82, 24], ["Gautier Lloris", "Le Havre AC", "Defensa central", 76, 76, 31], ["Étienne Youté Kinkoué", "Le Havre AC", "Defensa central", 75, 81, 24], ["Loïc Négo", "Le Havre AC", "Lateral", 74, 74, 35], ["Christopher Operi", "Le Havre AC", "Lateral", 76, 77, 29], ["Abdoulaye Touré", "Le Havre AC", "Centrocampista defensivo", 78, 78, 32], ["Yassine Kechta", "Le Havre AC", "Centrocampista", 75, 82, 24], ["Daler Kuzyaev", "Le Havre AC", "Centrocampista", 78, 78, 33], ["Josué Casimir", "Le Havre AC", "Extremo", 75, 80, 24], ["Antoine Joujou", "Le Havre AC", "Extremo", 74, 81, 23], ["André Ayew", "Le Havre AC", "Segundo delantero", 76, 76, 36], ["Issa Soumaré", "Le Havre AC", "Delantero", 74, 76, 25], ["Hervé Koffi", "RC Lens", "Portero", 78, 79, 29], ["Régis Gurtner", "RC Lens", "Portero", 73, 73, 39], ["Facundo Medina", "RC Lens", "Defensa central", 82, 84, 27], ["Jonathan Gradit", "RC Lens", "Defensa central", 79, 79, 33], ["Kevin Danso", "RC Lens", "Defensa central", 82, 84, 27], ["Przemysław Frankowski", "RC Lens", "Lateral", 81, 81, 31], ["Deiver Machado", "RC Lens", "Lateral", 78, 78, 32], ["Neil El Aynaoui", "RC Lens", "Centrocampista", 80, 85, 25], ["Andy Diouf", "RC Lens", "Centrocampista", 79, 84, 23], ["Nampalys Mendy", "RC Lens", "Centrocampista defensivo", 77, 77, 34], ["Florian Sotoca", "RC Lens", "Segundo delantero", 78, 78, 35], ["Angelo Fulgini", "RC Lens", "Mediapunta", 78, 79, 30], ["Odsonne Édouard", "RC Lens", "Delantero", 80, 81, 28], ["Rémy Labeau-Lascary", "RC Lens", "Delantero", 75, 82, 23], ["Lucas Chevalier", "LOSC Lille", "Portero", 84, 88, 24], ["Vito Mannone", "LOSC Lille", "Portero", 74, 74, 38], ["Bafodé Diakité", "LOSC Lille", "Defensa central", 82, 85, 25], ["Alexsandro Ribeiro", "LOSC Lille", "Defensa central", 81, 84, 26], ["Thomas Meunier", "LOSC Lille", "Lateral", 78, 78, 34], ["Gabriel Gudmundsson", "LOSC Lille", "Lateral", 78, 81, 27], ["Benjamin André", "LOSC Lille", "Centrocampista defensivo", 81, 81, 35], ["Ngal'ayel Mukau", "LOSC Lille", "Centrocampista", 78, 84, 21], ["Hákon Arnar Haraldsson", "LOSC Lille", "Mediapunta", 80, 85, 23], ["Ayyoub Bouaddi", "LOSC Lille", "Centrocampista", 79, 89, 18], ["Rémy Cabella", "LOSC Lille", "Mediapunta", 78, 78, 36], ["Osame Sahraoui", "LOSC Lille", "Extremo", 79, 84, 25], ["Matias Fernandez-Pardo", "LOSC Lille", "Extremo", 77, 86, 21], ["Jonathan David", "LOSC Lille", "Delantero", 84, 85, 26], ["Lucas Perri", "Olympique Lyonnais", "Portero", 82, 85, 28], ["Rémy Descamps", "Olympique Lyonnais", "Portero", 75, 76, 30], ["Moussa Niakhaté", "Olympique Lyonnais", "Defensa central", 80, 80, 30], ["Clinton Mata", "Olympique Lyonnais", "Defensa central", 79, 79, 33], ["Nicolás Tagliafico", "Olympique Lyonnais", "Lateral", 81, 81, 33], ["Ainsley Maitland-Niles", "Olympique Lyonnais", "Lateral", 79, 80, 28], ["Corentin Tolisso", "Olympique Lyonnais", "Centrocampista", 83, 83, 31], ["Nemanja Matić", "Olympique Lyonnais", "Centrocampista defensivo", 79, 79, 38], ["Tanner Tessmann", "Olympique Lyonnais", "Centrocampista", 79, 83, 24], ["Rayan Cherki", "Olympique Lyonnais", "Mediapunta", 84, 89, 22], ["Ernest Nuamah", "Olympique Lyonnais", "Extremo", 80, 86, 22], ["Malick Fofana", "Olympique Lyonnais", "Extremo", 82, 89, 21], ["Georges Mikautadze", "Olympique Lyonnais", "Delantero", 82, 85, 25], ["Alexandre Lacazette", "Olympique Lyonnais", "Delantero", 82, 82, 35], ["Gerónimo Rulli", "Olympique de Marseille", "Portero", 82, 82, 34], ["Jeffrey de Lange", "Olympique de Marseille", "Portero", 76, 79, 28], ["Leonardo Balerdi", "Olympique de Marseille", "Defensa central", 82, 84, 27], ["Derek Cornelius", "Olympique de Marseille", "Defensa central", 78, 80, 28], ["Amir Murillo", "Olympique de Marseille", "Lateral", 79, 79, 30], ["Quentin Merlin", "Olympique de Marseille", "Lateral", 79, 85, 24], ["Pierre-Emile Højbjerg", "Olympique de Marseille", "Centrocampista defensivo", 83, 83, 30], ["Geoffrey Kondogbia", "Olympique de Marseille", "Centrocampista", 80, 80, 33], ["Adrien Rabiot", "Olympique de Marseille", "Centrocampista", 84, 84, 31], ["Valentin Rongier", "Olympique de Marseille", "Centrocampista", 80, 80, 31], ["Mason Greenwood", "Olympique de Marseille", "Extremo", 84, 87, 24], ["Luis Henrique", "Olympique de Marseille", "Extremo", 80, 83, 24], ["Amine Gouiri", "Olympique de Marseille", "Delantero", 82, 85, 26], ["Faris Moumbagna", "Olympique de Marseille", "Delantero", 77, 81, 26], ["Philipp Köhn", "AS Monaco", "Portero", 80, 82, 28], ["Radosław Majecki", "AS Monaco", "Portero", 79, 83, 26], ["Thilo Kehrer", "AS Monaco", "Defensa central", 81, 81, 29], ["Mohammed Salisu", "AS Monaco", "Defensa central", 80, 82, 27], ["Wilfried Singo", "AS Monaco", "Defensa central", 82, 86, 25], ["Vanderson", "AS Monaco", "Lateral", 82, 86, 25], ["Caio Henrique", "AS Monaco", "Lateral", 82, 83, 29], ["Denis Zakaria", "AS Monaco", "Centrocampista defensivo", 83, 84, 29], ["Lamine Camara", "AS Monaco", "Centrocampista", 81, 88, 22], ["Aleksandr Golovin", "AS Monaco", "Mediapunta", 83, 83, 30], ["Maghnes Akliouche", "AS Monaco", "Mediapunta", 83, 90, 24], ["Eliesse Ben Seghir", "AS Monaco", "Extremo", 81, 89, 21], ["Folarin Balogun", "AS Monaco", "Delantero", 81, 84, 25], ["Breel Embolo", "AS Monaco", "Delantero", 81, 82, 29], ["Marcin Bułka", "OGC Nice", "Portero", 82, 84, 26], ["Maxime Dupé", "OGC Nice", "Portero", 75, 75, 33], ["Dante", "OGC Nice", "Defensa central", 79, 79, 42], ["Mohamed-Ali Cho", "OGC Nice", "Extremo", 79, 84, 22], ["Youssouf Ndayishimiye", "OGC Nice", "Defensa central", 80, 82, 27], ["Melvin Bard", "OGC Nice", "Lateral", 80, 83, 25], ["Jonathan Clauss", "OGC Nice", "Lateral", 82, 82, 33], ["Hicham Boudaoui", "OGC Nice", "Centrocampista", 81, 83, 26], ["Pablo Rosario", "OGC Nice", "Centrocampista defensivo", 79, 80, 29], ["Sofiane Diop", "OGC Nice", "Mediapunta", 79, 83, 26], ["Jérémie Boga", "OGC Nice", "Extremo", 81, 81, 29], ["Evann Guessand", "OGC Nice", "Delantero", 81, 84, 25], ["Terem Moffi", "OGC Nice", "Delantero", 80, 81, 27], ["Badredine Bouanani", "OGC Nice", "Extremo", 77, 85, 21]].map((r,i)=>({
+    id:'ligue1-2627-'+i,name:r[0],club:r[1],position:r[2],
+    base:r[3],overall:r[3],potential:r[4],age:r[5],
+    goals:0,assists:0,apps:0,firstTeamApps:0,
+    season:'2026/27',rosterDate:'2026-08-01',
+    rosterStatus:'provisional-official-snapshot'
+  }));
+  if(Array.isArray(REAL_PLAYERS)){
+    LIGUE1_PLAYERS.forEach(p=>{
+      const duplicate=REAL_PLAYERS.some(x=>x.name===p.name&&x.club===p.club);
+      if(!duplicate)REAL_PLAYERS.push(p);
+    });
+  }
+
+  // Recalcula presupuestos si existe el sistema económico.
+  if(typeof window.initClubBudgets==='function')window.initClubBudgets(CLUBS);
+
+  window.LIGUE1_FIRST_TEN=LIGUE1_FIRST_TEN;
+  window.LIGUE1_PLAYERS_2627=LIGUE1_PLAYERS;
+})();
+</script>
+<style>
+/* Confirmación más clara y táctil */
+.attributePicker{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.attributePick{min-height:86px!important;display:grid!important;align-content:center!important;gap:6px!important}
+.attributePick.selected{box-shadow:0 0 0 2px rgba(119,243,170,.45),0 12px 28px rgba(0,0,0,.2)!important}
+[data-action="save-training-plan"]{position:sticky;bottom:0;z-index:4;box-shadow:0 -10px 30px rgba(7,16,13,.9),0 12px 28px rgba(0,0,0,.3)!important}
+@media(max-width:760px){.attributePicker{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:430px){.attributePicker{grid-template-columns:1fr!important}}
+</style>
+
 </body></html>
