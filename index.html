@@ -4760,4 +4760,151 @@ window.legadoAddMoney=function(cant,motivo){
 })();
 </script>
 
+
+<script>
+// ===== LEGADO v0.24.0 · ENTRENAMIENTO EN INICIO + FICHA COMPLETA + ARGENTINA =====
+(function(){
+  const BASE_HOME = window.renderHome;
+  const BASE_TRAIN = window.renderTrain;
+
+  function pct(v){ return Math.max(0,Math.min(100,Math.round(Number(v)||0))); }
+  function stateMeter(label,value,reverse=false){
+    const n=pct(value);
+    const visual=reverse?100-n:n;
+    return `<div class="playerStateRow">
+      <div class="playerStateHead"><span>${label}</span><b>${n}</b></div>
+      <div class="playerStateTrack"><i style="width:${visual}%"></i></div>
+    </div>`;
+  }
+  function attributeCard(attr){
+    const base=Math.floor(Number(S.attributes?.[attr])||0);
+    const progress=Math.max(0,Math.min(1,Number(S.trainingProgress?.[attr])||0));
+    return `<div class="fullAttributeCard">
+      <div><span>${attr}</span><b>${base}</b></div>
+      <div class="trainingProgressTrack"><i style="width:${Math.round(progress*100)}%"></i></div>
+      <small>${Math.round(progress*100)}% hacia ${Math.min(99,base+1)}</small>
+    </div>`;
+  }
+  function currentPlanMarkup(){
+    const selected=S.trainingPlan?.week===S.week ? (S.trainingPlan.attributes||[]) : [];
+    return `<section class="card homeTrainingPanel">
+      <div class="panelTitle">
+        <div><span class="eyebrow">ENTRENAMIENTO SEMANAL</span><h3 style="margin:3px 0">Plan de desarrollo</h3></div>
+        <span class="pill">${selected.length===3?'CONFIRMADO':'PENDIENTE'}</span>
+      </div>
+      ${selected.length===3
+        ? `<div class="homeTrainingGrid">${selected.map(attributeCard).join('')}</div>`
+        : `<div class="notice gold">Selecciona tres atributos para esta semana. El entrenamiento solo se gestiona desde esta pantalla.</div>`}
+      <div class="row" style="margin-top:12px">
+        <button class="btn" data-action="training-plan">${selected.length===3?'Cambiar plan':'Elegir 3 atributos'}</button>
+        <button class="btn secondary" data-action="extra-training">Entrenamiento extra</button>
+      </div>
+    </section>`;
+  }
+
+  window.renderHome=function(){
+    BASE_HOME();
+    const main=document.querySelector('#view-home .careerMain')||document.querySelector('#view-home');
+    if(!main)return;
+    main.querySelectorAll('.homeTrainingPanel').forEach(x=>x.remove());
+    const anchor=main.querySelector('.playerIdentityCard')||main.firstElementChild;
+    if(anchor)anchor.insertAdjacentHTML('afterend',currentPlanMarkup());
+    else main.insertAdjacentHTML('beforeend',currentPlanMarkup());
+  };
+
+  window.renderTrain=function(){
+    const root=document.querySelector('#view-train');
+    if(!root)return;
+    const overallValue=typeof overall==='function'?Math.round(overall()):0;
+    const plan=S.trainingPlan?.week===S.week ? S.trainingPlan.attributes||[] : [];
+    root.innerHTML=`<div class="playerProfileDashboard">
+      <section class="card playerProfileHeader">
+        <div>
+          <span class="eyebrow">FICHA COMPLETA DEL JUGADOR</span>
+          <h2 style="margin:4px 0">${S.player?.name||'Mi jugador'}</h2>
+          <p class="muted" style="margin:0">${club()?.name||''} · ${S.player?.position||''} · ${S.age} años</p>
+        </div>
+        <div class="profileOverall"><b>${overallValue}</b><span>MEDIA</span></div>
+      </section>
+      <section class="card">
+        <div class="panelTitle"><h3>Atributos futbolísticos</h3><span class="pill">${ATTRS.length} atributos</span></div>
+        <div class="fullAttributeGrid">${ATTRS.map(attributeCard).join('')}</div>
+      </section>
+      <section class="card">
+        <div class="panelTitle"><h3>Estado físico y mental</h3><span class="pill">Semana ${S.week}</span></div>
+        <div class="stateDashboard">
+          ${stateMeter('Moral / confianza',S.confidence)}
+          ${stateMeter('Forma',S.form)}
+          ${stateMeter('Fatiga',S.fatigue,true)}
+          ${stateMeter('Relación con el entrenador',S.coach)}
+          ${stateMeter('Relación con la plantilla',S.squad)}
+          ${stateMeter('Apoyo de la afición',S.fans)}
+          ${stateMeter('Disciplina',S.discipline)}
+          ${stateMeter('Familia',S.family)}
+          ${stateMeter('Reputación',S.reputation)}
+          ${stateMeter('Marca personal',S.brand)}
+        </div>
+      </section>
+      <section class="card">
+        <div class="panelTitle"><h3>Situación deportiva</h3><span class="pill">${S.injury?'LESIONADO':'DISPONIBLE'}</span></div>
+        <div class="profileSummaryGrid">
+          <div><small>Plan semanal</small><b>${plan.length===3?plan.join(' · '):'Pendiente'}</b></div>
+          <div><small>Partidos</small><b>${S.stats?.apps||0}</b></div>
+          <div><small>Goles</small><b>${S.stats?.goals||0}</b></div>
+          <div><small>Asistencias</small><b>${S.stats?.assists||0}</b></div>
+          <div><small>Minutos</small><b>${S.stats?.minutes||0}</b></div>
+          <div><small>Lesión</small><b>${S.injury?.name||'Ninguna'}</b></div>
+        </div>
+      </section>
+    </div>`;
+  };
+  try{renderHome=window.renderHome;renderTrain=window.renderTrain;}catch(_){}
+
+  // Añade los diez primeros clubes argentinos por orden alfabético.
+  const ARG_CLUBS=[["Aldosivi", "Estadio José María Minella", 35354, 4, 69, 58], ["Argentinos Juniors", "Estadio Diego Armando Maradona", 26000, 2, 79, 76], ["Atlético Tucumán", "Estadio Monumental José Fierro", 35200, 3, 75, 70], ["Banfield", "Estadio Florencio Sola", 34901, 3, 74, 69], ["Barracas Central", "Estadio Claudio Fabián Tapia", 4400, 4, 70, 62], ["Belgrano", "Estadio Julio César Villagra", 34500, 2, 78, 76], ["Boca Juniors", "La Bombonera", 57200, 1, 88, 94], ["Central Córdoba", "Estadio Único Madre de Ciudades", 30000, 3, 74, 69], ["Defensa y Justicia", "Estadio Norberto Tomaghello", 18000, 2, 78, 75], ["Deportivo Riestra", "Estadio Guillermo Laza", 3000, 4, 68, 58]];
+  const existing=new Map(CLUBS.map(c=>[c.name,c]));
+  ARG_CLUBS.forEach((r,i)=>{
+    if(existing.has(r[0])){
+      Object.assign(existing.get(r[0]),{league:'Liga Profesional Argentina',country:'ARG',stadium:r[1],capacity:r[2],tier:r[3],level:r[4],prestige:r[5]});
+    }else{
+      CLUBS.push({id:'arg2026-'+i,name:r[0],country:'ARG',confed:'CONMEBOL',league:'Liga Profesional Argentina',
+        stadium:r[1],capacity:r[2],tier:r[3],level:r[4],prestige:r[5],
+        budget:Math.max(4,Math.round((6-r[3])*8)),fans:Math.min(100,r[5]+4),pressure:Math.min(100,r[5]+7),
+        history:'Club participante en la Liga Profesional 2026.',objectives:r[3]<=2?'Clasificación internacional':r[3]===3?'Zona media-alta':'Permanencia',rivals:[]});
+    }
+  });
+
+  const ARG_PLAYERS=[["Axel Werner", "Aldosivi", "Portero", 73, 74, 30], ["Sebastián Moyano", "Aldosivi", "Portero", 69, 69, 35], ["Ignacio Chicco", "Aldosivi", "Portero", 71, 72, 29], ["Gonzalo Mottes", "Aldosivi", "Defensa central", 70, 71, 28], ["Tomás Kummer", "Aldosivi", "Defensa central", 69, 75, 22], ["Rodrigo González", "Aldosivi", "Lateral", 70, 72, 28], ["Alan Sosa", "Aldosivi", "Mediapunta", 72, 74, 29], ["Federico Gino", "Aldosivi", "Centrocampista", 70, 70, 32], ["Agustín Colazo", "Aldosivi", "Delantero", 72, 74, 26], ["Elías Torres", "Aldosivi", "Delantero", 71, 75, 25], ["Natanael Guzmán", "Aldosivi", "Extremo", 70, 76, 23], ["Justo Giani", "Aldosivi", "Mediapunta", 72, 74, 27], ["Brayan Cortés", "Argentinos Juniors", "Portero", 77, 78, 30], ["Diego Rodríguez", "Argentinos Juniors", "Portero", 72, 72, 36], ["Miguel Acosta", "Argentinos Juniors", "Portero", 70, 75, 24], ["Francisco Álvarez", "Argentinos Juniors", "Defensa central", 76, 79, 26], ["Román Vega", "Argentinos Juniors", "Lateral", 77, 82, 22], ["Kevin Coronel", "Argentinos Juniors", "Defensa central", 74, 78, 24], ["Alan Lescano", "Argentinos Juniors", "Mediapunta", 79, 84, 24], ["Francis Mac Allister", "Argentinos Juniors", "Centrocampista", 76, 77, 30], ["Sebastián Prieto", "Argentinos Juniors", "Lateral", 74, 75, 32], ["José Herrera", "Argentinos Juniors", "Extremo", 76, 80, 23], ["Tomás Molina", "Argentinos Juniors", "Delantero", 76, 77, 31], ["Maximiliano Romero", "Argentinos Juniors", "Delantero", 77, 79, 27], ["Tomás Durso", "Atlético Tucumán", "Portero", 75, 79, 27], ["Luis Ingolotti", "Atlético Tucumán", "Portero", 72, 75, 26], ["Nicolás Romero", "Atlético Tucumán", "Defensa central", 75, 77, 29], ["Gianluca Ferrari", "Atlético Tucumán", "Defensa central", 74, 76, 28], ["Marcelo Ortiz", "Atlético Tucumán", "Lateral", 73, 73, 32], ["Matías Orihuela", "Atlético Tucumán", "Lateral", 74, 74, 34], ["Guillermo Acosta", "Atlético Tucumán", "Centrocampista", 74, 74, 38], ["Adrián Sánchez", "Atlético Tucumán", "Centrocampista", 75, 78, 27], ["Renzo Tesuri", "Atlético Tucumán", "Extremo", 75, 76, 30], ["Mateo Coronel", "Atlético Tucumán", "Delantero", 76, 79, 27], ["Luis Miguel Rodríguez", "Atlético Tucumán", "Segundo delantero", 73, 73, 41], ["Franco Nicola", "Atlético Tucumán", "Extremo", 72, 78, 24], ["Facundo Sanguinetti", "Banfield", "Portero", 73, 78, 24], ["Marcelo Barovero", "Banfield", "Portero", 72, 72, 42], ["Alexis Maldonado", "Banfield", "Defensa central", 74, 75, 29], ["Santiago López García", "Banfield", "Defensa central", 72, 78, 23], ["Emanuel Insúa", "Banfield", "Lateral", 74, 74, 35], ["Lautaro Ríos", "Banfield", "Centrocampista", 75, 80, 24], ["Jesús Soraire", "Banfield", "Centrocampista", 74, 74, 37], ["Gerónimo Rivera", "Banfield", "Extremo", 75, 83, 22], ["Nacho Rodríguez", "Banfield", "Mediapunta", 74, 80, 24], ["Bruno Sepúlveda", "Banfield", "Delantero", 75, 76, 33], ["Tomás Nasif", "Banfield", "Delantero", 73, 80, 21], ["Juan Bisanz", "Banfield", "Extremo", 73, 79, 24], ["Marcelo Miño", "Barracas Central", "Portero", 72, 73, 28], ["Sebastián Moyano", "Barracas Central", "Portero", 69, 69, 35], ["Nicolás Capraro", "Barracas Central", "Defensa central", 73, 76, 27], ["Gonzalo Goñi", "Barracas Central", "Defensa central", 72, 73, 28], ["Rodrigo Insúa", "Barracas Central", "Lateral", 72, 75, 28], ["Facundo Mater", "Barracas Central", "Lateral", 73, 74, 27], ["Iván Tapia", "Barracas Central", "Centrocampista", 75, 77, 27], ["Dardo Miloc", "Barracas Central", "Centrocampista defensivo", 72, 72, 35], ["Jhonatan Candia", "Barracas Central", "Delantero", 73, 73, 31], ["Facundo Bruera", "Barracas Central", "Delantero", 74, 75, 28], ["Alan Cantero", "Barracas Central", "Extremo", 73, 78, 28], ["Maximiliano Zalazar", "Barracas Central", "Extremo", 74, 81, 25], ["Thiago Cardozo", "Belgrano", "Portero", 76, 77, 29], ["Manuel Vicentini", "Belgrano", "Portero", 71, 71, 35], ["Juan Strumia", "Belgrano", "Portero", 72, 74, 26], ["Alejandro Rébola", "Belgrano", "Defensa central", 74, 74, 38], ["Mariano Troilo", "Belgrano", "Defensa central", 78, 85, 23], ["Facundo Quignón", "Belgrano", "Centrocampista defensivo", 75, 75, 33], ["Francisco González Metilli", "Belgrano", "Mediapunta", 77, 78, 29], ["Lucas Zelarayán", "Belgrano", "Mediapunta", 80, 80, 34], ["Nicolás Fernández", "Belgrano", "Delantero", 76, 77, 30], ["Franco Jara", "Belgrano", "Delantero", 74, 74, 38], ["Gabriel Compagnucci", "Belgrano", "Lateral", 74, 75, 34], ["Matías Suárez", "Belgrano", "Segundo delantero", 75, 75, 38], ["Agustín Marchesín", "Boca Juniors", "Portero", 80, 80, 38], ["Leandro Brey", "Boca Juniors", "Portero", 76, 83, 23], ["Fernando Rodríguez", "Boca Juniors", "Portero", 70, 79, 21], ["Lautaro Di Lollo", "Boca Juniors", "Defensa central", 77, 84, 22], ["Marcos Rojo", "Boca Juniors", "Defensa central", 79, 79, 36], ["Luis Advíncula", "Boca Juniors", "Lateral", 79, 79, 36], ["Marcelo Saracchi", "Boca Juniors", "Lateral", 77, 78, 28], ["Leandro Paredes", "Boca Juniors", "Centrocampista defensivo", 85, 85, 32], ["Milton Delgado", "Boca Juniors", "Centrocampista", 78, 87, 21], ["Kevin Zenón", "Boca Juniors", "Extremo", 81, 86, 25], ["Exequiel Zeballos", "Boca Juniors", "Extremo", 80, 86, 24], ["Miguel Merentiel", "Boca Juniors", "Delantero", 81, 81, 30], ["Edinson Cavani", "Boca Juniors", "Delantero", 79, 79, 39], ["Alan Velasco", "Boca Juniors", "Mediapunta", 80, 84, 24], ["Luis Ingolotti", "Central Córdoba", "Portero", 73, 75, 26], ["Alan Aguerre", "Central Córdoba", "Portero", 72, 72, 35], ["Sebastián Valdez", "Central Córdoba", "Defensa central", 74, 75, 30], ["Jonathan Galván", "Central Córdoba", "Defensa central", 73, 73, 34], ["Rafael Barrios", "Central Córdoba", "Lateral", 73, 75, 33], ["José Florentín", "Central Córdoba", "Centrocampista", 75, 76, 29], ["Cristian Vega", "Central Córdoba", "Centrocampista defensivo", 74, 74, 32], ["Matías Godoy", "Central Córdoba", "Extremo", 74, 79, 24], ["Lucas Varaldo", "Central Córdoba", "Delantero", 74, 77, 24], ["Leonardo Heredia", "Central Córdoba", "Mediapunta", 75, 75, 30], ["Santiago Laquidaín", "Central Córdoba", "Defensa central", 72, 78, 24], ["Gastón Verón", "Central Córdoba", "Delantero", 73, 79, 25], ["Enrique Bologna", "Defensa y Justicia", "Portero", 73, 73, 44], ["Cristopher Fiermarín", "Defensa y Justicia", "Portero", 76, 80, 28], ["Santiago Ramos Mingo", "Defensa y Justicia", "Defensa central", 77, 82, 24], ["Alexis Soto", "Defensa y Justicia", "Lateral", 76, 76, 32], ["Emanuel Aguilera", "Defensa y Justicia", "Defensa central", 74, 74, 37], ["Kevin Gutiérrez", "Defensa y Justicia", "Centrocampista defensivo", 77, 78, 29], ["David Barbona", "Defensa y Justicia", "Centrocampista", 77, 77, 31], ["Aaron Molinas", "Defensa y Justicia", "Mediapunta", 78, 83, 26], ["Gastón Togni", "Defensa y Justicia", "Extremo", 77, 80, 28], ["Abiel Osorio", "Defensa y Justicia", "Delantero", 75, 81, 24], ["Juan Miritello", "Defensa y Justicia", "Delantero", 76, 79, 27], ["Luciano Herrera", "Defensa y Justicia", "Extremo", 74, 81, 23], ["Ignacio Arce", "Deportivo Riestra", "Portero", 73, 73, 34], ["Nahuel Manganelli", "Deportivo Riestra", "Portero", 69, 70, 24], ["Nicolás Caro Torres", "Deportivo Riestra", "Defensa central", 72, 72, 30], ["Miguel Barbieri", "Deportivo Riestra", "Defensa central", 72, 72, 33], ["Pedro Ramírez", "Deportivo Riestra", "Lateral", 72, 73, 25], ["Milton Céliz", "Deportivo Riestra", "Centrocampista", 74, 74, 33], ["Pablo Monje", "Deportivo Riestra", "Centrocampista defensivo", 72, 73, 28], ["Jonatan Herrera", "Deportivo Riestra", "Delantero", 74, 74, 34], ["Antony Alonso", "Deportivo Riestra", "Delantero", 72, 74, 27], ["Gustavo Fernández", "Deportivo Riestra", "Delantero", 72, 72, 34], ["Braian Sánchez", "Deportivo Riestra", "Extremo", 72, 73, 32], ["Nicolás Benegas", "Deportivo Riestra", "Delantero", 73, 73, 30]].map((r,i)=>({
+    id:'arg-player-2026-'+i,name:r[0],club:r[1],position:r[2],base:r[3],overall:r[3],potential:r[4],age:r[5],
+    goals:0,assists:0,apps:0,firstTeamApps:0,season:'2026',rosterDate:'2026-08-01',rosterStatus:'confirmed-2026-snapshot'
+  }));
+  if(Array.isArray(REAL_PLAYERS)){
+    ARG_PLAYERS.forEach(p=>{
+      const same=REAL_PLAYERS.find(x=>x.name===p.name&&x.club===p.club);
+      if(same)Object.assign(same,p);else REAL_PLAYERS.push(p);
+    });
+  }
+  if(typeof window.initClubBudgets==='function')window.initClubBudgets(CLUBS);
+  window.ARGENTINA_FIRST_TEN_2026=ARG_CLUBS;
+})();
+</script>
+<style>
+.homeTrainingPanel{border-color:rgba(119,243,170,.3)!important}
+.homeTrainingGrid,.fullAttributeGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fullAttributeCard{padding:13px;border-radius:15px;background:linear-gradient(145deg,#102019,#09130f);border:1px solid var(--line)}
+.fullAttributeCard>div:first-child{display:flex;justify-content:space-between;gap:8px}.fullAttributeCard b{font-size:23px;color:var(--gold)}
+.fullAttributeCard small{display:block;color:var(--muted);margin-top:6px}
+.playerProfileDashboard{display:grid;gap:16px}.playerProfileHeader{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.profileOverall{width:88px;height:88px;border-radius:24px;display:grid;place-items:center;background:linear-gradient(145deg,var(--accent),#29b66d);color:#04160c}
+.profileOverall b{font-size:34px;line-height:1}.profileOverall span{font-size:9px;font-weight:900;letter-spacing:.13em}
+.stateDashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.playerStateRow{padding:12px;border-radius:14px;background:#09150f;border:1px solid var(--line)}
+.playerStateHead{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px}.playerStateHead b{color:var(--gold)}
+.playerStateTrack{height:8px;border-radius:999px;background:#1b2b24;overflow:hidden}.playerStateTrack i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent),var(--gold));border-radius:inherit}
+.profileSummaryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.profileSummaryGrid>div{padding:12px;border-radius:14px;background:#09150f;border:1px solid var(--line)}
+.profileSummaryGrid small{display:block;color:var(--muted)}.profileSummaryGrid b{display:block;margin-top:4px}
+@media(max-width:760px){.homeTrainingGrid,.fullAttributeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.stateDashboard,.profileSummaryGrid{grid-template-columns:1fr}}
+@media(max-width:430px){.homeTrainingGrid,.fullAttributeGrid{grid-template-columns:1fr}.playerProfileHeader{align-items:flex-start}.profileOverall{width:72px;height:72px}}
+</style>
+
 </body></html>
