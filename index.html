@@ -5176,4 +5176,87 @@ window.legadoAddMoney=function(cant,motivo){
 @media(max-width:520px){.worldFilterGrid{grid-template-columns:1fr!important}}
 </style>
 
+
+<script>
+// ===== LEGADO · ORDEN DE LIGAS POR PAÍS/CATEGORÍA + SERIE B =====
+(function(){
+  const SERIE_B_CLUBS=[["Arezzo", "Stadio Città di Arezzo", 13128, 4, 70, 68], ["Ascoli", "Stadio Cino e Lillo Del Duca", 20853, 3, 73, 75], ["Avellino", "Stadio Partenio-Adriano Lombardi", 26308, 3, 74, 76], ["Benevento", "Stadio Ciro Vigorito", 16867, 3, 74, 76], ["Carrarese", "Stadio dei Marmi", 4875, 3, 74, 70], ["Catanzaro", "Stadio Nicola Ceravolo", 14650, 2, 78, 78], ["Cesena", "Orogel Stadium Dino Manuzzi", 23860, 2, 77, 78], ["Cremonese", "Stadio Giovanni Zini", 16003, 1, 80, 80], ["Empoli", "Stadio Carlo Castellani", 16284, 2, 78, 80], ["Hellas Verona", "Stadio Marcantonio Bentegodi", 39211, 1, 81, 82], ["Juve Stabia", "Stadio Romeo Menti", 7642, 3, 75, 72], ["Mantova", "Stadio Danilo Martelli", 14844, 3, 74, 73], ["Modena", "Stadio Alberto Braglia", 21092, 2, 77, 77], ["Padova", "Stadio Euganeo", 32420, 3, 74, 75], ["Palermo", "Stadio Renzo Barbera", 36349, 1, 80, 84], ["Pisa", "Arena Garibaldi", 11908, 1, 81, 80], ["Sampdoria", "Stadio Luigi Ferraris", 33205, 1, 79, 84], ["Südtirol", "Stadio Druso", 5539, 3, 74, 70], ["L.R. Vicenza", "Stadio Romeo Menti", 12200, 3, 73, 76], ["Virtus Entella", "Stadio Comunale di Chiavari", 5535, 3, 73, 70]];
+  const byClub=new Map(CLUBS.map(c=>[clubKey(c.name),c]));
+  SERIE_B_CLUBS.forEach((r,i)=>{
+    const key=clubKey(r[0]);
+    const current=byClub.get(key);
+    if(current){
+      Object.assign(current,{country:'ITA',confed:'UEFA',league:'Serie B',stadium:r[1],capacity:r[2],tier:r[3],level:r[4],prestige:r[5]});
+    }else{
+      const c={id:'ita2-2627-'+i,name:r[0],country:'ITA',confed:'UEFA',league:'Serie B',
+        stadium:r[1],capacity:r[2],tier:r[3],level:r[4],prestige:r[5],
+        budget:Math.max(6,Math.round((6-r[3])*10)),fans:Math.min(100,r[5]+3),pressure:Math.min(100,r[5]+6),
+        history:'Club participante en la Serie B 2026/27.',
+        objectives:r[3]===1?'Ascenso directo':r[3]===2?'Play-off de ascenso':'Permanencia',rivals:[]};
+      CLUBS.push(c);byClub.set(key,c);
+    }
+  });
+
+  const SERIE_B_PLAYERS=[["Christian Bucchi", "Arezzo", "Delantero", 69, 73, 22], ["Alessandro Capello", "Arezzo", "Delantero", 74, 74, 30], ["Emiliano Pattarello", "Arezzo", "Extremo", 75, 76, 27], ["Mattia Damiani", "Arezzo", "Centrocampista", 73, 75, 29], ["Andrea Settembrini", "Arezzo", "Centrocampista", 72, 72, 34], ["Niccolò Guccione", "Arezzo", "Mediapunta", 73, 73, 34], ["Lorenzo Coccia", "Arezzo", "Lateral", 71, 76, 24], ["Marco Chiosa", "Arezzo", "Defensa central", 73, 73, 32], ["Luca Lilli", "Arezzo", "Defensa central", 70, 75, 23], ["Daniele Borra", "Arezzo", "Portero", 72, 72, 31], ["Alberto Montini", "Arezzo", "Centrocampista", 69, 74, 22], ["Gabriele Perrotta", "Arezzo", "Defensa central", 71, 73, 27], ["Davide Barosi", "Ascoli", "Portero", 73, 76, 26], ["Rok Bržan", "Ascoli", "Portero", 69, 75, 22], ["Manuel Alagna", "Ascoli", "Defensa central", 71, 77, 24], ["Giuseppe Bellusci", "Ascoli", "Defensa central", 73, 73, 37], ["Daniel Cappelletti", "Ascoli", "Defensa central", 73, 73, 35], ["Claud Adjapong", "Ascoli", "Lateral", 73, 76, 28], ["Augusto Bando", "Ascoli", "Centrocampista", 72, 78, 21], ["Samuel Giovane", "Ascoli", "Centrocampista", 74, 80, 23], ["Pedro Mendes", "Ascoli", "Delantero", 75, 77, 27], ["Emanuele Gatto", "Ascoli", "Extremo", 72, 73, 31], ["Mattia Tirelli", "Ascoli", "Delantero", 72, 78, 23], ["Giuseppe Agostinone", "Ascoli", "Lateral", 68, 74, 21], ["António Aloisi", "Avellino", "Defensa central", 70, 76, 22], ["Marco Armellino", "Avellino", "Centrocampista", 73, 73, 36], ["Vincenzo Arzillo", "Avellino", "Centrocampista", 69, 75, 21], ["Michele Besaggio", "Avellino", "Centrocampista", 74, 79, 27], ["Tommaso Biasci", "Avellino", "Delantero", 75, 76, 31], ["Andrea Cagnano", "Avellino", "Lateral", 73, 74, 28], ["Damiano Cancellieri", "Avellino", "Lateral", 70, 75, 24], ["Tommaso Cancellotti", "Avellino", "Lateral", 73, 73, 34], ["Michele Rigione", "Avellino", "Defensa central", 73, 73, 35], ["Antony Iannarilli", "Avellino", "Portero", 74, 74, 35], ["Raffaele Russo", "Avellino", "Extremo", 72, 76, 26], ["Cosimo Patierno", "Avellino", "Delantero", 74, 74, 34], ["Vincenzo Avolio", "Benevento", "Defensa central", 69, 75, 22], ["Vincenzo Battista", "Benevento", "Delantero", 68, 74, 21], ["Diego Borghini", "Benevento", "Defensa central", 71, 76, 25], ["Luca Caldirola", "Benevento", "Defensa central", 75, 75, 35], ["Raffaele Cantisani", "Benevento", "Delantero", 70, 77, 22], ["Lorenzo Carfora", "Benevento", "Mediapunta", 72, 80, 20], ["Riccardo Improta", "Benevento", "Extremo", 74, 74, 33], ["Camillo Ciano", "Benevento", "Mediapunta", 74, 74, 36], ["Alessandro Nunziante", "Benevento", "Portero", 71, 80, 19], ["Edoardo Masciangelo", "Benevento", "Lateral", 73, 74, 29], ["Davide Lamesta", "Benevento", "Extremo", 74, 77, 26], ["Giuseppe Borello", "Benevento", "Delantero", 72, 75, 27], ["Marco Bleve", "Carrarese", "Portero", 73, 73, 31], ["Fabio Abiuso", "Carrarese", "Delantero", 75, 80, 23], ["Federico Accornero", "Carrarese", "Mediapunta", 74, 81, 22], ["Niccolò Belloni", "Carrarese", "Centrocampista", 74, 75, 31], ["Devid Bouah", "Carrarese", "Lateral", 74, 78, 24], ["Mauro Coppolaro", "Carrarese", "Defensa central", 73, 74, 29], ["Simone Zanon", "Carrarese", "Lateral", 73, 78, 24], ["Nicolò Schiavi", "Carrarese", "Centrocampista", 75, 76, 31], ["Mattia Finotto", "Carrarese", "Delantero", 73, 73, 33], ["Giuseppe Panico", "Carrarese", "Delantero", 75, 76, 28], ["Julian Illanes", "Carrarese", "Defensa central", 74, 75, 29], ["Emanuele Zuelli", "Carrarese", "Centrocampista", 73, 78, 24], ["Salvatore Accursi", "Catanzaro", "Extremo", 68, 75, 20], ["Cristian Agnelli", "Catanzaro", "Centrocampista", 68, 74, 20], ["Gabriele Alesi", "Catanzaro", "Delantero", 70, 77, 22], ["Matias Antonini Lui", "Catanzaro", "Defensa central", 76, 81, 28], ["Gabriel Arditi", "Catanzaro", "Delantero", 69, 76, 21], ["Simone Ardizzone", "Catanzaro", "Delantero", 68, 74, 20], ["Ervin Bashi", "Catanzaro", "Defensa central", 71, 78, 22], ["Nicolò Brighenti", "Catanzaro", "Defensa central", 75, 75, 37], ["Nicolò Buso", "Catanzaro", "Delantero", 76, 80, 26], ["Edoardo Borrelli", "Catanzaro", "Portero", 69, 76, 21], ["Pietro Iemmello", "Catanzaro", "Delantero", 79, 79, 34], ["Jari Vandeputte", "Catanzaro", "Extremo", 79, 80, 30], ["Simone Abbondanza", "Cesena", "Defensa central", 68, 75, 20], ["Tommaso Arrigoni", "Cesena", "Centrocampista", 74, 74, 32], ["Simone Bastoni", "Cesena", "Centrocampista", 77, 77, 29], ["Filippo Bertaccini", "Cesena", "Delantero", 74, 80, 25], ["Dimitri Bisoli", "Cesena", "Centrocampista", 76, 76, 32], ["Jonathan Klinsmann", "Cesena", "Portero", 75, 76, 29], ["Marco Curto", "Cesena", "Defensa central", 75, 78, 27], ["Raffaele Celia", "Cesena", "Lateral", 74, 75, 26], ["Augustus Kargbo", "Cesena", "Extremo", 77, 79, 26], ["Cristian Shpendi", "Cesena", "Delantero", 79, 84, 23], ["Tommaso Berti", "Cesena", "Centrocampista", 76, 82, 22], ["Emanuele Adamo", "Cesena", "Lateral", 75, 77, 28], ["Felix Afena-Gyan", "Cremonese", "Delantero", 77, 83, 23], ["Federico Agazzi", "Cremonese", "Portero", 68, 74, 21], ["Tommaso Barbieri", "Cremonese", "Lateral", 78, 84, 23], ["Federico Baschirotto", "Cremonese", "Defensa central", 81, 81, 30], ["Tommaso Berti", "Cremonese", "Centrocampista", 76, 82, 22], ["Matteo Bianchetti", "Cremonese", "Defensa central", 77, 77, 33], ["Federico Bonazzoli", "Cremonese", "Delantero", 80, 80, 29], ["Alessio Brambilla", "Cremonese", "Centrocampista", 69, 76, 22], ["Eddy Cabianca", "Cremonese", "Defensa central", 72, 79, 22], ["Marco Cassin", "Cremonese", "Portero", 68, 75, 20], ["Michele Castagnetti", "Cremonese", "Centrocampista", 77, 77, 36], ["Franco Vázquez", "Cremonese", "Mediapunta", 79, 79, 37], ["Alessio Baralla", "Empoli", "Centrocampista", 68, 75, 20], ["Luca Belardinelli", "Empoli", "Centrocampista", 74, 80, 25], ["Dawid Bembnista", "Empoli", "Defensa central", 68, 76, 20], ["Flavio Junior Bianchi", "Empoli", "Delantero", 75, 78, 26], ["Federico Brancolini", "Empoli", "Portero", 72, 78, 24], ["Herculano Nabian", "Empoli", "Delantero", 73, 81, 22], ["Danilo Busiello", "Empoli", "Centrocampista", 68, 75, 20], ["Thomas Campaniello", "Empoli", "Delantero", 69, 76, 21], ["Jacopo Fazzini", "Empoli", "Centrocampista", 80, 86, 23], ["Sebastiano Esposito", "Empoli", "Delantero", 81, 85, 24], ["Ardian Ismajli", "Empoli", "Defensa central", 79, 79, 29], ["Liberato Cacace", "Empoli", "Lateral", 78, 81, 25], ["Isaac Aguiar Tomich", "Hellas Verona", "Delantero", 70, 78, 21], ["Junior Ajayi", "Hellas Verona", "Delantero", 69, 77, 21], ["Ruben Mel Akalé", "Hellas Verona", "Centrocampista", 69, 77, 20], ["Marco Baroni", "Hellas Verona", "Centrocampista", 68, 75, 20], ["Rafik Belghali", "Hellas Verona", "Lateral", 75, 81, 23], ["Antoine Bernede", "Hellas Verona", "Centrocampista", 77, 80, 27], ["Kieron Bowie", "Hellas Verona", "Delantero", 76, 82, 23], ["Domagoj Bradarić", "Hellas Verona", "Lateral", 78, 80, 26], ["Federico Caia", "Hellas Verona", "Delantero", 69, 76, 20], ["Nicolò Calabrese", "Hellas Verona", "Defensa central", 69, 76, 20], ["Lorenzo Montipò", "Hellas Verona", "Portero", 80, 80, 30], ["Diego Coppola", "Hellas Verona", "Defensa central", 81, 86, 22]].map((r,i)=>({
+    id:'ita2-player-2627-'+i,name:r[0],club:r[1],position:r[2],
+    base:r[3],overall:r[3],potential:r[4],age:r[5],
+    goals:0,assists:0,apps:0,firstTeamApps:0,season:'2026/27',
+    rosterDate:'2026-08-01',rosterStatus:'official-legab-snapshot'
+  }));
+  SERIE_B_PLAYERS.forEach(raw=>{
+    const key=playerIdentityKey(raw.name);
+    const same=REAL_PLAYERS.find(p=>playerIdentityKey(p.name)===key&&clubKey(p.club)===clubKey(raw.club));
+    if(same){Object.assign(same,normalisePlayerRecord({...same,...raw,id:same.id,legacyIds:same.legacyIds}));return;}
+    const p=normalisePlayerRecord(raw);REAL_PLAYERS.push(p);
+    if(typeof PLAYER_BY_ID!=='undefined')PLAYER_BY_ID.set(p.id,p);
+    if(typeof PLAYER_BY_NAME!=='undefined')PLAYER_BY_NAME.set(key,p);
+  });
+
+  const COUNTRY_ORDER=['ENG','ESP','ITA','FRA','GER','POR','NED','BEL','ARG','BRA','USA'];
+  const LEAGUE_PRIORITY={
+    'Premier League':1,'Championship':2,
+    'LaLiga':1,'La Liga':1,'Liga EA Sports':1,'LaLiga Hypermotion':2,'Liga Hypermotion':2,
+    'Serie A':1,'Serie B':2,
+    'Ligue 1':1,'Ligue 2':2,
+    'Bundesliga':1,'2. Bundesliga':2,
+    'Primeira Liga':1,'Liga Portugal 2':2,
+    'Eredivisie':1,'Eerste Divisie':2,
+    'Liga Profesional Argentina':1,
+    'Brasileirão Série A':1,'Brasileirão Série B':2,
+    'MLS':1
+  };
+
+  function countryForLeague(name){
+    const club=CLUBS.find(c=>c.league===name);
+    return club?.country||'ZZZ';
+  }
+  window.leagueOptions=function(){
+    const names=[...new Set(coveredClubs().map(c=>c.league))];
+    return names.sort((a,b)=>{
+      const ca=countryForLeague(a),cb=countryForLeague(b);
+      const ia=COUNTRY_ORDER.indexOf(ca),ib=COUNTRY_ORDER.indexOf(cb);
+      const countryA=ia<0?999:ia,countryB=ib<0?999:ib;
+      if(countryA!==countryB)return countryA-countryB;
+      const pa=LEAGUE_PRIORITY[a]??99,pb=LEAGUE_PRIORITY[b]??99;
+      if(pa!==pb)return pa-pb;
+      return a.localeCompare(b,'es');
+    });
+  };
+  try{leagueOptions=window.leagueOptions;}catch(_){}
+
+  // Fuerza el nuevo orden al abrir Mundo, sin tocar el resto del explorador.
+  const previousRenderWorld=window.renderWorld;
+  window.renderWorld=function(){
+    previousRenderWorld();
+    const select=document.querySelector('#teamBrowserLeague');
+    if(!select)return;
+    const selected=select.value;
+    const ordered=window.leagueOptions();
+    select.innerHTML=ordered.map(x=>`<option ${x===selected?'selected':''}>${x}</option>`).join('');
+  };
+  try{renderWorld=window.renderWorld;}catch(_){}
+  window.SERIE_B_2627_CLUBS=SERIE_B_CLUBS;
+})();
+</script>
+
 </body></html>
