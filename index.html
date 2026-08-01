@@ -5076,4 +5076,104 @@ window.legadoAddMoney=function(cant,motivo){
 })();
 </script>
 
+
+<script>
+// ===== LEGADO · MUNDO CON FILTROS ENCADENADOS + CHAMPIONSHIP COMPLETA =====
+(function(){
+  const REMAINING_CLUBS=[["Portsmouth", "Fratton Park", 20899, 3, 75, 76], ["Preston North End", "Deepdale", 23404, 3, 75, 75], ["Queens Park Rangers", "MATRADE Loftus Road", 18439, 3, 76, 77], ["Sheffield United", "Bramall Lane", 32050, 1, 81, 83], ["Southampton", "St Mary's Stadium", 32384, 1, 82, 84], ["Stoke City", "bet365 Stadium", 30089, 2, 77, 79], ["Swansea City", "Swansea.com Stadium", 21088, 2, 77, 78], ["Watford", "Vicarage Road", 22200, 2, 78, 80], ["West Bromwich Albion", "The Hawthorns", 26688, 2, 78, 81], ["Wrexham", "STōK Cae Ras", 13341, 2, 77, 78], ["Wolverhampton Wanderers", "Molineux Stadium", 31750, 1, 83, 86], ["West Ham United", "London Stadium", 62500, 1, 84, 88]];
+  const existingClubs=new Map(CLUBS.map(c=>[clubKey(c.name),c]));
+  REMAINING_CLUBS.forEach((r,i)=>{
+    const key=clubKey(r[0]);
+    const found=existingClubs.get(key);
+    if(found){
+      Object.assign(found,{country:'ENG',confed:'UEFA',league:'Championship',stadium:r[1],capacity:r[2],tier:r[3],level:r[4],prestige:r[5]});
+    }else{
+      const c={id:'eng2-rest-2627-'+i,name:r[0],country:'ENG',confed:'UEFA',league:'Championship',
+        stadium:r[1],capacity:r[2],tier:r[3],level:r[4],prestige:r[5],
+        budget:Math.max(18,Math.round((6-r[3])*18)),fans:Math.min(100,r[5]+3),pressure:Math.min(100,r[5]+6),
+        history:'Club participante en la EFL Championship 2026/27.',
+        objectives:r[3]===1?'Ascenso directo':r[3]===2?'Play-off de ascenso':'Permanencia',rivals:[]};
+      CLUBS.push(c);existingClubs.set(key,c);
+    }
+  });
+
+  const NEW_PLAYERS=[["Nicolas Schmid", "Portsmouth", "Portero", 76, 80, 29], ["Jordan Archer", "Portsmouth", "Portero", 72, 72, 33], ["Regan Poole", "Portsmouth", "Defensa central", 77, 79, 28], ["Conor Shaughnessy", "Portsmouth", "Defensa central", 75, 75, 30], ["Hayden Matthews", "Portsmouth", "Defensa central", 74, 82, 22], ["Zak Swanson", "Portsmouth", "Lateral", 75, 79, 25], ["Connor Ogilvie", "Portsmouth", "Lateral", 76, 76, 30], ["Marlon Pack", "Portsmouth", "Centrocampista defensivo", 75, 75, 35], ["Andre Dozzell", "Portsmouth", "Centrocampista", 76, 78, 27], ["Freddie Potts", "Portsmouth", "Centrocampista", 76, 82, 22], ["Callum Lang", "Portsmouth", "Extremo", 78, 80, 27], ["Josh Murphy", "Portsmouth", "Extremo", 77, 77, 31], ["Colby Bishop", "Portsmouth", "Delantero", 78, 79, 29], ["Kusini Yengi", "Portsmouth", "Delantero", 75, 80, 27], ["Freddie Woodman", "Preston North End", "Portero", 78, 79, 29], ["David Cornell", "Preston North End", "Portero", 71, 71, 35], ["Liam Lindsay", "Preston North End", "Defensa central", 77, 77, 30], ["Jordan Storey", "Preston North End", "Defensa central", 77, 79, 28], ["Jack Whatmough", "Preston North End", "Defensa central", 75, 75, 30], ["Brad Potts", "Preston North End", "Lateral", 76, 76, 32], ["Andrew Hughes", "Preston North End", "Lateral", 75, 75, 34], ["Ben Whiteman", "Preston North End", "Centrocampista defensivo", 78, 78, 30], ["Ali McCann", "Preston North End", "Centrocampista", 77, 79, 26], ["Mads Frøkjær-Jensen", "Preston North End", "Mediapunta", 77, 81, 27], ["Duane Holmes", "Preston North End", "Mediapunta", 76, 76, 31], ["Milutin Osmajić", "Preston North End", "Delantero", 77, 80, 27], ["Will Keane", "Preston North End", "Delantero", 76, 76, 33], ["Ched Evans", "Preston North End", "Delantero", 72, 72, 37], ["Paul Nardi", "Queens Park Rangers", "Portero", 77, 78, 32], ["Joe Walsh", "Queens Park Rangers", "Portero", 71, 78, 24], ["Jake Clarke-Salter", "Queens Park Rangers", "Defensa central", 78, 80, 28], ["Steve Cook", "Queens Park Rangers", "Defensa central", 76, 76, 35], ["Jimmy Dunne", "Queens Park Rangers", "Defensa central", 77, 78, 28], ["Kenneth Paal", "Queens Park Rangers", "Lateral", 77, 78, 29], ["Karamoko Dembélé", "Queens Park Rangers", "Extremo", 78, 83, 23], ["Sam Field", "Queens Park Rangers", "Centrocampista defensivo", 79, 80, 28], ["Jonathan Varane", "Queens Park Rangers", "Centrocampista", 76, 82, 24], ["Ilias Chair", "Queens Park Rangers", "Mediapunta", 80, 81, 28], ["Koki Saito", "Queens Park Rangers", "Extremo", 77, 83, 24], ["Paul Smyth", "Queens Park Rangers", "Extremo", 75, 76, 28], ["Michael Frey", "Queens Park Rangers", "Delantero", 77, 77, 32], ["Rayan Kolli", "Queens Park Rangers", "Delantero", 73, 82, 21], ["Michael Cooper", "Sheffield United", "Portero", 81, 84, 27], ["Adam Davies", "Sheffield United", "Portero", 73, 73, 34], ["Anel Ahmedhodžić", "Sheffield United", "Defensa central", 82, 84, 27], ["Jack Robinson", "Sheffield United", "Defensa central", 78, 78, 32], ["Harry Souttar", "Sheffield United", "Defensa central", 80, 81, 27], ["Femi Seriki", "Sheffield United", "Lateral", 75, 82, 23], ["Harrison Burrows", "Sheffield United", "Lateral", 80, 84, 24], ["Vinícius Souza", "Sheffield United", "Centrocampista defensivo", 81, 83, 27], ["Gustavo Hamer", "Sheffield United", "Centrocampista", 83, 84, 29], ["Sydie Peck", "Sheffield United", "Centrocampista", 77, 86, 21], ["Callum O'Hare", "Sheffield United", "Mediapunta", 80, 81, 28], ["Jesurun Rak-Sakyi", "Sheffield United", "Extremo", 79, 85, 23], ["Tyrese Campbell", "Sheffield United", "Delantero", 79, 81, 26], ["Kieffer Moore", "Sheffield United", "Delantero", 78, 78, 34], ["Aaron Ramsdale", "Southampton", "Portero", 82, 84, 28], ["Alex McCarthy", "Southampton", "Portero", 75, 75, 36], ["Taylor Harwood-Bellis", "Southampton", "Defensa central", 82, 86, 24], ["Jan Bednarek", "Southampton", "Defensa central", 81, 81, 30], ["Nathan Wood", "Southampton", "Defensa central", 78, 83, 24], ["Kyle Walker-Peters", "Southampton", "Lateral", 82, 83, 29], ["Ryan Manning", "Southampton", "Lateral", 77, 77, 30], ["Flynn Downes", "Southampton", "Centrocampista defensivo", 81, 82, 27], ["Mateus Fernandes", "Southampton", "Centrocampista", 81, 87, 22], ["Adam Lallana", "Southampton", "Centrocampista", 76, 76, 38], ["Tyler Dibling", "Southampton", "Extremo", 81, 90, 20], ["Kamaldeen Sulemana", "Southampton", "Extremo", 79, 83, 24], ["Cameron Archer", "Southampton", "Delantero", 79, 83, 24], ["Adam Armstrong", "Southampton", "Delantero", 80, 80, 29], ["Viktor Johansson", "Stoke City", "Portero", 80, 82, 27], ["Jack Bonham", "Stoke City", "Portero", 72, 72, 33], ["Ben Wilmot", "Stoke City", "Defensa central", 78, 80, 26], ["Ben Gibson", "Stoke City", "Defensa central", 77, 77, 33], ["Michael Rose", "Stoke City", "Defensa central", 75, 75, 31], ["Junior Tchamadeu", "Stoke City", "Lateral", 76, 82, 22], ["Eric Bocat", "Stoke City", "Lateral", 76, 80, 26], ["Wouter Burger", "Stoke City", "Centrocampista", 79, 83, 25], ["Lewis Baker", "Stoke City", "Centrocampista", 77, 77, 31], ["Bae Jun-ho", "Stoke City", "Mediapunta", 79, 85, 23], ["Million Manhoef", "Stoke City", "Extremo", 79, 84, 24], ["Tom Cannon", "Stoke City", "Delantero", 78, 83, 23], ["Niall Ennis", "Stoke City", "Delantero", 74, 76, 27], ["Sam Gallagher", "Stoke City", "Delantero", 75, 75, 30], ["Lawrence Vigouroux", "Swansea City", "Portero", 78, 79, 32], ["Andy Fisher", "Swansea City", "Portero", 72, 74, 28], ["Ben Cabango", "Swansea City", "Defensa central", 79, 82, 26], ["Harry Darling", "Swansea City", "Defensa central", 78, 80, 27], ["Josh Tymon", "Swansea City", "Lateral", 78, 80, 27], ["Josh Key", "Swansea City", "Lateral", 77, 81, 26], ["Matt Grimes", "Swansea City", "Centrocampista defensivo", 80, 80, 31], ["Gonçalo Franco", "Swansea City", "Centrocampista", 78, 82, 25], ["Ji-sung Eom", "Swansea City", "Extremo", 77, 83, 24], ["Ronald", "Swansea City", "Extremo", 78, 83, 25], ["Oli Cooper", "Swansea City", "Mediapunta", 76, 80, 26], ["Liam Cullen", "Swansea City", "Delantero", 77, 79, 27], ["Žan Vipotnik", "Swansea City", "Delantero", 77, 82, 24], ["Florian Bianchini", "Swansea City", "Extremo", 75, 80, 25], ["Egil Selvik", "Watford", "Portero", 78, 81, 29], ["Daniel Bachmann", "Watford", "Portero", 77, 77, 32], ["Mattie Pollock", "Watford", "Defensa central", 78, 82, 24], ["Francisco Sierralta", "Watford", "Defensa central", 78, 79, 29], ["Ryan Porteous", "Watford", "Defensa central", 79, 80, 27], ["Ryan Andrews", "Watford", "Lateral", 77, 84, 22], ["Yasser Larouci", "Watford", "Lateral", 76, 81, 25], ["Imrân Louza", "Watford", "Centrocampista", 80, 82, 27], ["Moussa Sissoko", "Watford", "Centrocampista", 77, 77, 37], ["Tom Dele-Bashiru", "Watford", "Centrocampista", 77, 80, 27], ["Giorgi Chakvetadze", "Watford", "Mediapunta", 80, 84, 26], ["Kwadwo Baah", "Watford", "Extremo", 77, 83, 23], ["Mamadou Doumbia", "Watford", "Delantero", 75, 84, 20], ["Vakoun Bayo", "Watford", "Delantero", 77, 79, 29], ["Alex Palmer", "West Bromwich Albion", "Portero", 80, 82, 29], ["Joe Wildsmith", "West Bromwich Albion", "Portero", 74, 74, 30], ["Kyle Bartley", "West Bromwich Albion", "Defensa central", 77, 77, 35], ["Semi Ajayi", "West Bromwich Albion", "Defensa central", 78, 78, 32], ["Torbjørn Heggem", "West Bromwich Albion", "Defensa central", 78, 81, 27], ["Darnell Furlong", "West Bromwich Albion", "Lateral", 78, 79, 30], ["Gianluca Frabotta", "West Bromwich Albion", "Lateral", 76, 78, 27], ["Alex Mowatt", "West Bromwich Albion", "Centrocampista", 79, 79, 31], ["Jayson Molumby", "West Bromwich Albion", "Centrocampista", 78, 80, 27], ["Tom Fellows", "West Bromwich Albion", "Extremo", 79, 86, 23], ["Karlan Grant", "West Bromwich Albion", "Extremo", 78, 78, 29], ["Mikey Johnston", "West Bromwich Albion", "Extremo", 78, 81, 27], ["Josh Maja", "West Bromwich Albion", "Delantero", 80, 82, 27], ["Daryl Dike", "West Bromwich Albion", "Delantero", 77, 80, 26], ["Arthur Okonkwo", "Wrexham", "Portero", 78, 83, 24], ["Mark Howard", "Wrexham", "Portero", 70, 70, 39], ["Max Cleworth", "Wrexham", "Defensa central", 76, 82, 24], ["Eoghan O'Connell", "Wrexham", "Defensa central", 75, 75, 30], ["Lewis Brunt", "Wrexham", "Defensa central", 75, 80, 25], ["Ryan Barnett", "Wrexham", "Lateral", 77, 80, 27], ["James McClean", "Wrexham", "Lateral", 75, 75, 37], ["George Dobson", "Wrexham", "Centrocampista defensivo", 77, 78, 28], ["Elliot Lee", "Wrexham", "Mediapunta", 78, 79, 31], ["Oliver Rathbone", "Wrexham", "Centrocampista", 77, 78, 29], ["Andy Cannon", "Wrexham", "Centrocampista", 76, 76, 30], ["Jack Marriott", "Wrexham", "Delantero", 76, 76, 31], ["Sam Smith", "Wrexham", "Delantero", 77, 79, 28], ["Paul Mullin", "Wrexham", "Delantero", 77, 77, 31], ["José Sá", "Wolverhampton Wanderers", "Portero", 83, 83, 33], ["Sam Johnstone", "Wolverhampton Wanderers", "Portero", 80, 80, 33], ["Toti Gomes", "Wolverhampton Wanderers", "Defensa central", 82, 84, 27], ["Santiago Bueno", "Wolverhampton Wanderers", "Defensa central", 81, 84, 27], ["Yerson Mosquera", "Wolverhampton Wanderers", "Defensa central", 80, 85, 25], ["Matt Doherty", "Wolverhampton Wanderers", "Lateral", 79, 79, 34], ["Hugo Bueno", "Wolverhampton Wanderers", "Lateral", 80, 85, 23], ["João Gomes", "Wolverhampton Wanderers", "Centrocampista", 84, 87, 25], ["André", "Wolverhampton Wanderers", "Centrocampista defensivo", 84, 87, 25], ["Tommy Doyle", "Wolverhampton Wanderers", "Centrocampista", 80, 84, 24], ["Jean-Ricner Bellegarde", "Wolverhampton Wanderers", "Mediapunta", 81, 82, 28], ["Rodrigo Gomes", "Wolverhampton Wanderers", "Extremo", 80, 85, 23], ["Jørgen Strand Larsen", "Wolverhampton Wanderers", "Delantero", 83, 85, 26], ["Hwang Hee-chan", "Wolverhampton Wanderers", "Delantero", 81, 81, 30], ["Alphonse Areola", "West Ham United", "Portero", 82, 82, 33], ["Wes Foderingham", "West Ham United", "Portero", 74, 74, 35], ["Max Kilman", "West Ham United", "Defensa central", 83, 84, 29], ["Jean-Clair Todibo", "West Ham United", "Defensa central", 83, 85, 26], ["Konstantinos Mavropanos", "West Ham United", "Defensa central", 81, 82, 28], ["Aaron Wan-Bissaka", "West Ham United", "Lateral", 83, 83, 28], ["Emerson Palmieri", "West Ham United", "Lateral", 81, 81, 32], ["Edson Álvarez", "West Ham United", "Centrocampista defensivo", 83, 83, 28], ["James Ward-Prowse", "West Ham United", "Centrocampista", 82, 82, 31], ["Tomáš Souček", "West Ham United", "Centrocampista", 82, 82, 31], ["Lucas Paquetá", "West Ham United", "Mediapunta", 85, 85, 29], ["Mohammed Kudus", "West Ham United", "Extremo", 85, 87, 26], ["Jarrod Bowen", "West Ham United", "Extremo", 86, 86, 29], ["Niclas Füllkrug", "West Ham United", "Delantero", 82, 82, 33]].map((r,i)=>({
+    id:'champ-rest-2627-'+i,name:r[0],club:r[1],position:r[2],
+    base:r[3],overall:r[3],potential:r[4],age:r[5],
+    goals:0,assists:0,apps:0,firstTeamApps:0,season:'2026/27',
+    rosterDate:'2026-08-01',rosterStatus:'current-confirmed-snapshot'
+  }));
+  NEW_PLAYERS.forEach(raw=>{
+    const key=playerIdentityKey(raw.name);
+    const same=REAL_PLAYERS.find(p=>playerIdentityKey(p.name)===key && clubKey(p.club)===clubKey(raw.club));
+    if(same){Object.assign(same,normalisePlayerRecord({...same,...raw,id:same.id,legacyIds:same.legacyIds}));return;}
+    const p=normalisePlayerRecord(raw);REAL_PLAYERS.push(p);
+    if(typeof PLAYER_BY_ID!=='undefined')PLAYER_BY_ID.set(p.id,p);
+    if(typeof PLAYER_BY_NAME!=='undefined')PLAYER_BY_NAME.set(key,p);
+  });
+
+  function coveredClubs(){
+    return CLUBS.filter(c=>REAL_PLAYERS.some(p=>clubKey(p.club)===clubKey(c.name)));
+  }
+  function leagueOptions(){
+    return [...new Set(coveredClubs().map(c=>c.league))].sort((a,b)=>a.localeCompare(b,'es'));
+  }
+  function clubsForLeague(league){
+    return coveredClubs().filter(c=>!league||c.league===league).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  }
+  function refillClubSelector(preserve=true){
+    const leagueSel=document.querySelector('#teamBrowserLeague');
+    const clubSel=document.querySelector('#teamBrowserClub');
+    if(!leagueSel||!clubSel)return;
+    const current=preserve?clubSel.value:'';
+    const list=clubsForLeague(leagueSel.value);
+    clubSel.innerHTML=list.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    if(current&&list.some(c=>c.id===current))clubSel.value=current;
+    else if(list.length){
+      const preferred=list.find(c=>c.id===S.uiWorldClub)||list[0];
+      clubSel.value=preferred.id;S.uiWorldClub=preferred.id;
+    }
+  }
+
+  window.renderWorld=function(){
+    const c=club(),country=COUNTRIES.find(x=>x.code===c.country),league=LEAGUES[c.country];
+    const covered=coveredClubs();
+    const selected=S.uiWorldClub&&covered.some(x=>x.id===S.uiWorldClub)?S.uiWorldClub:(covered.find(x=>x.id===S.clubId)||covered[0]||c).id;
+    S.uiWorldClub=selected;
+    const selectedClub=CLUBS.find(x=>x.id===selected)||c;
+    const selectedLeague=selectedClub.league;
+    const leagues=leagueOptions();
+    const filteredClubs=clubsForLeague(selectedLeague);
+    document.querySelector('#view-world').innerHTML=`<div class="grid"><div class="card">
+      <div class="sectionTitle"><div><span class="eyebrow">Explorador de clubes</span><h2 style="margin:4px 0">Plantillas y medias</h2></div><span class="pill">${REAL_PLAYERS.length} jugadores</span></div>
+      <p class="muted">Busca primero por liga y club. Después puedes limitar la plantilla por posición o por nombre.</p>
+      <div class="teamFilters worldFilterGrid">
+        <label>Liga<select id="teamBrowserLeague">${leagues.map(x=>`<option ${x===selectedLeague?'selected':''}>${x}</option>`).join('')}</select></label>
+        <label>Club<select id="teamBrowserClub">${filteredClubs.map(x=>`<option value="${x.id}" ${x.id===selected?'selected':''}>${x.name}</option>`).join('')}</select></label>
+        <label>Posición<select id="teamBrowserPosition"><option value="">Todas</option>${POSITIONS.map(x=>`<option>${x}</option>`).join('')}</select></label>
+        <label>Nombre<input id="teamBrowserSearch" placeholder="Buscar futbolista"></label>
+      </div><div id="teamBrowserContent" class="teamBrowser"></div></div>
+      <div class="grid g2"><div class="card"><h2>Mundo futbolístico</h2><div class="kpi">${CLUBS.length}</div><div class="muted">clubes reales seleccionados</div>
+      <button class="btn gold" data-action="real-data" style="width:100%;margin:12px 0">Abrir base de datos completa</button>
+      <label>Confederación<select id="worldConfed">${Object.keys(CONFEDS).map(x=>`<option ${x===c.confed?'selected':''}>${x}</option>`).join('')}</select></label><div id="worldList"></div></div>
+      <div class="card"><h2>Tu entorno</h2><p><b>${country.name}</b> · ${country.confed}</p><p>Federación: ${country.federation}</p><p>Liga: ${league[0]} · ${league[1]} clubes · ${league[2]} descensos</p><p>Competiciones continentales: ${CONTINENTALS[c.confed].join(', ')}</p><p>Selección: nivel ${country.level}, ranking base ${country.ranking}, torneo ${country.continental}</p></div></div>${freeAgentMarketHtml()}</div>`;
+    renderTeamBrowser();renderWorldList(c.confed);
+  };
+  try{renderWorld=window.renderWorld;}catch(_){}
+
+  document.addEventListener('change',e=>{
+    if(e.target.id==='teamBrowserLeague'){
+      refillClubSelector(false);
+      renderTeamBrowser();
+    }
+  });
+  window.CHAMPIONSHIP_REMAINING_2627=REMAINING_CLUBS;
+})();
+</script>
+<style>
+.worldFilterGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+@media(max-width:900px){.worldFilterGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:520px){.worldFilterGrid{grid-template-columns:1fr!important}}
+</style>
+
 </body></html>
