@@ -4410,4 +4410,98 @@ window.legadoAddMoney=function(cant,motivo){
 .trainingProgressTrack{height:7px;border-radius:999px;background:#1b2b24;overflow:hidden;margin-top:7px}.trainingProgressTrack i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent2),var(--accent),var(--gold));transition:width .25s ease}.developmentGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.trainingProgressMini{padding:12px;border-radius:14px;background:#09150f;border:1px solid var(--line)}.trainingProgressMini>div:first-child{display:flex;justify-content:space-between;gap:8px}.trainingProgressMini b{color:var(--gold);font-size:20px}.trainingProgressMini small{display:block;color:var(--muted);margin-top:6px}.attributePick .trainingProgressTrack{grid-column:1/-1;width:100%}@media(max-width:720px){.developmentGrid{grid-template-columns:1fr}}
 </style>
 
+
+<script>
+// ===== LEGADO v0.22.5 · PROGRESO SEMANAL APLICADO + UI DE DESARROLLO =====
+(function(){
+  function ensureProgressState(){
+    if(!S)return;
+    S.trainingProgress=S.trainingProgress||{};
+    ATTRS.forEach(a=>{
+      const n=Number(S.trainingProgress[a]);
+      S.trainingProgress[a]=Number.isFinite(n)?Math.max(0,n):0;
+    });
+  }
+
+  function effectiveAttribute(attr){
+    ensureProgressState();
+    return (Number(S.attributes[attr])||0)+(Number(S.trainingProgress[attr])||0);
+  }
+
+  // El manejador anterior llamaba a una referencia antigua de saveTrainingPlan.
+  // Este último interceptor garantiza que se ejecute siempre la versión gradual actual.
+  const previousHandleAction=window.handleAction;
+  window.handleAction=function(el){
+    const action=el?.dataset?.action;
+    if(action==='save-training-plan'){
+      return window.saveTrainingPlan();
+    }
+    if(action==='training-plan'){
+      return window.openTrainingPlan();
+    }
+    return previousHandleAction(el);
+  };
+  try{handleAction=window.handleAction}catch(_){ }
+
+  // Muestra el progreso parcial en la cifra del atributo sin regalar puntos enteros.
+  const enhancedMeter=function(name,val){
+    const partial=S?.trainingProgress?.[name]||0;
+    const shown=Math.min(99,Number(val||0)+Number(partial||0));
+    const label=partial>0?shown.toFixed(2):String(Math.round(shown));
+    return `<div class="stat enhancedStat"><span>${name}</span><div class="bar"><i style="width:${clamp(shown)}%"></i></div><b>${label}</b></div>`;
+  };
+  try{meter=enhancedMeter}catch(_){ }
+  window.meter=enhancedMeter;
+
+  // Refuerza visualmente el panel de desarrollo y muestra la ganancia de la última semana.
+  const oldRenderHome=window.renderHome;
+  window.renderHome=function(){
+    oldRenderHome();
+    if(!S)return;
+    ensureProgressState();
+    const card=document.querySelector('#view-home .developmentCard');
+    if(!card)return;
+    card.classList.add('developmentCardEnhanced');
+    const last=S.trainingHistory?.[0];
+    const summary=document.createElement('div');
+    summary.className='trainingWeekSummary';
+    if(last&&last.week===S.week){
+      summary.innerHTML=`<span class="trainingPulse">✓</span><div><b>Sesión semanal aplicada</b><small>${last.attributes.map(r=>`${r.attr}: +${Math.round(r.earned*100)}%${r.points?` · +${r.points} punto`:''}`).join(' · ')}</small></div>`;
+    }else{
+      summary.innerHTML=`<span class="trainingPulse pending">↗</span><div><b>Plan pendiente</b><small>Elige tres atributos para aplicar el progreso de esta semana.</small></div>`;
+    }
+    const title=card.querySelector('.panelTitle');
+    if(title)title.insertAdjacentElement('afterend',summary);
+  };
+  try{renderHome=window.renderHome}catch(_){ }
+
+  // Actualiza también la ficha inmediatamente después de guardar el plan.
+  const currentSave=window.saveTrainingPlan;
+  window.saveTrainingPlan=function(){
+    const before={};
+    ATTRS.forEach(a=>before[a]=effectiveAttribute(a));
+    const result=currentSave();
+    ensureProgressState();
+    // Persistencia explícita para evitar que un render o guardado antiguo pierda el progreso.
+    try{save()}catch(_){ }
+    return result;
+  };
+  try{saveTrainingPlan=window.saveTrainingPlan}catch(_){ }
+
+  ensureProgressState();
+})();
+</script>
+<style>
+.developmentCardEnhanced{background:radial-gradient(circle at 92% 0,rgba(245,203,97,.11),transparent 32%),linear-gradient(145deg,#13281f,#07120e)!important;border-color:rgba(119,243,170,.28)!important}
+.trainingWeekSummary{display:flex;align-items:center;gap:12px;padding:12px 13px;margin:2px 0 14px;border-radius:14px;background:rgba(119,243,170,.075);border:1px solid rgba(119,243,170,.18)}
+.trainingWeekSummary b{display:block}.trainingWeekSummary small{display:block;color:var(--muted);margin-top:3px;line-height:1.45}
+.trainingPulse{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;background:var(--accent);color:#05170d;font-weight:1000;box-shadow:0 8px 22px rgba(68,211,128,.2)}
+.trainingPulse.pending{background:#23382f;color:var(--gold);box-shadow:none}
+.trainingProgressMini{position:relative;overflow:hidden;min-height:112px;display:flex;flex-direction:column;justify-content:center}
+.trainingProgressMini:after{content:"";position:absolute;right:-22px;top:-30px;width:90px;height:90px;border-radius:50%;border:18px solid rgba(119,243,170,.035)}
+.trainingProgressMini>*{position:relative;z-index:1}.trainingProgressMini b{font-size:24px!important}
+.enhancedStat b{min-width:46px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px}
+@media(max-width:720px){.trainingWeekSummary{align-items:flex-start}.trainingWeekSummary small{font-size:11px}}
+</style>
+
 </body></html>
